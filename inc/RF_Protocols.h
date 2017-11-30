@@ -38,7 +38,7 @@ typedef struct
  * Rohrmotor24
  * https://github.com/bjwelker/Raspi-Rollo/tree/master/Arduino/Rollo_Code_Receiver
  */
-#define ROHRMOTOR24_IDENTIFIER	0x01
+#define ROHRMOTOR24_IDENTIFIER			0x01
 #define ROHRMOTOR24			{ROHRMOTOR24_IDENTIFIER, 4800, 1500, 1000, 30, 70, 40}
 
 /*
@@ -48,12 +48,18 @@ typedef struct
 #define Seamaid_PAR_56_RGB_IDENTIFIER	0x02
 #define Seamaid_PAR_56_RGB	{Seamaid_PAR_56_RGB_IDENTIFIER, 3000, 9000, 1500, 25, 75, 24}
 
+/*
+ * Wall plug Noru
+  */
+#define NORU_IDENTIFIER					0x03
+#define NORU				{NORU_IDENTIFIER, 9500, 3000, 1000, 10, 70, 24}
+
 
 /*
  * Protocol array
  */
-static const PROTOCOL_DATA_t PROTOCOL_DATA[2] = { ROHRMOTOR24, Seamaid_PAR_56_RGB};
-#define PROTOCOLCOUNT sizeof PROTOCOL_DATA / sizeof PROTOCOL_DATA[0]
+#define PROTOCOLCOUNT	3
+static const PROTOCOL_DATA_t PROTOCOL_DATA[PROTOCOLCOUNT] = { ROHRMOTOR24, Seamaid_PAR_56_RGB, NORU};
 
 
 
