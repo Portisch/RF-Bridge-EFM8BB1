@@ -25,6 +25,7 @@ SI_SEGMENT_VARIABLE(DUTY_CYLCE_LOW, uint8_t, SI_SEG_XDATA) = 0xAB;
 
 SI_SEGMENT_VARIABLE(actual_bit_of_byte, uint8_t, SI_SEG_XDATA) = 0;
 SI_SEGMENT_VARIABLE(actual_bit, uint8_t, SI_SEG_XDATA) = 0;
+SI_SEGMENT_VARIABLE(actual_sync_bit, uint8_t, SI_SEG_XDATA) = 0;
 SI_SEGMENT_VARIABLE(actual_byte, uint8_t, SI_SEG_XDATA) = 0;
 SI_SEGMENT_VARIABLE(protocol_index, uint8_t, SI_SEG_XDATA) = 0;
 
@@ -80,6 +81,7 @@ void PCA0_channel1EventCb()
 	static uint8_t used_protocol;
 	static uint16_t low_pulse_time;
 	uint8_t in_sync = false;
+	uint8_t current_duty_cycle;
 
 	// Store most recent capture value
 	current_capture_value = PCA0CP1 * 10;
@@ -135,6 +137,7 @@ void PCA0_channel1EventCb()
 						actual_bit_of_byte = 8;
 						actual_byte = 0;
 						actual_bit = 0;
+						actual_sync_bit = 0;
 						low_pulse_time = 0;
 						memset(RF_DATA, 0, sizeof(RF_DATA));
 						rf_state = RF_IN_SYNC;
@@ -145,14 +148,25 @@ void PCA0_channel1EventCb()
 
 			// one matching sync got received
 			case RF_IN_SYNC:
+				// at first skip SYNC bits
+				if ((PROTOCOL_DATA[used_protocol].SYNC_BIT_COUNT > 0) &&
+					(actual_sync_bit < PROTOCOL_DATA[used_protocol].SYNC_BIT_COUNT))
+				{
+					actual_sync_bit++;
+					break;
+				}
+
+				// check the rest of the bits
 				actual_bit_of_byte--;
 				actual_bit++;
 
-				// if high time is longer than low time: logic 1
-				// if high time is shorter than low time: logic 0
-				// the high time of bit 0 is getting measured to be able to determine the last bit
-				if (
-					((capture_period_pos > capture_period_neg) && (actual_bit < PROTOCOL_DATA[used_protocol].BIT_COUNT)) ||
+				// calculate current duty cycle
+				current_duty_cycle = 100 - ((100 * (uint32_t)capture_period_pos) / ((uint32_t)capture_period_pos + (uint32_t)capture_period_neg));
+
+				if (((current_duty_cycle > (PROTOCOL_DATA[used_protocol].BIT_HIGH_DUTY - DUTY_CYCLE_TOLERANCE)) &&
+					(current_duty_cycle < (PROTOCOL_DATA[used_protocol].BIT_HIGH_DUTY + DUTY_CYCLE_TOLERANCE)) &&
+					(actual_bit < PROTOCOL_DATA[used_protocol].BIT_COUNT)) ||
+					// the duty cycle can not be used for the last bit because of the missing rising edge on the end
 					((capture_period_pos > low_pulse_time) && (actual_bit == PROTOCOL_DATA[used_protocol].BIT_COUNT))
 					)
 				{

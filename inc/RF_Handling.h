@@ -39,6 +39,7 @@ extern SI_SEGMENT_VARIABLE(DUTY_CYLCE_LOW, uint8_t, SI_SEG_XDATA);
 
 extern SI_SEGMENT_VARIABLE(actual_bit_of_byte, uint8_t, SI_SEG_XDATA);
 extern SI_SEGMENT_VARIABLE(actual_bit, uint8_t, SI_SEG_XDATA);
+extern SI_SEGMENT_VARIABLE(actual_sync_bit, uint8_t, SI_SEG_XDATA);
 extern SI_SEGMENT_VARIABLE(actual_byte, uint8_t, SI_SEG_XDATA);
 extern SI_SEGMENT_VARIABLE(protocol_index, uint8_t, SI_SEG_XDATA);
 
