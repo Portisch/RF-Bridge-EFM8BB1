@@ -54,12 +54,24 @@ typedef struct
 #define NORU_IDENTIFIER					0x03
 #define NORU				{NORU_IDENTIFIER, 9500, 3000, 1000, 10, 70, 24}
 
+/*
+ * WS-1200 Series Wireless Weather Station
+  */
+#define WS_1200_IDENTIFIER				0x04
+#define WS_1200				{WS_1200_IDENTIFIER, 0, 29400, 1450, 38, 64, 71}
+
 
 /*
  * Protocol array
  */
-#define PROTOCOLCOUNT	3
-static const PROTOCOL_DATA_t PROTOCOL_DATA[PROTOCOLCOUNT] = { ROHRMOTOR24, Seamaid_PAR_56_RGB, NORU};
+#define PROTOCOLCOUNT	4
+static const PROTOCOL_DATA_t PROTOCOL_DATA[PROTOCOLCOUNT] =
+{
+		ROHRMOTOR24,
+		Seamaid_PAR_56_RGB,
+		NORU,
+		WS_1200
+};
 
 
 

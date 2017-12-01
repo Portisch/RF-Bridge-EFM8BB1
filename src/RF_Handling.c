@@ -79,6 +79,7 @@ void PCA0_channel1EventCb()
 
 	static uint8_t used_protocol;
 	static uint16_t low_pulse_time;
+	uint8_t in_sync = false;
 
 	// Store most recent capture value
 	current_capture_value = PCA0CP1 * 10;
@@ -100,14 +101,36 @@ void PCA0_channel1EventCb()
 				if (RF_DATA_STATUS != 0)
 					break;
 
+				// check all protocols
 				for ( used_protocol = 0; used_protocol < PROTOCOLCOUNT; used_protocol++)
 				{
-					if (
+					// check if SYNC high and SYNC low should be compared
+					if (PROTOCOL_DATA[used_protocol].SYNC_HIGH > 0)
+					{
+						if (
 							(capture_period_pos > (PROTOCOL_DATA[used_protocol].SYNC_HIGH - SYNC_TOLERANCE)) &&
 							(capture_period_pos < (PROTOCOL_DATA[used_protocol].SYNC_HIGH + SYNC_TOLERANCE)) &&
 							(capture_period_neg > (PROTOCOL_DATA[used_protocol].SYNC_LOW - SYNC_TOLERANCE)) &&
 							(capture_period_neg < (PROTOCOL_DATA[used_protocol].SYNC_LOW + SYNC_TOLERANCE))
-					)
+						)
+						{
+							in_sync = true;
+						}
+					}
+					// only SYNC low should be checked
+					else
+					{
+						if (
+							(capture_period_neg > (PROTOCOL_DATA[used_protocol].SYNC_LOW - SYNC_TOLERANCE)) &&
+							(capture_period_neg < (PROTOCOL_DATA[used_protocol].SYNC_LOW + SYNC_TOLERANCE))
+						)
+						{
+							in_sync = true;
+						}
+					}
+
+					// check if a matching protocol got found
+					if (in_sync)
 					{
 						actual_bit_of_byte = 8;
 						actual_byte = 0;
