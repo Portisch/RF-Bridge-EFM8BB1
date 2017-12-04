@@ -43,13 +43,11 @@ void PCA0_intermediateOverflowCb()
 	if(((RF_DATA[actual_byte] >> actual_bit_of_byte) & 0x01) == 0x01)
 	{
 		// bit 1
-		LED = LED_ON;
 		SetTimer0Overflow(T0_HIGH);
 	}
 	else
 	{
 		// bit 0
-		LED = LED_OFF;
 		SetTimer0Overflow(T0_LOW);
 	}
 }
