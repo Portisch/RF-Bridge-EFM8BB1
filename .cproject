@@ -65,7 +65,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="lib/bsp/bsp.h|lib/efm8bb1/peripheralDrivers/inc/pca_0.h|lib/efm8bb1/peripheralDrivers/src/pca_0.c|src" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding=".git/objects/info|.git/objects/pack|.git/refs/tags|lib/bsp/bsp.h|lib/efm8bb1/peripheralDrivers/inc/pca_0.h|lib/efm8bb1/peripheralDrivers/src/pca_0.c|src" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
 					</sourceEntries>
 				</configuration>

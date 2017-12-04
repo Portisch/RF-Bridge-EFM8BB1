@@ -23,9 +23,10 @@ typedef struct
 	uint16_t SYNC_LOW;
 	// bit count of SYNC bits
 	uint8_t SYNC_BIT_COUNT;
-	// time in 탎 for one bit. This is the sum of the high and low time of on bit
-	// example bit 1: high time 700탎, low time 300탎: sum is 1000탎 == 1kHz
-	uint16_t BIT_TIME;
+	// high time of a logic bit 1
+	uint16_t BIT_HIGH_TIME;
+	// high time of a logic bit 0
+	uint16_t BIT_LOW_TIME;
 	// duty cycle for logic bit 1
 	uint8_t BIT_HIGH_DUTY;
 	// duty cycle for logic bit 0
@@ -42,26 +43,26 @@ typedef struct
  * https://github.com/bjwelker/Raspi-Rollo/tree/master/Arduino/Rollo_Code_Receiver
  */
 #define ROHRMOTOR24_IDENTIFIER			0x01
-#define ROHRMOTOR24			{ROHRMOTOR24_IDENTIFIER, 4800, 1500, 0, 1000, 35, 65, 40}
+#define ROHRMOTOR24			{ROHRMOTOR24_IDENTIFIER, 4800, 1500, 0, 700, 300, 70, 30, 40}
 
 /*
  * UNDERWATER PAR56 LED LAMP, 502266
  * http://www.seamaid-lighting.com/de/produit/lampe-par56/
  */
 #define Seamaid_PAR_56_RGB_IDENTIFIER	0x02
-#define Seamaid_PAR_56_RGB	{Seamaid_PAR_56_RGB_IDENTIFIER, 3000, 9000, 0, 1500, 27, 77, 24}
+#define Seamaid_PAR_56_RGB	{Seamaid_PAR_56_RGB_IDENTIFIER, 3000, 9000, 0, 1100, 400, 75, 25, 24}
 
 /*
  * Wall plug Noru
   */
 #define NORU_IDENTIFIER					0x03
-#define NORU				{NORU_IDENTIFIER, 9500, 3000, 0, 1000, 10, 70, 24}
+#define NORU				{NORU_IDENTIFIER, 9500, 3000, 0, 900, 320, 70, 30, 24}
 
 /*
  * WS-1200 Series Wireless Weather Station
   */
 #define WS_1200_IDENTIFIER				0x04
-#define WS_1200				{WS_1200_IDENTIFIER, 0, 29400, 7, 1450, 64, 38, 64}
+#define WS_1200				{WS_1200_IDENTIFIER, 0, 29400, 7, 700, 300, 38, 64, 64}
 
 
 /*

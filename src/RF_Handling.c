@@ -22,6 +22,8 @@ SI_SEGMENT_VARIABLE(sniffing_is_on, uint8_t, SI_SEG_XDATA) = false;
 
 SI_SEGMENT_VARIABLE(DUTY_CYCLE_HIGH, uint8_t, SI_SEG_XDATA) = 0x56;
 SI_SEGMENT_VARIABLE(DUTY_CYLCE_LOW, uint8_t, SI_SEG_XDATA) = 0xAB;
+SI_SEGMENT_VARIABLE(T0_HIGH, uint8_t, SI_SEG_XDATA) = 0x00;
+SI_SEGMENT_VARIABLE(T0_LOW, uint8_t, SI_SEG_XDATA) = 0x00;
 
 SI_SEGMENT_VARIABLE(actual_bit_of_byte, uint8_t, SI_SEG_XDATA) = 0;
 SI_SEGMENT_VARIABLE(actual_bit, uint8_t, SI_SEG_XDATA) = 0;
@@ -34,12 +36,22 @@ SI_SEGMENT_VARIABLE(protocol_index, uint8_t, SI_SEG_XDATA) = 0;
 //-----------------------------------------------------------------------------
 void PCA0_overflowCb()
 {
-
 }
 
 void PCA0_intermediateOverflowCb()
 {
-
+	if(((RF_DATA[actual_byte] >> actual_bit_of_byte) & 0x01) == 0x01)
+	{
+		// bit 1
+		LED = LED_ON;
+		SetTimer0Overflow(T0_HIGH);
+	}
+	else
+	{
+		// bit 0
+		LED = LED_OFF;
+		SetTimer0Overflow(T0_LOW);
+	}
 }
 
 void PCA0_channel0EventCb()
@@ -60,16 +72,8 @@ void PCA0_channel0EventCb()
 	actual_bit++;
 	actual_bit_of_byte--;
 
-	if(((RF_DATA[actual_byte] >> actual_bit_of_byte) & 0x01) == 0x01)
-	{
-		// bit 1
-		PCA0_writeChannel(PCA0_CHAN0, DUTY_CYCLE_HIGH << 8);
-	}
-	else
-	{
-		// bit 0
-		PCA0_writeChannel(PCA0_CHAN0, DUTY_CYLCE_LOW << 8);
-	}
+	// set duty cycle for the next bit...
+	SetPCA0DutyCylce();
 }
 
 void PCA0_channel1EventCb()
@@ -161,7 +165,7 @@ void PCA0_channel1EventCb()
 				actual_bit++;
 
 				// calculate current duty cycle
-				current_duty_cycle = 100 - ((100 * (uint32_t)capture_period_pos) / ((uint32_t)capture_period_pos + (uint32_t)capture_period_neg));
+				current_duty_cycle = (100 * (uint32_t)capture_period_pos) / ((uint32_t)capture_period_pos + (uint32_t)capture_period_neg);
 
 				if (((current_duty_cycle > (PROTOCOL_DATA[used_protocol].BIT_HIGH_DUTY - DUTY_CYCLE_TOLERANCE)) &&
 					(current_duty_cycle < (PROTOCOL_DATA[used_protocol].BIT_HIGH_DUTY + DUTY_CYCLE_TOLERANCE)) &&
@@ -259,7 +263,7 @@ uint8_t PCA0_DoTransmit(uint8_t identifier)
 {
 	uint8_t i;
 	uint8_t protocol_index = 0xFF;
-	uint8_t TCON_save;
+	uint16_t bit_time;
 
 	// check first for valid identifier
 	if ((identifier > 0x00) && (identifier < 0x80))
@@ -277,25 +281,21 @@ uint8_t PCA0_DoTransmit(uint8_t identifier)
 		// check if protocol got found
 		if (protocol_index != 0xFF)
 		{
-			// calculate T0_Overflow
-			i = (uint8_t)(0x100 - ((uint32_t)SYSCLK / (0xFF * (1000000 / (uint32_t)PROTOCOL_DATA[protocol_index].BIT_TIME))));
-
-			//Save Timer Configuration
-			TCON_save = TCON;
-			//Stop Timer 0
-			TCON &= ~TCON_TR0__BMASK;
-
-			/***********************************************************************
-			 - Timer 0 High Byte = i (T0_Overflow)
-			 ***********************************************************************/
-			TH0 = (i << TH0_TH0__SHIFT);
-
 			//Restore Timer Configuration
-			TCON |= (TCON_save & TCON_TR0__BMASK);
+			//TCON |= (TCON_save & TCON_TR0__BMASK);
+			bit_time = (100 * (uint32_t)PROTOCOL_DATA[protocol_index].BIT_HIGH_TIME) / PROTOCOL_DATA[protocol_index].BIT_HIGH_DUTY;
+			// calculate T0_Overflow
+			T0_HIGH = (uint8_t)(0x100 - ((uint32_t)SYSCLK / (0xFF * (1000000 / (uint32_t)bit_time))));
+
+			bit_time = (100 * (uint32_t)PROTOCOL_DATA[protocol_index].BIT_LOW_TIME) / PROTOCOL_DATA[protocol_index].BIT_LOW_DUTY;
+			// calculate T0_Overflow
+			T0_LOW = (uint8_t)(0x100 - ((uint32_t)SYSCLK / (0xFF * (1000000 / (uint32_t)bit_time))));
 
 			// calculate high and low duty cycle
-			DUTY_CYCLE_HIGH = (uint16_t)(0xFF - ((PROTOCOL_DATA[protocol_index].BIT_HIGH_DUTY * 0xFF) / 100));
-			DUTY_CYLCE_LOW = (uint16_t)(0xFF - ((PROTOCOL_DATA[protocol_index].BIT_LOW_DUTY * 0xFF) / 100));
+			//DUTY_CYCLE_HIGH = (uint16_t)(0xFF - ((PROTOCOL_DATA[protocol_index].BIT_HIGH_DUTY * 0xFF) / 100));
+			DUTY_CYCLE_HIGH = (uint16_t)((PROTOCOL_DATA[protocol_index].BIT_HIGH_DUTY * 0xFF) / 100);
+			//DUTY_CYLCE_LOW = (uint16_t)(0xFF - ((PROTOCOL_DATA[protocol_index].BIT_LOW_DUTY * 0xFF) / 100));
+			DUTY_CYLCE_LOW = (uint16_t)((PROTOCOL_DATA[protocol_index].BIT_LOW_DUTY * 0xFF) / 100);
 
 			// enable interrupt for RF transmitting
 			PCA0CPM0 |= PCA0CPM0_ECCF__ENABLED;
@@ -311,6 +311,28 @@ uint8_t PCA0_DoTransmit(uint8_t identifier)
 	}
 
 	return protocol_index;
+}
+
+void SetPCA0DutyCylce(void)
+{
+	if(((RF_DATA[actual_byte] >> actual_bit_of_byte) & 0x01) == 0x01)
+	{
+		// bit 1
+		PCA0_writeChannel(PCA0_CHAN0, DUTY_CYCLE_HIGH << 8);
+	}
+	else
+	{
+		// bit 0
+		PCA0_writeChannel(PCA0_CHAN0, DUTY_CYLCE_LOW << 8);
+	}
+}
+
+void SetTimer0Overflow(uint8_t T0_Overflow)
+{
+	/***********************************************************************
+	 - Timer 0 High Byte = T0_Overflow
+	 ***********************************************************************/
+	TH0 = (T0_Overflow << TH0_TH0__SHIFT);
 }
 
 void PCA0_StopTransmit(void)

@@ -224,9 +224,9 @@ extern void TIMER01_0_enter_DefaultMode_from_RESET(void) {
 
 	// $[TH0 - Timer 0 High Byte]
 	/***********************************************************************
-	 - Timer 0 High Byte = 0x0B
+	 - Timer 0 High Byte = 0xA0
 	 ***********************************************************************/
-	TH0 = (0x0B << TH0_TH0__SHIFT);
+	TH0 = (0xA0 << TH0_TH0__SHIFT);
 	// [TH0 - Timer 0 High Byte]$
 
 	// $[TL0 - Timer 0 Low Byte]

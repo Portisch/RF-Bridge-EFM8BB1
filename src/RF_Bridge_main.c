@@ -189,16 +189,8 @@ int main (void)
 					actual_byte = 1;
 					actual_bit = 1;
 
-					if(((RF_DATA[actual_byte] >> actual_bit_of_byte) & 0x01) == 0x01)
-					{
-						// bit 1
-						PCA0_writeChannel(PCA0_CHAN0, DUTY_CYCLE_HIGH << 8);
-					}
-					else
-					{
-						// bit 0
-						PCA0_writeChannel(PCA0_CHAN0, DUTY_CYLCE_LOW << 8);
-					}
+					// set first bit to be in sync when PCA0 is starting
+					SetPCA0DutyCylce();
 
 					SendRF_SYNC(protocol_index);
 					PCA0CN0_CR = PCA0CN0_CR__RUN;

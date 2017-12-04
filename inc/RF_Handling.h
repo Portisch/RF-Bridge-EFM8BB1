@@ -10,6 +10,8 @@
 
 extern void SendRF_SYNC(uint8_t used_protocol);
 extern uint8_t PCA0_DoTransmit(uint8_t identifier);
+extern void SetPCA0DutyCylce(void);
+extern void SetTimer0Overflow(uint8_t T0_Overflow);
 extern void PCA0_StopTransmit(void);
 extern void PCA0_DoSniffing(void);
 extern void PCA0_StopSniffing(void);
@@ -36,6 +38,8 @@ extern SI_SEGMENT_VARIABLE(sniffing_is_on, uint8_t, SI_SEG_XDATA);
 
 extern SI_SEGMENT_VARIABLE(DUTY_CYCLE_HIGH, uint8_t, SI_SEG_XDATA);
 extern SI_SEGMENT_VARIABLE(DUTY_CYLCE_LOW, uint8_t, SI_SEG_XDATA);
+extern SI_SEGMENT_VARIABLE(T0_HIGH, uint8_t, SI_SEG_XDATA);
+extern SI_SEGMENT_VARIABLE(T0_LOW, uint8_t, SI_SEG_XDATA);
 
 extern SI_SEGMENT_VARIABLE(actual_bit_of_byte, uint8_t, SI_SEG_XDATA);
 extern SI_SEGMENT_VARIABLE(actual_bit, uint8_t, SI_SEG_XDATA);

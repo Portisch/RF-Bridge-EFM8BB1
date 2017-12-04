@@ -50,18 +50,18 @@
     <property object="PCACH_2" propertyId="ABPeripheral.included" value="true"/>
     <property object="PCA_0" propertyId="ABPeripheral.included" value="true"/>
     <property object="PCA_0" propertyId="pca.pcacountertimerconfiguration.enablepcacountertimeroverflowinterrupt" value="Enabled"/>
-    <property object="PCA_0" propertyId="pca.pcacountertimerconfiguration.pcaclockfrequency" value="100.000 kHz"/>
-    <property object="PCA_0" propertyId="pca.pcacountertimerconfiguration.pcaclockfrequencyintegervalue" value="100000"/>
-    <property object="PCA_0" propertyId="pca.pcacountertimerconfiguration.pcaclockperiod" value="10.000 uS"/>
+    <property object="PCA_0" propertyId="pca.pcacountertimerconfiguration.pcaclockfrequency" value="255.208 kHz"/>
+    <property object="PCA_0" propertyId="pca.pcacountertimerconfiguration.pcaclockfrequencyintegervalue" value="255208"/>
+    <property object="PCA_0" propertyId="pca.pcacountertimerconfiguration.pcaclockperiod" value="3.918 uS"/>
     <property object="PCA_0" propertyId="pca.pcacountertimerconfiguration.pcacontertimerlowbyte" value="255"/>
     <property object="PCA_0" propertyId="pca.pcacountertimerconfiguration.pcacountertimer" value="255"/>
     <property object="PCA_0" propertyId="pca.pcacountertimerconfiguration.selectpcacountertimerpulse" value="Timer 0 overflow"/>
     <property object="PCA_0" propertyId="pca.pcapwmconfiguration.cex0outputpolarity" value="Inverted"/>
     <property object="PCA_0" propertyId="pca.pcapwmconfiguration.enablecycleoverflowinterrupt" value="Enabled"/>
     <property object="TIMER01_0" propertyId="ABPeripheral.included" value="true"/>
-    <property object="TIMER01_0" propertyId="timer01.timer0highbyte.timer0highbyte" value="11"/>
-    <property object="TIMER01_0" propertyId="timer01.timer0mode2:8bitcountertimerwithautoreload.targetoverflowfrequency" value="100000"/>
-    <property object="TIMER01_0" propertyId="timer01.timer0mode2:8bitcountertimerwithautoreload.timerreloadvalue" value="11"/>
+    <property object="TIMER01_0" propertyId="timer01.timer0highbyte.timer0highbyte" value="160"/>
+    <property object="TIMER01_0" propertyId="timer01.timer0mode2:8bitcountertimerwithautoreload.targetoverflowfrequency" value="255000"/>
+    <property object="TIMER01_0" propertyId="timer01.timer0mode2:8bitcountertimerwithautoreload.timerreloadvalue" value="160"/>
     <property object="TIMER01_0" propertyId="timer01.timer1highbyte.timer1highbyte" value="150"/>
     <property object="TIMER01_0" propertyId="timer01.timer1mode2:8bitcountertimerwithautoreload.targetoverflowfrequency" value="19200"/>
     <property object="TIMER01_0" propertyId="timer01.timer1mode2:8bitcountertimerwithautoreload.timerreloadvalue" value="150"/>
