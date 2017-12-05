@@ -39,9 +39,20 @@ Light ON:<br/>
 Binary: 10101010 10100110 00000100 00000010 00110010 11111010 10001111 01010101<br/>
 Hex: AA A6 04 02 32 FA 8F 55<br/>
 
+## Transmiting by command 0xA5
+This is the original implemented RF transmit command<br/>
+Hex: AA A5 24 E0 01 40 03 84 D0 03 58 55<br/>
+
+0xAA: uart sync init<br/>
+0x24-0xE0: Tsyn<br/>
+0x01-0x40 Tlow<br/>
+0x03-0x84 Thigh<br/>
+0xD0-0x58 24bit Data<br/>
+
+The low time of the SYNC is default 2000µs, duty cycle of the high bit 70%, 30% of the low bit.<br/>
+
 ## Transmiting by command 0xA8
-There is already a new command in the firmware to be able to send RF data.<br/>
-The original command isn't supported yet!<br/>
+There is a new command in the firmware to be able to send RF data.<br/>
 
 Hex: AA A8 06 01 D0 F9 32 11 33 55<br/>
 
@@ -51,6 +62,22 @@ Hex: AA A8 06 01 D0 F9 32 11 33 55<br/>
 0x01: protocol identifier (ROHRMOTOR24)<br/>
 0xD0-0x55: data<br/>
 0x55: uart sync end
+
+Universal transmit by command 0xA8<br/>
+Hex: AA A8 0D 7F 12 C0 05 DC 02 BC 46 01 2C 1E 08 AA 55<br/>
+
+0xAA: uart sync init<br/>
+0xA8: transmit RF data<br/>
+0x0D: data len<br/>
+0x7F: protocol identifier 0x7F<br/>
+0x12-0xC0: SYNC_HIGH<br/>
+0x05-0xDC: SYNC_LOW<br/>
+0x02-0xBC: BIT_HIGH_TIME<br/>
+0x46: BIT_HIGH_DUTY<br/>
+0x01-0x2C: BIT_LOW_TIME<br/>
+0x1E: BIT_LOW_DUTY<br/>
+0x08: BIT_COUNT + SYNC_BIT_COUNT in front of RF data<br/>
+0x1E: RF data to send<br/>
 
 # Next Steps
 Add full support for the original firmware<br/>
