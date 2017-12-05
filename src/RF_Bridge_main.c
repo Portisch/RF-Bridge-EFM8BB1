@@ -16,12 +16,12 @@
 #include "pca_0.h"
 #include "uart.h"
 #include "RF_Handling.h"
+#include "RF_Protocols.h"
 // $[Generated Includes]
 // [Generated Includes]$
 
-uart_state_t uart_state = IDLE;
-uart_command_t uart_command = NONE;
-bool Sniffing = false;
+SI_SEGMENT_VARIABLE(uart_state, uart_state_t, SI_SEG_XDATA) = IDLE;
+SI_SEGMENT_VARIABLE(uart_command, uart_command_t, SI_SEG_XDATA) = NONE;
 
 //-----------------------------------------------------------------------------
 // SiLabs_Startup() Routine
@@ -34,6 +34,20 @@ bool Sniffing = false;
 void SiLabs_Startup (void)
 {
 
+}
+
+void StartRFTransmit(void)
+{
+	actual_bit_of_byte = 0x08;
+	actual_bit_of_byte--;
+	actual_bit = 1;
+
+	// set first bit to be in sync when PCA0 is starting
+	SetPCA0DutyCylce();
+
+	// make RF sync pulse
+	SendRF_SYNC();
+	PCA0CN0_CR = PCA0CN0_CR__RUN;
 }
 
 //-----------------------------------------------------------------------------
@@ -70,6 +84,7 @@ int main (void)
 		unsigned int rxdata;
 		uint8_t len;
 		uint8_t position;
+		uint8_t protocol_index;
 
 		rxdata = uart_getc();
 
@@ -80,7 +95,7 @@ int main (void)
 			{
 				// check if UART_SYNC_INIT got received
 				case IDLE:
-					if ((rxdata & 0xFF) == UART_SYNC_INIT)
+					if ((rxdata & 0xFF) == RF_CODE_START)
 						uart_state = SYNC_INIT;
 					break;
 
@@ -92,7 +107,7 @@ int main (void)
 					// check if some data needs to be received
 					switch(uart_command)
 					{
-						case LEARNING:
+						case RF_CODE_LEARN:
 							Timer_3_Timeout = 50000;
 							BUZZER = BUZZER_ON;
 							// start 5µs timer
@@ -101,17 +116,21 @@ int main (void)
 							while((TMR3CN0 & TMR3CN0_TR3__BMASK) == TMR3CN0_TR3__RUN);
 							BUZZER = BUZZER_OFF;
 							break;
-						case SNIFFING_ON:
+						case RF_CODE_RFOUT:
+							uart_state = RECEIVING;
+							position = 0;
+							len = 9;
+							break;
+						case RF_CODE_SNIFFING_ON:
 							PCA0_DoSniffing();
 							break;
-						case SNIFFING_OFF:
+						case RF_CODE_SNIFFING_OFF:
 							PCA0_StopSniffing();
 							sniffing_is_on = false;
 							break;
-						case TRANSMIT_DATA:
+						case RF_CODE_TRANSMIT_DATA_NEW:
 							uart_state = RECEIVE_LEN;
 							break;
-
 
 						// unknown command
 						default:
@@ -121,7 +140,7 @@ int main (void)
 					}
 					break;
 
-				// Receiving UART data len
+				// Receiving UART data length
 				case RECEIVE_LEN:
 					position = 0;
 					len = rxdata & 0xFF;
@@ -142,11 +161,11 @@ int main (void)
 
 				// wait and check for UART_SYNC_END
 				case SYNC_FINISH:
-					if ((rxdata & 0xFF) == UART_SYNC_END)
+					if ((rxdata & 0xFF) == RF_CODE_STOP)
 					{
 						uart_state = IDLE;
 						// send acknowledge
-						uart_put_command(COMMAND_AK);
+						uart_put_command(RF_CODE_ACK);
 					}
 					break;
 			}
@@ -157,22 +176,20 @@ int main (void)
 		 ------------------------------------------*/
 		switch(uart_command)
 		{
-			case SNIFFING_ON:
+			case RF_CODE_SNIFFING_ON:
 				// check if a RF signal got decoded
 				if ((RF_DATA_STATUS & RF_DATA_RECEIVED_MASK) != 0)
 				{
 					uint8_t used_protocol = RF_DATA_STATUS & 0x7F;
-					uart_put_RF_Data(SNIFFING_ON, used_protocol);
+					uart_put_RF_Data(RF_CODE_SNIFFING_ON, used_protocol);
 
 					// clear RF status
 					RF_DATA_STATUS = 0;
 				}
 				break;
 
-			// transmit data on RF
-			// byte 0:		Protocol identifier
-			// byte 1..N:	data to be transmitted
-			case TRANSMIT_DATA:
+			// do original transfer
+			case RF_CODE_RFOUT:
 				// only do the job if all data got received by UART
 				if (uart_state != IDLE)
 					break;
@@ -180,21 +197,73 @@ int main (void)
 				if (sniffing_is_on)
 					PCA0_StopSniffing();
 
-				protocol_index = PCA0_DoTransmit(RF_DATA[0]);
+				// byte 0..1:	Tsyn
+				// byte 2..3:	Tlow
+				// byte 4..5:	Thigh
+				// byte 6..7:	24bit Data
+				// set low time of sync to 2000µs - unknown
+				// set duty cycle of high and low bit to 70 and 30 % - unknown
+				PCA0_InitTransmit(*(uint16_t *)&RF_DATA[0], 2000,
+						*(uint16_t *)&RF_DATA[4], 70, *(uint16_t *)&RF_DATA[2], 30, 24);
 
-				if (protocol_index != 0xFF)
+				actual_byte = 7;
+
+				// start RF transmit
+				StartRFTransmit();
+
+				uart_command = NONE;
+				break;
+
+			// transmit data on RF
+			case RF_CODE_TRANSMIT_DATA_NEW:
+				// only do the job if all data got received by UART
+				if (uart_state != IDLE)
+					break;
+
+				if (sniffing_is_on)
+					PCA0_StopSniffing();
+
+				// check if unknown protocol should be used
+				// byte 0:		0x7F Protocol identifier
+				// byte 1..2:	SYNC_HIGH
+				// byte 3..4:	SYNC_LOW
+				// byte 5..6:	BIT_HIGH_TIME
+				// byte 7:		BIT_HIGH_DUTY
+				// byte 8..9:	BIT_LOW_TIME
+				// byte 10:		BIT_LOW_DUTY
+				// byte 11:		BIT_COUNT + SYNC_BIT_COUNT in front of RF data
+				// byte 12..N:	RF data to send
+				if (RF_DATA[0] == 0x7F)
 				{
-					actual_bit_of_byte = 0x08;
-					actual_bit_of_byte--;
-					actual_byte = 1;
-					actual_bit = 1;
+					PCA0_InitTransmit(*(uint16_t *)&RF_DATA[1], *(uint16_t *)&RF_DATA[3],
+							*(uint16_t *)&RF_DATA[5], RF_DATA[7], *(uint16_t *)&RF_DATA[8], RF_DATA[10], RF_DATA[11]);
 
-					// set first bit to be in sync when PCA0 is starting
-					SetPCA0DutyCylce();
-
-					SendRF_SYNC(protocol_index);
-					PCA0CN0_CR = PCA0CN0_CR__RUN;
+					actual_byte = 12;
 				}
+				// byte 0:		Protocol identifier 0x01..0x7E
+				// byte 1..N:	data to be transmitted
+				else
+				{
+					protocol_index = PCA0_GetProtocolIndex(RF_DATA[0]);
+
+					if (protocol_index != 0xFF)
+					{
+						PCA0_InitTransmit(PROTOCOL_DATA[protocol_index].SYNC_HIGH, PROTOCOL_DATA[protocol_index].SYNC_LOW,
+								PROTOCOL_DATA[protocol_index].BIT_HIGH_TIME, PROTOCOL_DATA[protocol_index].BIT_HIGH_DUTY,
+								PROTOCOL_DATA[protocol_index].BIT_LOW_TIME, PROTOCOL_DATA[protocol_index].BIT_LOW_DUTY,
+								PROTOCOL_DATA[protocol_index].BIT_COUNT);
+
+						actual_byte = 1;
+					}
+					else
+					{
+						uart_command = NONE;
+					}
+				}
+
+				// if valid RF protocol start RF transmit
+				if (uart_command != NONE)
+					StartRFTransmit();
 
 				uart_command = NONE;
 				break;

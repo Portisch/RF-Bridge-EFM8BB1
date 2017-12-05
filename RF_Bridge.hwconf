@@ -57,7 +57,6 @@
     <property object="PCA_0" propertyId="pca.pcacountertimerconfiguration.pcacountertimer" value="255"/>
     <property object="PCA_0" propertyId="pca.pcacountertimerconfiguration.selectpcacountertimerpulse" value="Timer 0 overflow"/>
     <property object="PCA_0" propertyId="pca.pcapwmconfiguration.cex0outputpolarity" value="Inverted"/>
-    <property object="PCA_0" propertyId="pca.pcapwmconfiguration.enablecycleoverflowinterrupt" value="Enabled"/>
     <property object="TIMER01_0" propertyId="ABPeripheral.included" value="true"/>
     <property object="TIMER01_0" propertyId="timer01.timer0highbyte.timer0highbyte" value="160"/>
     <property object="TIMER01_0" propertyId="timer01.timer0mode2:8bitcountertimerwithautoreload.targetoverflowfrequency" value="255000"/>

@@ -1,3 +1,4 @@
+"./lib/efm8bb1/peripheralDrivers/src/pca_0.OBJ",
 "./lib/efm8bb1/peripheralDrivers/src/uart_0.OBJ",
 "./src/InitDevice.OBJ",
 "./src/RF_Bridge_main.OBJ",

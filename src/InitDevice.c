@@ -392,10 +392,6 @@ extern void PCA_0_enter_DefaultMode_from_RESET(void) {
 	// [PCA0POL - PCA Output Polarity]$
 
 	// $[PCA0PWM - PCA PWM Configuration]
-	/***********************************************************************
-	 - A PCA interrupt will be generated when COVF is set
-	 ***********************************************************************/
-	PCA0PWM |= PCA0PWM_ECOV__COVF_MASK_ENABLED;
 	// [PCA0PWM - PCA PWM Configuration]$
 
 	// $[PCA On]

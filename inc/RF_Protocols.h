@@ -69,6 +69,10 @@ typedef struct
  * Protocol array
  */
 #define PROTOCOLCOUNT	4
+#if PROTOCOLCOUNT > 0x7F
+#error Too much protocols are defined, stop!
+#endif
+
 SI_SEGMENT_VARIABLE(PROTOCOL_DATA[PROTOCOLCOUNT], static const PROTOCOL_DATA_t, SI_SEG_CODE) =
 {
 		ROHRMOTOR24,

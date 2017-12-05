@@ -11,9 +11,8 @@
 //-----------------------------------------------------------------------------
 // Global Constants
 //-----------------------------------------------------------------------------
-//#define UART_BUFFER_LENGTH   64 + 4
-#define UART_SYNC_INIT		0xAA
-#define UART_SYNC_END		0x55
+#define RF_CODE_START		0xAA
+#define RF_CODE_STOP		0x55
 
 #define UART_BUFFER_SIZE	64 + 4
 
@@ -42,15 +41,15 @@ typedef enum
 typedef enum
 {
 	NONE = 0x00,
-	COMMAND_AK = 0xA0,
-	LEARNING = 0xA1,
-	TIMEOUT_EXITS = 0xA2,
-	LEARNING_SUCCESS = 0xA3,
-	FORWARD_RF_KEY = 0xA4,
-	TRANSMIT_KEY = 0xA5,
-	SNIFFING_ON = 0xA6,
-	SNIFFING_OFF = 0xA7,
-	TRANSMIT_DATA = 0xA8
+	RF_CODE_ACK = 0xA0,
+	RF_CODE_LEARN = 0xA1,
+	RF_CODE_LEARN_KO = 0xA2,
+	RF_CODE_LEARN_OK = 0xA3,
+	RF_CODE_RFIN = 0xA4,
+	RF_CODE_RFOUT = 0xA5,
+	RF_CODE_SNIFFING_ON = 0xA6,
+	RF_CODE_SNIFFING_OFF = 0xA7,
+	RF_CODE_TRANSMIT_DATA_NEW = 0xA8
 } uart_command_t;
 
 
@@ -59,7 +58,8 @@ typedef enum
 //-----------------------------------------------------------------------------
 extern SI_SEGMENT_VARIABLE(UART_RX_Buffer[UART_BUFFER_SIZE], uint8_t, SI_SEG_XDATA);
 extern SI_SEGMENT_VARIABLE(UART_TX_Buffer[UART_BUFFER_SIZE], uint8_t, SI_SEG_XDATA);
-extern uart_state_t uart_state;
+extern SI_SEGMENT_VARIABLE(uart_state, uart_state_t, SI_SEG_XDATA);
+extern SI_SEGMENT_VARIABLE(uart_command, uart_command_t, SI_SEG_XDATA);
 
 extern void uart_buffer_reset(void);
 extern uint8_t uart_getlen(void);

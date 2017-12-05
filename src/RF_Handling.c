@@ -24,12 +24,14 @@ SI_SEGMENT_VARIABLE(DUTY_CYCLE_HIGH, uint8_t, SI_SEG_XDATA) = 0x56;
 SI_SEGMENT_VARIABLE(DUTY_CYLCE_LOW, uint8_t, SI_SEG_XDATA) = 0xAB;
 SI_SEGMENT_VARIABLE(T0_HIGH, uint8_t, SI_SEG_XDATA) = 0x00;
 SI_SEGMENT_VARIABLE(T0_LOW, uint8_t, SI_SEG_XDATA) = 0x00;
+SI_SEGMENT_VARIABLE(SYNC_HIGH, uint16_t, SI_SEG_XDATA) = 0x00;
+SI_SEGMENT_VARIABLE(SYNC_LOW, uint16_t, SI_SEG_XDATA) = 0x00;
+SI_SEGMENT_VARIABLE(BIT_COUNT, uint8_t, SI_SEG_XDATA) = 0x00;
 
 SI_SEGMENT_VARIABLE(actual_bit_of_byte, uint8_t, SI_SEG_XDATA) = 0;
 SI_SEGMENT_VARIABLE(actual_bit, uint8_t, SI_SEG_XDATA) = 0;
 SI_SEGMENT_VARIABLE(actual_sync_bit, uint8_t, SI_SEG_XDATA) = 0;
 SI_SEGMENT_VARIABLE(actual_byte, uint8_t, SI_SEG_XDATA) = 0;
-SI_SEGMENT_VARIABLE(protocol_index, uint8_t, SI_SEG_XDATA) = 0;
 
 //-----------------------------------------------------------------------------
 // Callbacks
@@ -61,7 +63,7 @@ void PCA0_channel0EventCb()
 		actual_bit_of_byte = 8;
 	}
 
-	if (actual_bit == PROTOCOL_DATA[protocol_index].BIT_COUNT)
+	if (actual_bit == BIT_COUNT)
 	{
 		PCA0_StopTransmit();
 		return;
@@ -216,7 +218,7 @@ void PCA0_channel2EventCb()
 //-----------------------------------------------------------------------------
 // Send RF SYNC HIGH/LOW Routine
 //-----------------------------------------------------------------------------
-void SendRF_SYNC(uint8_t used_protocol)
+void SendRF_SYNC(void)
 {
 	// enable P0.0 for I/O control
 	XBR1 &= ~XBR1_PCA0ME__CEX0_CEX1;
@@ -239,7 +241,7 @@ void SendRF_SYNC(uint8_t used_protocol)
 	// switch to high
 	T_DATA = 1;
 	// do high time
-	Timer_3_Timeout = PROTOCOL_DATA[used_protocol].SYNC_HIGH;
+	Timer_3_Timeout = SYNC_HIGH;
 	// start 5µs timer
 	TMR3CN0 |= TMR3CN0_TR3__RUN;
 	// wait until timer has finished
@@ -248,7 +250,7 @@ void SendRF_SYNC(uint8_t used_protocol)
 	T_DATA = 0;
 
 	// do low time
-	Timer_3_Timeout = PROTOCOL_DATA[used_protocol].SYNC_LOW;
+	Timer_3_Timeout = SYNC_LOW;
 	// start 5µs timer
 	TMR3CN0 |= TMR3CN0_TR3__RUN;
 	// wait until timer has finished
@@ -257,11 +259,10 @@ void SendRF_SYNC(uint8_t used_protocol)
 	XBR1 |= XBR1_PCA0ME__CEX0_CEX1;
 }
 
-uint8_t PCA0_DoTransmit(uint8_t identifier)
+uint8_t PCA0_GetProtocolIndex(uint8_t identifier)
 {
 	uint8_t i;
 	uint8_t protocol_index = 0xFF;
-	uint16_t bit_time;
 
 	// check first for valid identifier
 	if ((identifier > 0x00) && (identifier < 0x80))
@@ -275,40 +276,45 @@ uint8_t PCA0_DoTransmit(uint8_t identifier)
 				break;
 			}
 		}
-
-		// check if protocol got found
-		if (protocol_index != 0xFF)
-		{
-			//Restore Timer Configuration
-			//TCON |= (TCON_save & TCON_TR0__BMASK);
-			bit_time = (100 * (uint32_t)PROTOCOL_DATA[protocol_index].BIT_HIGH_TIME) / PROTOCOL_DATA[protocol_index].BIT_HIGH_DUTY;
-			// calculate T0_Overflow
-			T0_HIGH = (uint8_t)(0x100 - ((uint32_t)SYSCLK / (0xFF * (1000000 / (uint32_t)bit_time))));
-
-			bit_time = (100 * (uint32_t)PROTOCOL_DATA[protocol_index].BIT_LOW_TIME) / PROTOCOL_DATA[protocol_index].BIT_LOW_DUTY;
-			// calculate T0_Overflow
-			T0_LOW = (uint8_t)(0x100 - ((uint32_t)SYSCLK / (0xFF * (1000000 / (uint32_t)bit_time))));
-
-			// calculate high and low duty cycle
-			//DUTY_CYCLE_HIGH = (uint16_t)(0xFF - ((PROTOCOL_DATA[protocol_index].BIT_HIGH_DUTY * 0xFF) / 100));
-			DUTY_CYCLE_HIGH = (uint16_t)((PROTOCOL_DATA[protocol_index].BIT_HIGH_DUTY * 0xFF) / 100);
-			//DUTY_CYLCE_LOW = (uint16_t)(0xFF - ((PROTOCOL_DATA[protocol_index].BIT_LOW_DUTY * 0xFF) / 100));
-			DUTY_CYLCE_LOW = (uint16_t)((PROTOCOL_DATA[protocol_index].BIT_LOW_DUTY * 0xFF) / 100);
-
-			// enable interrupt for RF transmitting
-			PCA0CPM0 |= PCA0CPM0_ECCF__ENABLED;
-
-			// disable interrupt for RF receiving
-			PCA0CPM1 &= ~PCA0CPM1_ECCF__ENABLED;
-
-			/***********************************************************************
-			 - PCA Counter/Timer Low Byte = 0xFF
-			 ***********************************************************************/
-			PCA0L = (0xFF << PCA0L_PCA0L__SHIFT);
-		}
 	}
 
 	return protocol_index;
+}
+
+void PCA0_InitTransmit(uint16_t sync_high, uint16_t sync_low, uint16_t BIT_HIGH_TIME, uint8_t BIT_HIGH_DUTY,
+		uint16_t BIT_LOW_TIME, uint8_t BIT_LOW_DUTY, uint8_t bitcount)
+{
+	uint16_t bit_time;
+
+	bit_time = (100 * (uint32_t)BIT_HIGH_TIME) / BIT_HIGH_DUTY;
+	// calculate T0_Overflow
+	T0_HIGH = (uint8_t)(0x100 - ((uint32_t)SYSCLK / (0xFF * (1000000 / (uint32_t)bit_time))));
+
+	bit_time = (100 * (uint32_t)BIT_LOW_TIME) / BIT_LOW_DUTY;
+	// calculate T0_Overflow
+	T0_LOW = (uint8_t)(0x100 - ((uint32_t)SYSCLK / (0xFF * (1000000 / (uint32_t)bit_time))));
+
+	// calculate high and low duty cycle
+	DUTY_CYCLE_HIGH = (uint16_t)((BIT_HIGH_DUTY * 0xFF) / 100);
+	DUTY_CYLCE_LOW = (uint16_t)((BIT_LOW_DUTY * 0xFF) / 100);
+
+	// set constants
+	SYNC_HIGH = sync_high;
+	SYNC_LOW = sync_low;
+	BIT_COUNT = bitcount;
+
+	// enable interrupt for RF transmitting
+	PCA0CPM0 |= PCA0CPM0_ECCF__ENABLED;
+
+	PCA0PWM |= PCA0PWM_ECOV__COVF_MASK_ENABLED;
+
+	// disable interrupt for RF receiving
+	PCA0CPM1 &= ~PCA0CPM1_ECCF__ENABLED;
+
+	/***********************************************************************
+	 - PCA Counter/Timer Low Byte = 0xFF
+	 ***********************************************************************/
+	PCA0L = (0xFF << PCA0L_PCA0L__SHIFT);
 }
 
 void SetPCA0DutyCylce(void)
@@ -339,6 +345,7 @@ void PCA0_StopTransmit(void)
 	PCA0_writeChannel(PCA0_CHAN0, 0x0000);
 	// disable interrupt for RF transmitting
 	PCA0CPM0 &= ~PCA0CPM0_ECCF__ENABLED;
+	PCA0PWM &= ~PCA0PWM_ECOV__COVF_MASK_ENABLED;
 	PCA0_halt();
 
 	// enable P0.0 for I/O control
@@ -348,7 +355,7 @@ void PCA0_StopTransmit(void)
 	// disable P0.0 for I/O control, enter PCA mode
 	XBR1 |= XBR1_PCA0ME__CEX0_CEX1;
 
-	// restart sniffing it was active
+	// restart sniffing if it was active
 	if(sniffing_is_on)
 		PCA0_DoSniffing();
 }
@@ -356,19 +363,7 @@ void PCA0_StopTransmit(void)
 void PCA0_DoSniffing(void)
 {
 	// restore timer to 100000Hz, 10µs interval
-	//Save Timer Configuration
-	uint8_t TCON_save;
-	TCON_save = TCON;
-	//Stop Timer 0
-	TCON &= ~TCON_TR0__BMASK;
-
-	/***********************************************************************
-	 - Timer 0 High Byte = 0x0B
-	 ***********************************************************************/
-	TH0 = (0x0B << TH0_TH0__SHIFT);
-
-	//Restore Timer Configuration
-	TCON |= (TCON_save & TCON_TR0__BMASK);
+	SetTimer0Overflow(0x0B);
 
 	// stop PCA
 	PCA0CN0_CR = PCA0CN0_CR__STOP;
@@ -385,6 +380,7 @@ void PCA0_DoSniffing(void)
 	rf_state = RF_IDLE;
 	RF_DATA_STATUS = 0;
 	sniffing_is_on = true;
+	uart_command = RF_CODE_SNIFFING_ON;
 }
 
 void PCA0_StopSniffing(void)
