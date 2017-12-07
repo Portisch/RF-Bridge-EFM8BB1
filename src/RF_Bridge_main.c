@@ -177,7 +177,9 @@ int main (void)
 		 ------------------------------------------*/
 		switch(uart_command)
 		{
+			// do original learning
 			case RF_CODE_LEARN:
+				// check for learning timeout
 				if (IsTimerFinished())
 				{
 					InitTimer_ms(1, 1000);
@@ -185,9 +187,13 @@ int main (void)
 					// wait until timer has finished
 					WaitTimerFinsihed();
 					BUZZER = BUZZER_OFF;
+					// send not-acknowledge
+					uart_put_command(RF_CODE_LEARN_KO);
 					uart_command = NONE;
 				}
 				break;
+
+			// do new sniffing
 			case RF_CODE_SNIFFING_ON:
 				// check if a RF signal got decoded
 				if ((RF_DATA_STATUS & RF_DATA_RECEIVED_MASK) != 0)
