@@ -108,13 +108,14 @@ int main (void)
 					switch(uart_command)
 					{
 						case RF_CODE_LEARN:
-							Timer_3_Timeout = 50000;
+							InitTimer_ms(1, 50);
 							BUZZER = BUZZER_ON;
-							// start 5µs timer
-							TMR3CN0 |= TMR3CN0_TR3__RUN;
 							// wait until timer has finished
-							while((TMR3CN0 & TMR3CN0_TR3__BMASK) == TMR3CN0_TR3__RUN);
+							WaitTimerFinsihed();
 							BUZZER = BUZZER_OFF;
+
+							// start timeout timer
+							InitTimer_ms(1, 30000);
 							break;
 						case RF_CODE_RFOUT:
 							uart_state = RECEIVING;
@@ -176,6 +177,17 @@ int main (void)
 		 ------------------------------------------*/
 		switch(uart_command)
 		{
+			case RF_CODE_LEARN:
+				if (IsTimerFinished())
+				{
+					InitTimer_ms(1, 1000);
+					BUZZER = BUZZER_ON;
+					// wait until timer has finished
+					WaitTimerFinsihed();
+					BUZZER = BUZZER_OFF;
+					uart_command = NONE;
+				}
+				break;
 			case RF_CODE_SNIFFING_ON:
 				// check if a RF signal got decoded
 				if ((RF_DATA_STATUS & RF_DATA_RECEIVED_MASK) != 0)

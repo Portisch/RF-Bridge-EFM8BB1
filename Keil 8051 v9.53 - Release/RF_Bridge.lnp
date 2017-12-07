@@ -1,5 +1,6 @@
 "./lib/efm8bb1/peripheralDrivers/src/pca_0.OBJ",
 "./lib/efm8bb1/peripheralDrivers/src/uart_0.OBJ",
+"./src/Globals.OBJ",
 "./src/InitDevice.OBJ",
 "./src/RF_Bridge_main.OBJ",
 "./src/RF_Handling.OBJ",

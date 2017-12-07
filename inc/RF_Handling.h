@@ -18,7 +18,6 @@ extern void PCA0_StopTransmit(void);
 extern void PCA0_DoSniffing(void);
 extern void PCA0_StopSniffing(void);
 
-#define SYSCLK	24500000
 // 64 byte == 512 bits, so a RF signal with maximum of 512 bits is possible
 #define RF_DATA_BUFFERSIZE		64
 
@@ -39,7 +38,6 @@ extern SI_SEGMENT_VARIABLE(RF_DATA[RF_DATA_BUFFERSIZE], uint8_t, SI_SEG_XDATA);
 // Bit 6-0:	Protocol identifier
 extern SI_SEGMENT_VARIABLE(RF_DATA_STATUS, uint8_t, SI_SEG_XDATA);
 
-extern SI_SEGMENT_VARIABLE(Timer_3_Timeout, uint16_t, SI_SEG_XDATA);
 extern SI_SEGMENT_VARIABLE(sniffing_is_on, uint8_t, SI_SEG_XDATA);
 
 extern SI_SEGMENT_VARIABLE(DUTY_CYCLE_HIGH, uint8_t, SI_SEG_XDATA);

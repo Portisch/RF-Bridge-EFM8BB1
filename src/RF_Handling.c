@@ -17,7 +17,6 @@ SI_SEGMENT_VARIABLE(RF_DATA[RF_DATA_BUFFERSIZE], uint8_t, SI_SEG_XDATA);
 SI_SEGMENT_VARIABLE(RF_DATA_STATUS, uint8_t, SI_SEG_XDATA) = 0;
 SI_SEGMENT_VARIABLE(rf_state, rf_state_t, SI_SEG_XDATA) = RF_IDLE;
 
-SI_SEGMENT_VARIABLE(Timer_3_Timeout, uint16_t, SI_SEG_XDATA) = 0x0000;
 SI_SEGMENT_VARIABLE(sniffing_is_on, uint8_t, SI_SEG_XDATA) = false;
 
 SI_SEGMENT_VARIABLE(DUTY_CYCLE_HIGH, uint8_t, SI_SEG_XDATA) = 0x56;
@@ -223,38 +222,33 @@ void SendRF_SYNC(void)
 	// enable P0.0 for I/O control
 	XBR1 &= ~XBR1_PCA0ME__CEX0_CEX1;
 	// do activate the SYN115 chip
-	Timer_3_Timeout = 3000;
 	// switch to high
 	T_DATA = 1;
-	// start 5탎 timer
-	TMR3CN0 |= TMR3CN0_TR3__RUN;
+	// start timer
+	InitTimer_us(10, 3000);
 	// wait until timer has finished
-	while((TMR3CN0 & TMR3CN0_TR3__BMASK) == TMR3CN0_TR3__RUN);
+	WaitTimerFinsihed();
 	// switch to low
 	T_DATA = 0;
-
-	Timer_3_Timeout = 100;
-	// start 5탎 timer
-	TMR3CN0 |= TMR3CN0_TR3__RUN;
+	// start timer
+	InitTimer_us(10, 100);
 	// wait until timer has finished
-	while((TMR3CN0 & TMR3CN0_TR3__BMASK) == TMR3CN0_TR3__RUN);
+	WaitTimerFinsihed();
 	// switch to high
 	T_DATA = 1;
 	// do high time
-	Timer_3_Timeout = SYNC_HIGH;
-	// start 5탎 timer
-	TMR3CN0 |= TMR3CN0_TR3__RUN;
+	// start timer
+	InitTimer_us(5, SYNC_HIGH);
 	// wait until timer has finished
-	while((TMR3CN0 & TMR3CN0_TR3__BMASK) == TMR3CN0_TR3__RUN);
+	WaitTimerFinsihed();
 	// switch to low
 	T_DATA = 0;
 
 	// do low time
-	Timer_3_Timeout = SYNC_LOW;
-	// start 5탎 timer
-	TMR3CN0 |= TMR3CN0_TR3__RUN;
+	// start timer
+	InitTimer_us(5, SYNC_LOW);
 	// wait until timer has finished
-	while((TMR3CN0 & TMR3CN0_TR3__BMASK) == TMR3CN0_TR3__RUN);
+	WaitTimerFinsihed();
 	// disable P0.0 for I/O control, enter PCA mode
 	XBR1 |= XBR1_PCA0ME__CEX0_CEX1;
 }
@@ -390,28 +384,4 @@ void PCA0_StopSniffing(void)
 
 	// disable interrupt for RF receiving
 	PCA0CPM1 &= ~PCA0CPM1_ECCF__ENABLED;
-}
-
-//-----------------------------------------------------------------------------
-// TIMER3_ISR
-//-----------------------------------------------------------------------------
-//
-// TIMER3 ISR Content goes here. Remember to clear flag bits:
-// TMR3CN0::TF3H (Timer # High Byte Overflow Flag)
-// TMR3CN0::TF3L (Timer # Low Byte Overflow Flag)
-//
-//-----------------------------------------------------------------------------
-SI_INTERRUPT (TIMER3_ISR, TIMER3_IRQn)
-{
-	// Clear Timer 3 high overflow flag
-	TMR3CN0 &= ~TMR3CN0_TF3H__SET;
-
-	// check if pulse time is over
-	if(Timer_3_Timeout <= 0)
-	{
-		// stop timer
-		TMR3CN0 &= ~TMR3CN0_TR3__RUN;
-	}
-
-	Timer_3_Timeout -= 5;
 }
