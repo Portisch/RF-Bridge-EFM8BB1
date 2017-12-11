@@ -120,7 +120,7 @@ int main (void)
 
 							// set desired RF protocol PT2260
 							desired_rf_protocol = PT2260_IDENTIFIER;
-							PCA0_DoSniffing(RF_CODE_LEARN);
+							last_sniffing_command = PCA0_DoSniffing(RF_CODE_LEARN);
 
 							// start timeout timer
 							InitTimer_ms(1, 30000);
@@ -135,8 +135,10 @@ int main (void)
 							PCA0_DoSniffing(RF_CODE_SNIFFING_ON);
 							break;
 						case RF_CODE_SNIFFING_OFF:
-							PCA0_StopSniffing();
-							sniffing_is_on = false;
+							// set desired RF protocol PT2260
+							desired_rf_protocol = PT2260_IDENTIFIER;
+							// re-enable default RF_CODE_RFIN sniffing
+							PCA0_DoSniffing(RF_CODE_RFIN);
 							break;
 						case RF_CODE_TRANSMIT_DATA_NEW:
 							uart_state = RECEIVE_LEN;
@@ -191,23 +193,30 @@ int main (void)
 				// check if a RF signal got decoded
 				if ((RF_DATA_STATUS & RF_DATA_RECEIVED_MASK) != 0)
 				{
-					uart_command = NONE;
+					InitTimer_ms(1, 200);
+					BUZZER = BUZZER_ON;
+					// wait until timer has finished
+					WaitTimerFinsihed();
+					BUZZER = BUZZER_OFF;
+
+					PCA0_DoSniffing(last_sniffing_command);
 					uart_put_RF_CODE_Data(RF_CODE_LEARN_OK);
 
 					// clear RF status
 					RF_DATA_STATUS = 0;
 				}
 				// check for learning timeout
-				if (IsTimerFinished())
+				else if (IsTimerFinished())
 				{
 					InitTimer_ms(1, 1000);
 					BUZZER = BUZZER_ON;
 					// wait until timer has finished
 					WaitTimerFinsihed();
 					BUZZER = BUZZER_OFF;
+
+					PCA0_DoSniffing(last_sniffing_command);
 					// send not-acknowledge
 					uart_put_command(RF_CODE_LEARN_KO);
-					uart_command = NONE;
 				}
 				break;
 

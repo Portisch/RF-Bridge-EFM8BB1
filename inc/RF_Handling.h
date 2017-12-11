@@ -16,7 +16,7 @@ extern void PCA0_InitTransmit(uint16_t sync_high, uint16_t sync_low, uint16_t BI
 extern void SetPCA0DutyCylce(void);
 extern void SetTimer0Overflow(uint8_t T0_Overflow);
 extern void PCA0_StopTransmit(void);
-extern void PCA0_DoSniffing(uint8_t active_command);
+extern uint8_t PCA0_DoSniffing(uint8_t active_command);
 extern void PCA0_StopSniffing(void);
 
 // 64 byte == 512 bits, so a RF signal with maximum of 512 bits is possible
@@ -41,6 +41,7 @@ extern SI_SEGMENT_VARIABLE(RF_DATA_STATUS, uint8_t, SI_SEG_XDATA);
 extern SI_SEGMENT_VARIABLE(desired_rf_protocol, uint8_t, SI_SEG_XDATA);
 
 extern SI_SEGMENT_VARIABLE(sniffing_is_on, uint8_t, SI_SEG_XDATA);
+extern SI_SEGMENT_VARIABLE(last_sniffing_command, uint8_t, SI_SEG_XDATA);
 
 extern SI_SEGMENT_VARIABLE(DUTY_CYCLE_HIGH, uint8_t, SI_SEG_XDATA);
 extern SI_SEGMENT_VARIABLE(DUTY_CYLCE_LOW, uint8_t, SI_SEG_XDATA);

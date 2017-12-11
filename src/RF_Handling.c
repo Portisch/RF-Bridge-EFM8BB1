@@ -423,8 +423,9 @@ void PCA0_StopTransmit(void)
 		PCA0_DoSniffing(last_sniffing_command);
 }
 
-void PCA0_DoSniffing(uint8_t active_command)
+uint8_t PCA0_DoSniffing(uint8_t active_command)
 {
+	uint8_t ret = last_sniffing_command;
 	// restore timer to 100000Hz, 10µs interval
 	SetTimer0Overflow(0x0B);
 
@@ -449,6 +450,8 @@ void PCA0_DoSniffing(uint8_t active_command)
 
 	// backup uart_command to be able to enable the sniffing again
 	last_sniffing_command = active_command;
+
+	return ret;
 }
 
 void PCA0_StopSniffing(void)
