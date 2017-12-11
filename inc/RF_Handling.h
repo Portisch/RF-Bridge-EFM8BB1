@@ -8,6 +8,7 @@
 #ifndef INC_RF_HANDLING_H_
 #define INC_RF_HANDLING_H_
 
+extern uint8_t RFInSync(uint8_t protocol_index, uint16_t period_pos, uint16_t period_neg);
 extern void SendRF_SYNC(void);
 extern uint8_t PCA0_GetProtocolIndex(uint8_t identifier);
 extern void PCA0_InitTransmit(uint16_t sync_high, uint16_t sync_low, uint16_t BIT_HIGH_TIME, uint8_t BIT_HIGH_DUTY,

@@ -83,7 +83,6 @@ void PCA0_channel1EventCb()
 
 	static uint8_t used_protocol;
 	static uint16_t low_pulse_time;
-	uint8_t in_sync = false;
 	uint8_t current_duty_cycle;
 
 	// Store most recent capture value
@@ -106,46 +105,20 @@ void PCA0_channel1EventCb()
 				if (RF_DATA_STATUS != 0)
 					break;
 
-				// check all protocols
-				for ( used_protocol = 0; used_protocol < PROTOCOLCOUNT; used_protocol++)
-				{
-					// check if SYNC high and SYNC low should be compared
-					if (PROTOCOL_DATA[used_protocol].SYNC_HIGH > 0)
-					{
-						if (
-							(capture_period_pos > (PROTOCOL_DATA[used_protocol].SYNC_HIGH - SYNC_TOLERANCE)) &&
-							(capture_period_pos < (PROTOCOL_DATA[used_protocol].SYNC_HIGH + SYNC_TOLERANCE)) &&
-							(capture_period_neg > (PROTOCOL_DATA[used_protocol].SYNC_LOW - SYNC_TOLERANCE)) &&
-							(capture_period_neg < (PROTOCOL_DATA[used_protocol].SYNC_LOW + SYNC_TOLERANCE))
-						)
-						{
-							in_sync = true;
-						}
-					}
-					// only SYNC low should be checked
-					else
-					{
-						if (
-							(capture_period_neg > (PROTOCOL_DATA[used_protocol].SYNC_LOW - SYNC_TOLERANCE)) &&
-							(capture_period_neg < (PROTOCOL_DATA[used_protocol].SYNC_LOW + SYNC_TOLERANCE))
-						)
-						{
-							in_sync = true;
-						}
-					}
+				// check all protocols in the list
+				used_protocol = RFInSync(0x00, capture_period_pos, capture_period_neg);
 
-					// check if a matching protocol got found
-					if (in_sync)
-					{
-						actual_bit_of_byte = 8;
-						actual_byte = 0;
-						actual_bit = 0;
-						actual_sync_bit = 0;
-						low_pulse_time = 0;
-						memset(RF_DATA, 0, sizeof(RF_DATA));
-						rf_state = RF_IN_SYNC;
-						break;
-					}
+				// check if a matching protocol got found
+				if (used_protocol != 0x80)
+				{
+					actual_bit_of_byte = 8;
+					actual_byte = 0;
+					actual_bit = 0;
+					actual_sync_bit = 0;
+					low_pulse_time = 0;
+					memset(RF_DATA, 0, sizeof(RF_DATA));
+					rf_state = RF_IN_SYNC;
+					break;
 				}
 				break;
 
@@ -212,6 +185,55 @@ void PCA0_channel1EventCb()
 void PCA0_channel2EventCb()
 {
 
+}
+
+//-----------------------------------------------------------------------------
+// Check for a RF sync
+//-----------------------------------------------------------------------------
+uint8_t RFInSync(uint8_t protocol_index, uint16_t period_pos, uint16_t period_neg)
+{
+	uint8_t ret = 0x80;
+	uint8_t used_protocol;
+
+	switch(protocol_index)
+	{
+		// protocol is undefined, do loop through all protocols
+		case 0x00:
+
+			// check all protocols
+			for (used_protocol = 0x00 ; used_protocol < PROTOCOLCOUNT; used_protocol++)
+			{
+				// check if SYNC high and SYNC low should be compared
+				if (PROTOCOL_DATA[used_protocol].SYNC_HIGH > 0)
+				{
+					if (
+						(period_pos > (PROTOCOL_DATA[used_protocol].SYNC_HIGH - SYNC_TOLERANCE)) &&
+						(period_pos < (PROTOCOL_DATA[used_protocol].SYNC_HIGH + SYNC_TOLERANCE)) &&
+						(period_neg > (PROTOCOL_DATA[used_protocol].SYNC_LOW - SYNC_TOLERANCE)) &&
+						(period_neg < (PROTOCOL_DATA[used_protocol].SYNC_LOW + SYNC_TOLERANCE))
+					)
+					{
+						ret = used_protocol;
+						break;
+					}
+				}
+				// only SYNC low should be checked
+				else
+				{
+					if (
+						(period_neg > (PROTOCOL_DATA[used_protocol].SYNC_LOW - SYNC_TOLERANCE)) &&
+						(period_neg < (PROTOCOL_DATA[used_protocol].SYNC_LOW + SYNC_TOLERANCE))
+					)
+					{
+						ret = used_protocol;
+						break;
+					}
+				}
+			}
+			break;
+	}
+
+	return ret;
 }
 
 //-----------------------------------------------------------------------------
