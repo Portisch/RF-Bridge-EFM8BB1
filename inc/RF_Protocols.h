@@ -36,6 +36,7 @@ typedef struct
 } PROTOCOL_DATA_t;
 
 #define SYNC_TOLERANCE 			200
+#define SYNC_TOLERANCE_ORIGINAL	2000
 #define DUTY_CYCLE_TOLERANCE 	8
 
 /*
@@ -64,11 +65,32 @@ typedef struct
 #define WS_1200_IDENTIFIER				0x04
 #define WS_1200				{WS_1200_IDENTIFIER, 0, 29400, 7, 700, 300, 38, 64, 64}
 
+/*
+ * PT2260, EV1527,... original RF bridge protocol
+ * http://www.princeton.com.tw/Portals/0/Product/PT2260_4.pdf
+ * The built-in oscillator circuitry of PT2260 allows a frequency in a range about 100-500kHz.
+ *
+ * 100kHz:
+ * Alpha = 10탎
+ * Sync High: 128 * Alpha = 1.28ms
+ * Sync Low: 3968 * Alpha = 39.68ms
+ *
+ * 500kHz:
+ * Alpha = 2탎
+ * Sync High: 128 * Alpha = 256탎
+ * Sync Low: 3968 * Alpha = 7936탎
+ *
+ * Default frequency is about 400kHz
+ * We define a SYNC_TOLERANCE_ORIGINAL with 2000탎 to have a bigger range:
+ */
+#define PT2260_IDENTIFIER				0x05
+#define PT2260				{PT2260_IDENTIFIER, 360, 11150, 0, 1080, 360, 75, 25, 24}
+
 
 /*
  * Protocol array
  */
-#define PROTOCOLCOUNT	4
+#define PROTOCOLCOUNT	5
 #if PROTOCOLCOUNT > 0x7F
 #error Too much protocols are defined, stop!
 #endif
