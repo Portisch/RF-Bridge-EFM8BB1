@@ -8,7 +8,7 @@
 #ifndef INC_RF_HANDLING_H_
 #define INC_RF_HANDLING_H_
 
-extern uint8_t RFInSync(uint8_t protocol_index, uint16_t period_pos, uint16_t period_neg);
+extern uint8_t RFInSync(uint8_t identifier, uint16_t period_pos, uint16_t period_neg);
 extern void SendRF_SYNC(void);
 extern uint8_t PCA0_GetProtocolIndex(uint8_t identifier);
 extern void PCA0_InitTransmit(uint16_t sync_high, uint16_t sync_low, uint16_t BIT_HIGH_TIME, uint8_t BIT_HIGH_DUTY,
@@ -38,6 +38,7 @@ extern SI_SEGMENT_VARIABLE(RF_DATA[RF_DATA_BUFFERSIZE], uint8_t, SI_SEG_XDATA);
 // Bit 7:	1 Data received, 0 nothing received
 // Bit 6-0:	Protocol identifier
 extern SI_SEGMENT_VARIABLE(RF_DATA_STATUS, uint8_t, SI_SEG_XDATA);
+extern SI_SEGMENT_VARIABLE(desired_rf_protocol, uint8_t, SI_SEG_XDATA);
 
 extern SI_SEGMENT_VARIABLE(sniffing_is_on, uint8_t, SI_SEG_XDATA);
 
@@ -47,6 +48,8 @@ extern SI_SEGMENT_VARIABLE(T0_HIGH, uint8_t, SI_SEG_XDATA);
 extern SI_SEGMENT_VARIABLE(T0_LOW, uint8_t, SI_SEG_XDATA);
 extern SI_SEGMENT_VARIABLE(SYNC_HIGH, uint16_t, SI_SEG_XDATA);
 extern SI_SEGMENT_VARIABLE(SYNC_LOW, uint16_t, SI_SEG_XDATA);
+extern SI_SEGMENT_VARIABLE(BIT_HIGH, uint16_t, SI_SEG_XDATA);
+extern SI_SEGMENT_VARIABLE(BIT_LOW, uint16_t, SI_SEG_XDATA);
 extern SI_SEGMENT_VARIABLE(BIT_COUNT, uint8_t, SI_SEG_XDATA);
 
 extern SI_SEGMENT_VARIABLE(actual_bit_of_byte, uint8_t, SI_SEG_XDATA);

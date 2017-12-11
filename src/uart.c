@@ -196,3 +196,32 @@ void uart_put_RF_Data(uint8_t Command, uint8_t used_protocol)
 	UART0_initTxPolling();
 }
 
+void uart_put_RF_CODE_Data(uint8_t Command)
+{
+	uint8_t i = 0;
+	uint8_t b = 0;
+
+	uart_putc(RF_CODE_START);
+	uart_putc(Command);
+
+	// sync low time
+	uart_putc((SYNC_LOW >> 8) & 0xFF);
+	uart_putc(SYNC_LOW & 0xFF);
+	// bit 0 high time
+	uart_putc((BIT_LOW >> 8) & 0xFF);
+	uart_putc(BIT_LOW & 0xFF);
+	// bit 1 high time
+	uart_putc((BIT_HIGH >> 8) & 0xFF);
+	uart_putc(BIT_HIGH & 0xFF);
+
+	// copy data to UART buffer
+	i = 0;
+	while(i < (24 / 8))
+	{
+		uart_putc(RF_DATA[i]);
+		i++;
+	}
+	uart_putc(RF_CODE_STOP);
+
+	UART0_initTxPolling();
+}

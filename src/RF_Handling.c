@@ -16,6 +16,7 @@
 SI_SEGMENT_VARIABLE(RF_DATA[RF_DATA_BUFFERSIZE], uint8_t, SI_SEG_XDATA);
 SI_SEGMENT_VARIABLE(RF_DATA_STATUS, uint8_t, SI_SEG_XDATA) = 0;
 SI_SEGMENT_VARIABLE(rf_state, rf_state_t, SI_SEG_XDATA) = RF_IDLE;
+SI_SEGMENT_VARIABLE(desired_rf_protocol, uint8_t, SI_SEG_XDATA) = UNKNOWN_IDENTIFIER;
 
 SI_SEGMENT_VARIABLE(sniffing_is_on, uint8_t, SI_SEG_XDATA) = false;
 
@@ -25,6 +26,8 @@ SI_SEGMENT_VARIABLE(T0_HIGH, uint8_t, SI_SEG_XDATA) = 0x00;
 SI_SEGMENT_VARIABLE(T0_LOW, uint8_t, SI_SEG_XDATA) = 0x00;
 SI_SEGMENT_VARIABLE(SYNC_HIGH, uint16_t, SI_SEG_XDATA) = 0x00;
 SI_SEGMENT_VARIABLE(SYNC_LOW, uint16_t, SI_SEG_XDATA) = 0x00;
+SI_SEGMENT_VARIABLE(BIT_HIGH, uint16_t, SI_SEG_XDATA) = 0x00;
+SI_SEGMENT_VARIABLE(BIT_LOW, uint16_t, SI_SEG_XDATA) = 0x00;
 SI_SEGMENT_VARIABLE(BIT_COUNT, uint8_t, SI_SEG_XDATA) = 0x00;
 
 SI_SEGMENT_VARIABLE(actual_bit_of_byte, uint8_t, SI_SEG_XDATA) = 0;
@@ -106,11 +109,14 @@ void PCA0_channel1EventCb()
 					break;
 
 				// check all protocols in the list
-				used_protocol = RFInSync(0x00, capture_period_pos, capture_period_neg);
+				used_protocol = RFInSync(desired_rf_protocol, capture_period_pos, capture_period_neg);
 
 				// check if a matching protocol got found
 				if (used_protocol != 0x80)
 				{
+					// backup sync time
+					SYNC_HIGH = capture_period_pos;
+					SYNC_LOW = capture_period_neg;
 					actual_bit_of_byte = 8;
 					actual_byte = 0;
 					actual_bit = 0;
@@ -146,11 +152,15 @@ void PCA0_channel1EventCb()
 					((capture_period_pos > low_pulse_time) && (actual_bit == PROTOCOL_DATA[used_protocol].BIT_COUNT))
 					)
 				{
+					// backup last bit high time
+					BIT_HIGH = capture_period_pos;
 					LED = LED_ON;
 					RF_DATA[(actual_bit - 1) / 8] |= (1 << actual_bit_of_byte);
 				}
 				else
 				{
+					// backup last bit high time
+					BIT_LOW = capture_period_pos;
 					LED = LED_OFF;
 					// backup low bit pulse time to be able to determine the last bit
 					if (capture_period_pos > low_pulse_time)
@@ -190,15 +200,15 @@ void PCA0_channel2EventCb()
 //-----------------------------------------------------------------------------
 // Check for a RF sync
 //-----------------------------------------------------------------------------
-uint8_t RFInSync(uint8_t protocol_index, uint16_t period_pos, uint16_t period_neg)
+uint8_t RFInSync(uint8_t identifier, uint16_t period_pos, uint16_t period_neg)
 {
 	uint8_t ret = 0x80;
 	uint8_t used_protocol;
 
-	switch(protocol_index)
+	switch(identifier)
 	{
 		// protocol is undefined, do loop through all protocols
-		case 0x00:
+		case UNKNOWN_IDENTIFIER:
 
 			// check all protocols
 			for (used_protocol = 0x00 ; used_protocol < PROTOCOLCOUNT; used_protocol++)
@@ -228,6 +238,42 @@ uint8_t RFInSync(uint8_t protocol_index, uint16_t period_pos, uint16_t period_ne
 						ret = used_protocol;
 						break;
 					}
+				}
+			}
+			break;
+
+		// check other protocols
+		default:
+			used_protocol = PCA0_GetProtocolIndex(identifier);
+
+			// check if identifier got found in list
+			if (used_protocol == 0xFF)
+				break;
+
+			// check if SYNC high and SYNC low should be compared
+			if (PROTOCOL_DATA[used_protocol].SYNC_HIGH > 0)
+			{
+				if (
+					(period_pos > (PROTOCOL_DATA[used_protocol].SYNC_HIGH - SYNC_TOLERANCE)) &&
+					(period_pos < (PROTOCOL_DATA[used_protocol].SYNC_HIGH + SYNC_TOLERANCE)) &&
+					(period_neg > (PROTOCOL_DATA[used_protocol].SYNC_LOW - SYNC_TOLERANCE)) &&
+					(period_neg < (PROTOCOL_DATA[used_protocol].SYNC_LOW + SYNC_TOLERANCE))
+				)
+				{
+					ret = used_protocol;
+					break;
+				}
+			}
+			// only SYNC low should be checked
+			else
+			{
+				if (
+					(period_neg > (PROTOCOL_DATA[used_protocol].SYNC_LOW - SYNC_TOLERANCE)) &&
+					(period_neg < (PROTOCOL_DATA[used_protocol].SYNC_LOW + SYNC_TOLERANCE))
+				)
+				{
+					ret = used_protocol;
+					break;
 				}
 			}
 			break;
@@ -396,7 +442,6 @@ void PCA0_DoSniffing(void)
 	rf_state = RF_IDLE;
 	RF_DATA_STATUS = 0;
 	sniffing_is_on = true;
-	uart_command = RF_CODE_SNIFFING_ON;
 }
 
 void PCA0_StopSniffing(void)

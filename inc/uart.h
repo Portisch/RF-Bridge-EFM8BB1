@@ -69,6 +69,7 @@ extern void uart_putc(uint8_t txdata);
 extern void uart_put_command(uint8_t command);
 extern void uart_put_uint16_t(uint8_t command, uint16_t value);
 extern void uart_put_RF_Data(uint8_t Command, uint8_t used_protocol);
+extern void uart_put_RF_CODE_Data(uint8_t Command);
 
 
 #endif /* INC_UART_H_ */

@@ -114,15 +114,19 @@ int main (void)
 							WaitTimerFinsihed();
 							BUZZER = BUZZER_OFF;
 
+							// set desired RF protocol PT2260
+							desired_rf_protocol = PT2260_IDENTIFIER;
+							PCA0_DoSniffing();
+
 							// start timeout timer
 							InitTimer_ms(1, 30000);
 							break;
 						case RF_CODE_RFOUT:
 							uart_state = RECEIVING;
-							position = 0;
 							len = 9;
 							break;
 						case RF_CODE_SNIFFING_ON:
+							desired_rf_protocol = UNKNOWN_IDENTIFIER;
 							PCA0_DoSniffing();
 							break;
 						case RF_CODE_SNIFFING_OFF:
@@ -179,6 +183,15 @@ int main (void)
 		{
 			// do original learning
 			case RF_CODE_LEARN:
+				// check if a RF signal got decoded
+				if ((RF_DATA_STATUS & RF_DATA_RECEIVED_MASK) != 0)
+				{
+					uart_command = NONE;
+					uart_put_RF_CODE_Data(RF_CODE_LEARN_OK);
+
+					// clear RF status
+					RF_DATA_STATUS = 0;
+				}
 				// check for learning timeout
 				if (IsTimerFinished())
 				{
