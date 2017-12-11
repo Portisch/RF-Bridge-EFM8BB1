@@ -19,6 +19,7 @@ SI_SEGMENT_VARIABLE(rf_state, rf_state_t, SI_SEG_XDATA) = RF_IDLE;
 SI_SEGMENT_VARIABLE(desired_rf_protocol, uint8_t, SI_SEG_XDATA) = UNKNOWN_IDENTIFIER;
 
 SI_SEGMENT_VARIABLE(sniffing_is_on, uint8_t, SI_SEG_XDATA) = false;
+SI_SEGMENT_VARIABLE(last_sniffing_command, uint8_t, SI_SEG_XDATA) = NONE;
 
 SI_SEGMENT_VARIABLE(DUTY_CYCLE_HIGH, uint8_t, SI_SEG_XDATA) = 0x56;
 SI_SEGMENT_VARIABLE(DUTY_CYLCE_LOW, uint8_t, SI_SEG_XDATA) = 0xAB;
@@ -419,10 +420,10 @@ void PCA0_StopTransmit(void)
 
 	// restart sniffing if it was active
 	if(sniffing_is_on)
-		PCA0_DoSniffing();
+		PCA0_DoSniffing(last_sniffing_command);
 }
 
-void PCA0_DoSniffing(void)
+void PCA0_DoSniffing(uint8_t active_command)
 {
 	// restore timer to 100000Hz, 10µs interval
 	SetTimer0Overflow(0x0B);
@@ -442,6 +443,9 @@ void PCA0_DoSniffing(void)
 	rf_state = RF_IDLE;
 	RF_DATA_STATUS = 0;
 	sniffing_is_on = true;
+
+	// backup uart_command to be able to enable the sniffing again
+	last_sniffing_command = active_command;
 }
 
 void PCA0_StopSniffing(void)

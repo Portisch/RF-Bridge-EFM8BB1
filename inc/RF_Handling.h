@@ -16,7 +16,7 @@ extern void PCA0_InitTransmit(uint16_t sync_high, uint16_t sync_low, uint16_t BI
 extern void SetPCA0DutyCylce(void);
 extern void SetTimer0Overflow(uint8_t T0_Overflow);
 extern void PCA0_StopTransmit(void);
-extern void PCA0_DoSniffing(void);
+extern void PCA0_DoSniffing(uint8_t active_command);
 extern void PCA0_StopSniffing(void);
 
 // 64 byte == 512 bits, so a RF signal with maximum of 512 bits is possible

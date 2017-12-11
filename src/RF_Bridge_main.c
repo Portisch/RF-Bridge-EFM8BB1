@@ -69,7 +69,12 @@ int main (void)
 
 	// start sniffing if enabled by default
 	if (Sniffing)
-		PCA0_DoSniffing();
+	{
+		// set desired RF protocol PT2260
+		desired_rf_protocol = PT2260_IDENTIFIER;
+		uart_command = RF_CODE_RFIN;
+		PCA0_DoSniffing(RF_CODE_RFIN);
+	}
 	else
 		PCA0_StopSniffing();
 
@@ -116,7 +121,7 @@ int main (void)
 
 							// set desired RF protocol PT2260
 							desired_rf_protocol = PT2260_IDENTIFIER;
-							PCA0_DoSniffing();
+							PCA0_DoSniffing(RF_CODE_LEARN);
 
 							// start timeout timer
 							InitTimer_ms(1, 30000);
@@ -127,7 +132,7 @@ int main (void)
 							break;
 						case RF_CODE_SNIFFING_ON:
 							desired_rf_protocol = UNKNOWN_IDENTIFIER;
-							PCA0_DoSniffing();
+							PCA0_DoSniffing(RF_CODE_SNIFFING_ON);
 							break;
 						case RF_CODE_SNIFFING_OFF:
 							PCA0_StopSniffing();
@@ -206,13 +211,12 @@ int main (void)
 				}
 				break;
 
-			// do new sniffing
-			case RF_CODE_SNIFFING_ON:
+			// do original sniffing
+			case RF_CODE_RFIN:
 				// check if a RF signal got decoded
 				if ((RF_DATA_STATUS & RF_DATA_RECEIVED_MASK) != 0)
 				{
-					uint8_t used_protocol = RF_DATA_STATUS & 0x7F;
-					uart_put_RF_Data(RF_CODE_SNIFFING_ON, used_protocol);
+					uart_put_RF_CODE_Data(RF_CODE_RFIN);
 
 					// clear RF status
 					RF_DATA_STATUS = 0;
@@ -243,6 +247,19 @@ int main (void)
 				StartRFTransmit();
 
 				uart_command = NONE;
+				break;
+
+			// do new sniffing
+			case RF_CODE_SNIFFING_ON:
+				// check if a RF signal got decoded
+				if ((RF_DATA_STATUS & RF_DATA_RECEIVED_MASK) != 0)
+				{
+					uint8_t used_protocol = RF_DATA_STATUS & 0x7F;
+					uart_put_RF_Data(RF_CODE_SNIFFING_ON, used_protocol);
+
+					// clear RF status
+					RF_DATA_STATUS = 0;
+				}
 				break;
 
 			// transmit data on RF
