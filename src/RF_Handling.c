@@ -444,6 +444,9 @@ void PCA0_DoSniffing(uint8_t active_command)
 	RF_DATA_STATUS = 0;
 	sniffing_is_on = true;
 
+	// set uart_command back if sniffing was on
+	uart_command = active_command;
+
 	// backup uart_command to be able to enable the sniffing again
 	last_sniffing_command = active_command;
 }

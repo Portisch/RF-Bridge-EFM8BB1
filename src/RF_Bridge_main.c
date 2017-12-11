@@ -72,7 +72,6 @@ int main (void)
 	{
 		// set desired RF protocol PT2260
 		desired_rf_protocol = PT2260_IDENTIFIER;
-		uart_command = RF_CODE_RFIN;
 		PCA0_DoSniffing(RF_CODE_RFIN);
 	}
 	else
@@ -128,6 +127,7 @@ int main (void)
 							break;
 						case RF_CODE_RFOUT:
 							uart_state = RECEIVING;
+							position = 0;
 							len = 9;
 							break;
 						case RF_CODE_SNIFFING_ON:
@@ -237,9 +237,9 @@ int main (void)
 				// byte 4..5:	Thigh
 				// byte 6..7:	24bit Data
 				// set low time of sync to 2000µs - unknown
-				// set duty cycle of high and low bit to 70 and 30 % - unknown
-				PCA0_InitTransmit(*(uint16_t *)&RF_DATA[0], 2000,
-						*(uint16_t *)&RF_DATA[4], 70, *(uint16_t *)&RF_DATA[2], 30, 24);
+				// set duty cycle of high and low bit to 75 and 25 % - unknown
+				PCA0_InitTransmit(*(uint16_t *)&RF_DATA[0], 1000,
+						*(uint16_t *)&RF_DATA[4], 75, *(uint16_t *)&RF_DATA[2], 25, 24);
 
 				actual_byte = 7;
 
