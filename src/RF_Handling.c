@@ -18,7 +18,6 @@ SI_SEGMENT_VARIABLE(RF_DATA_STATUS, uint8_t, SI_SEG_XDATA) = 0;
 SI_SEGMENT_VARIABLE(rf_state, rf_state_t, SI_SEG_XDATA) = RF_IDLE;
 SI_SEGMENT_VARIABLE(desired_rf_protocol, uint8_t, SI_SEG_XDATA) = UNKNOWN_IDENTIFIER;
 
-SI_SEGMENT_VARIABLE(sniffing_is_on, uint8_t, SI_SEG_XDATA) = false;
 SI_SEGMENT_VARIABLE(last_sniffing_command, uint8_t, SI_SEG_XDATA) = NONE;
 
 SI_SEGMENT_VARIABLE(DUTY_CYCLE_HIGH, uint8_t, SI_SEG_XDATA) = 0x56;
@@ -402,6 +401,22 @@ void SetTimer0Overflow(uint8_t T0_Overflow)
 	TH0 = (T0_Overflow << TH0_TH0__SHIFT);
 }
 
+void PCA0_StartTransmit(void)
+{
+	actual_bit_of_byte = 0x08;
+	actual_bit_of_byte--;
+	actual_bit = 1;
+
+	rf_state = RF_TRANSMITTING;
+
+	// set first bit to be in sync when PCA0 is starting
+	SetPCA0DutyCylce();
+
+	// make RF sync pulse
+	SendRF_SYNC();
+	PCA0CN0_CR = PCA0CN0_CR__RUN;
+}
+
 void PCA0_StopTransmit(void)
 {
 	// set duty cycle to zero
@@ -418,9 +433,7 @@ void PCA0_StopTransmit(void)
 	// disable P0.0 for I/O control, enter PCA mode
 	XBR1 |= XBR1_PCA0ME__CEX0_CEX1;
 
-	// restart sniffing if it was active
-	if(sniffing_is_on)
-		PCA0_DoSniffing(last_sniffing_command);
+	rf_state = RF_FINISHED;
 }
 
 uint8_t PCA0_DoSniffing(uint8_t active_command)
@@ -443,7 +456,6 @@ uint8_t PCA0_DoSniffing(uint8_t active_command)
 
 	rf_state = RF_IDLE;
 	RF_DATA_STATUS = 0;
-	sniffing_is_on = true;
 
 	// set uart_command back if sniffing was on
 	uart_command = active_command;
@@ -461,4 +473,6 @@ void PCA0_StopSniffing(void)
 
 	// disable interrupt for RF receiving
 	PCA0CPM1 &= ~PCA0CPM1_ECCF__ENABLED;
+
+	rf_state = RF_IDLE;
 }
