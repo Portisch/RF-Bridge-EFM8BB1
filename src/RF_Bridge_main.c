@@ -73,6 +73,7 @@ int main (void)
 		// set desired RF protocol PT2260
 		desired_rf_protocol = PT2260_IDENTIFIER;
 		PCA0_DoSniffing(RF_CODE_RFIN);
+		last_sniffing_command = RF_CODE_RFIN;
 	}
 	else
 		PCA0_StopSniffing();
@@ -133,15 +134,23 @@ int main (void)
 						case RF_CODE_SNIFFING_ON:
 							desired_rf_protocol = UNKNOWN_IDENTIFIER;
 							PCA0_DoSniffing(RF_CODE_SNIFFING_ON);
+							last_sniffing_command = RF_CODE_SNIFFING_ON;
 							break;
 						case RF_CODE_SNIFFING_OFF:
 							// set desired RF protocol PT2260
 							desired_rf_protocol = PT2260_IDENTIFIER;
 							// re-enable default RF_CODE_RFIN sniffing
 							PCA0_DoSniffing(RF_CODE_RFIN);
+							last_sniffing_command = RF_CODE_RFIN;
 							break;
 						case RF_CODE_TRANSMIT_DATA_NEW:
 							uart_state = RECEIVE_LEN;
+							break;
+
+						case RF_CODE_ACK:
+							// re-enable default RF_CODE_RFIN sniffing
+							last_sniffing_command = PCA0_DoSniffing(last_sniffing_command);
+							uart_state = IDLE;
 							break;
 
 						// unknown command
