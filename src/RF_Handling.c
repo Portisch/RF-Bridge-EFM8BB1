@@ -68,14 +68,15 @@ void PCA0_channel0EventCb()
 	if (actual_bit == BIT_COUNT)
 	{
 		PCA0_StopTransmit();
-		return;
 	}
+	else
+	{
+		actual_bit++;
+		actual_bit_of_byte--;
 
-	actual_bit++;
-	actual_bit_of_byte--;
-
-	// set duty cycle for the next bit...
-	SetPCA0DutyCylce();
+		// set duty cycle for the next bit...
+		SetPCA0DutyCylce();
+	}
 }
 
 void PCA0_channel1EventCb()
@@ -295,20 +296,20 @@ void SendRF_SYNC(void)
 	// start timer
 	InitTimer_us(10, 3000);
 	// wait until timer has finished
-	WaitTimerFinsihed();
+	WaitTimerFinished();
 	// switch to low
 	T_DATA = 0;
 	// start timer
 	InitTimer_us(10, 100);
 	// wait until timer has finished
-	WaitTimerFinsihed();
+	WaitTimerFinished();
 	// switch to high
 	T_DATA = 1;
 	// do high time
 	// start timer
 	InitTimer_us(5, SYNC_HIGH);
 	// wait until timer has finished
-	WaitTimerFinsihed();
+	WaitTimerFinished();
 	// switch to low
 	T_DATA = 0;
 
@@ -316,7 +317,7 @@ void SendRF_SYNC(void)
 	// start timer
 	InitTimer_us(5, SYNC_LOW);
 	// wait until timer has finished
-	WaitTimerFinsihed();
+	WaitTimerFinished();
 	// disable P0.0 for I/O control, enter PCA mode
 	XBR1 |= XBR1_PCA0ME__CEX0_CEX1;
 }
@@ -414,7 +415,8 @@ void PCA0_StartTransmit(void)
 
 	// make RF sync pulse
 	SendRF_SYNC();
-	PCA0CN0_CR = PCA0CN0_CR__RUN;
+
+	PCA0_run();
 }
 
 void PCA0_StopTransmit(void)
@@ -424,7 +426,14 @@ void PCA0_StopTransmit(void)
 	// disable interrupt for RF transmitting
 	PCA0CPM0 &= ~PCA0CPM0_ECCF__ENABLED;
 	PCA0PWM &= ~PCA0PWM_ECOV__COVF_MASK_ENABLED;
+	// stop PCA
 	PCA0_halt();
+
+	// clear all interrupt flags of PCA0
+	PCA0CN0 &= ~(PCA0CN0_CF__BMASK
+	  		                       | PCA0CN0_CCF0__BMASK
+	  		                       | PCA0CN0_CCF1__BMASK
+	  		                       | PCA0CN0_CCF2__BMASK);
 
 	// enable P0.0 for I/O control
 	XBR1 &= ~XBR1_PCA0ME__CEX0_CEX1;
@@ -442,17 +451,14 @@ uint8_t PCA0_DoSniffing(uint8_t active_command)
 	// restore timer to 100000Hz, 10µs interval
 	SetTimer0Overflow(0x0B);
 
-	// stop PCA
-	PCA0CN0_CR = PCA0CN0_CR__STOP;
-
 	// enable interrupt for RF receiving
 	PCA0CPM1 |= PCA0CPM1_ECCF__ENABLED;
-
 	// disable interrupt for RF transmitting
 	PCA0CPM0 &= ~PCA0CPM0_ECCF__ENABLED;
+	PCA0PWM &= ~PCA0PWM_ECOV__COVF_MASK_ENABLED;
 
 	// start PCA
-	PCA0CN0_CR = PCA0CN0_CR__RUN;
+	PCA0_run();
 
 	rf_state = RF_IDLE;
 	RF_DATA_STATUS = 0;
@@ -469,7 +475,13 @@ uint8_t PCA0_DoSniffing(uint8_t active_command)
 void PCA0_StopSniffing(void)
 {
 	// stop PCA
-	PCA0CN0_CR = PCA0CN0_CR__STOP;
+	PCA0_halt();
+
+	// clear all interrupt flags of PCA0
+	PCA0CN0 &= ~(PCA0CN0_CF__BMASK
+	  		                       | PCA0CN0_CCF0__BMASK
+	  		                       | PCA0CN0_CCF1__BMASK
+	  		                       | PCA0CN0_CCF2__BMASK);
 
 	// disable interrupt for RF receiving
 	PCA0CPM1 &= ~PCA0CPM1_ECCF__ENABLED;

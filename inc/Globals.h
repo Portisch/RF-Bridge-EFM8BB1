@@ -30,7 +30,7 @@ SI_SBIT(BUZZER, SFR_P1, 6);		// BUZZER
 
 extern void InitTimer_us(uint16_t interval, uint16_t timeout);
 extern void InitTimer_ms(uint16_t interval, uint16_t timeout);
-extern void WaitTimerFinsihed(void);
+extern void WaitTimerFinished(void);
 extern bool IsTimerFinished(void);
 
 

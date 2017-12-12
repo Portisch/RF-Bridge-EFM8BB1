@@ -49,7 +49,7 @@ void InitTimer_ms(uint16_t interval, uint16_t timeout)
 	TMR3CN0 |= TMR3CN0_TR3__RUN;
 }
 
-void WaitTimerFinsihed(void)
+void WaitTimerFinished(void)
 {
 	// wait until timer has finished
 	while((TMR3CN0 & TMR3CN0_TR3__BMASK) == TMR3CN0_TR3__RUN);

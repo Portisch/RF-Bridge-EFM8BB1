@@ -22,6 +22,7 @@ SI_SEGMENT_VARIABLE(UART_RX_Buffer_Position, static volatile uint8_t,  SI_SEG_XD
 SI_SEGMENT_VARIABLE(UART_TX_Buffer_Position, static volatile uint8_t,  SI_SEG_XDATA)=0;
 SI_SEGMENT_VARIABLE(UART_Buffer_Read_Position, static volatile uint8_t,  SI_SEG_XDATA)=0;
 SI_SEGMENT_VARIABLE(UART_Buffer_Write_Position, static volatile uint8_t,  SI_SEG_XDATA)=0;
+SI_SEGMENT_VARIABLE(UART_Buffer_Write_Len, static volatile uint8_t,  SI_SEG_XDATA)=0;
 SI_SEGMENT_VARIABLE(lastRxError, static volatile uint8_t,  SI_SEG_XDATA)=0;
 
 //-----------------------------------------------------------------------------
@@ -47,41 +48,27 @@ SI_INTERRUPT(UART0_ISR, UART0_IRQn)
 	// receiving byte
 	if ((flags &  SCON0_RI__SET))
 	{
-	    if ( UART_RX_Buffer_Position == UART_BUFFER_SIZE )
-	    {
-	        /* error: receive buffer overflow */
-	        lastRxError = UART_BUFFER_OVERFLOW >> 8;
-	    }
-	    else
-	    {
-	        /* store received data in buffer */
-	    	UART_RX_Buffer[UART_RX_Buffer_Position] = SBUF0;
-	        UART_RX_Buffer_Position++;
-	    }
+        /* store received data in buffer */
+    	UART_RX_Buffer[UART_RX_Buffer_Position] = UART0_read();
+        UART_RX_Buffer_Position++;
+
+        // set to beginning of buffer if end is reached
+        if ( UART_RX_Buffer_Position == UART_BUFFER_SIZE )
+	    	UART_RX_Buffer_Position = 0;
 	}
 
 	// transmit byte
 	if ((flags & SCON0_TI__SET))
 	{
-		if ( UART_TX_Buffer_Position == UART_BUFFER_SIZE )
+		if (UART_Buffer_Write_Len > 0)
 		{
-	        /* error: receive buffer overflow */
-	        lastRxError = UART_BUFFER_OVERFLOW >> 8;
+			UART0_write(UART_TX_Buffer[UART_Buffer_Write_Position]);
+			UART_Buffer_Write_Position++;
+			UART_Buffer_Write_Len--;
 		}
-		else
-		{
-			if (UART_Buffer_Write_Position < UART_TX_Buffer_Position)
-			{
-				SBUF0 = UART_TX_Buffer[UART_Buffer_Write_Position];
-				UART_Buffer_Write_Position++;
-			}
 
-			if (UART_Buffer_Write_Position == UART_TX_Buffer_Position)
-			{
-				UART_TX_Buffer_Position = 0;
-				UART_Buffer_Write_Position = 0;
-			}
-		}
+		if (UART_Buffer_Write_Position == UART_BUFFER_SIZE)
+			UART_Buffer_Write_Position = 0;
 	}
 }
 
@@ -96,11 +83,6 @@ void uart_buffer_reset(void)
 uint8_t uart_getlen(void)
 {
 	return UART_RX_Buffer_Position - UART_Buffer_Read_Position;
-}
-
-bool uart_transfer_finished(void)
-{
-	return UART_Buffer_Write_Position == UART_TX_Buffer_Position;
 }
 
 /*************************************************************************
@@ -121,12 +103,8 @@ unsigned int uart_getc(void)
     rxdata = UART_RX_Buffer[UART_Buffer_Read_Position];
     UART_Buffer_Read_Position++;
 
-    /* all got read of the received data, reset to 0 */
-    if (UART_Buffer_Read_Position == UART_RX_Buffer_Position)
-    {
+    if (UART_Buffer_Read_Position == UART_BUFFER_SIZE)
     	UART_Buffer_Read_Position = 0;
-    	UART_RX_Buffer_Position = 0;
-    }
 
     rxdata |= (lastRxError << 8);
     lastRxError = 0;
@@ -142,10 +120,11 @@ Returns:  none
 void uart_putc(uint8_t txdata)
 {
 	if (UART_TX_Buffer_Position == UART_BUFFER_SIZE)
-		lastRxError = UART_BUFFER_OVERFLOW >> 8;
+		UART_TX_Buffer_Position = 0;
 
 	UART_TX_Buffer[UART_TX_Buffer_Position] = txdata;
 	UART_TX_Buffer_Position++;
+	UART_Buffer_Write_Len++;
 }
 
 void uart_put_command(uint8_t command)

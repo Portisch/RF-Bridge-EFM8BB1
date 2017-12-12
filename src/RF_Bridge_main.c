@@ -41,6 +41,8 @@ void SiLabs_Startup (void)
 // ----------------------------------------------------------------------------
 int main (void)
 {
+	bool ReadUARTData = true;
+
 	// Call hardware initialization routine
 	enter_DefaultMode_from_RESET();
 
@@ -77,7 +79,11 @@ int main (void)
 		uint8_t position;
 		uint8_t protocol_index;
 
-		rxdata = uart_getc();
+		// read only data from uart if idle
+		if (ReadUARTData)
+			rxdata = uart_getc();
+		else
+			rxdata = UART_NO_DATA;
 
 		if (rxdata != UART_NO_DATA)
 		{
@@ -102,7 +108,7 @@ int main (void)
 							InitTimer_ms(1, 50);
 							BUZZER = BUZZER_ON;
 							// wait until timer has finished
-							WaitTimerFinsihed();
+							WaitTimerFinished();
 							BUZZER = BUZZER_OFF;
 
 							// set desired RF protocol PT2260
@@ -113,6 +119,7 @@ int main (void)
 							InitTimer_ms(1, 30000);
 							break;
 						case RF_CODE_RFOUT:
+							PCA0_StopSniffing();
 							uart_state = RECEIVING;
 							position = 0;
 							len = 9;
@@ -171,16 +178,19 @@ int main (void)
 					if ((rxdata & 0xFF) == RF_CODE_STOP)
 					{
 						uart_state = IDLE;
+						ReadUARTData = false;
 
 						// check if AKN should be sent
 						switch(uart_command)
 						{
-							case RF_CODE_RFOUT:
-							case RF_CODE_TRANSMIT_DATA_NEW:
-								break;
-							default:
+							case RF_CODE_LEARN:
+							case RF_CODE_SNIFFING_ON:
+							case RF_CODE_SNIFFING_OFF:
 								// send acknowledge
 								uart_put_command(RF_CODE_ACK);
+							case RF_CODE_ACK:
+								// enable UART again
+								ReadUARTData = true;
 								break;
 						}
 					}
@@ -201,7 +211,7 @@ int main (void)
 					InitTimer_ms(1, 200);
 					BUZZER = BUZZER_ON;
 					// wait until timer has finished
-					WaitTimerFinsihed();
+					WaitTimerFinished();
 					BUZZER = BUZZER_OFF;
 
 					PCA0_DoSniffing(last_sniffing_command);
@@ -209,6 +219,9 @@ int main (void)
 
 					// clear RF status
 					RF_DATA_STATUS = 0;
+
+					// enable UART again
+					ReadUARTData = true;
 				}
 				// check for learning timeout
 				else if (IsTimerFinished())
@@ -216,12 +229,15 @@ int main (void)
 					InitTimer_ms(1, 1000);
 					BUZZER = BUZZER_ON;
 					// wait until timer has finished
-					WaitTimerFinsihed();
+					WaitTimerFinished();
 					BUZZER = BUZZER_OFF;
 
 					PCA0_DoSniffing(last_sniffing_command);
 					// send not-acknowledge
 					uart_put_command(RF_CODE_LEARN_KO);
+
+					// enable UART again
+					ReadUARTData = true;
 				}
 				break;
 
@@ -248,8 +264,6 @@ int main (void)
 				{
 					// init and start RF transmit
 					case RF_IDLE:
-						PCA0_StopSniffing();
-
 						// byte 0..1:	Tsyn
 						// byte 2..3:	Tlow
 						// byte 4..5:	Thigh
@@ -267,13 +281,14 @@ int main (void)
 
 					// wait until data got transfered
 					case RF_FINISHED:
-						rf_state = RF_IDLE;
-
 						// restart sniffing if it was active
 						PCA0_DoSniffing(last_sniffing_command);
 
 						// send acknowledge
 						uart_put_command(RF_CODE_ACK);
+
+						// enable UART again
+						ReadUARTData = true;
 						break;
 				}
 				break;
@@ -350,13 +365,14 @@ int main (void)
 
 					// wait until data got transfered
 					case RF_FINISHED:
-						rf_state = RF_IDLE;
-
 						// restart sniffing if it was active
 						PCA0_DoSniffing(last_sniffing_command);
 
 						// send acknowledge
 						uart_put_command(RF_CODE_ACK);
+
+						// enable UART again
+						ReadUARTData = true;
 						break;
 				}
 				break;
