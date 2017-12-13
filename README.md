@@ -4,6 +4,8 @@ RF-Bridge-EFM8BB1
 The Sonoff RF Bridge is only supporting one protocol with 24 bits.<br/>
 The Idea is to write a alternative firmware for the onboard EFM8BB1 chip.
 
+All original commands 0xA0 to 0xA5 are supported!
+
 # Hardware
 There are the pins C2 & C2CK on the board. With a Arduino you can build a programmer to read/erase and program the flash.
 Software for the Arduino: https://github.com/conorpp/efm8-arduino-programmer
@@ -49,7 +51,7 @@ Hex: AA A5 24 E0 01 40 03 84 D0 03 58 55<br/>
 0x03-0x84 Thigh<br/>
 0xD0-0x58 24bit Data<br/>
 
-The low time of the SYNC is default 2000µs, duty cycle of the high bit 70%, 30% of the low bit.<br/>
+The low time of the SYNC is default 1000µs, duty cycle of the high bit 75%, 25% of the low bit.<br/>
 
 ## Transmiting by command 0xA8
 There is a new command in the firmware to be able to send RF data.<br/>
@@ -79,7 +81,13 @@ Hex: AA A8 0D 7F 12 C0 05 DC 02 BC 46 01 2C 1E 08 AA 55<br/>
 0x08: BIT_COUNT + SYNC_BIT_COUNT in front of RF data<br/>
 0x1E: RF data to send<br/>
 
+## Learning by command 0xA9
+Hex: AA A9 55<br/>
+
+With the new learning the RF Bridge will scan for all predefined protocols.
+The first received RF code will be sent by OK 0xAB.
+If a timeout happens 0xAA will be sent.
+
 # Next Steps
-Add full support for the original firmware<br/>
 Add ESPurna support:<br/>
 A new protocol have to be implemented to support more RF signals -> have to be defined!
