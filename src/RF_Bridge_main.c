@@ -42,6 +42,7 @@ void SiLabs_Startup (void)
 int main (void)
 {
 	bool ReadUARTData = true;
+	uint8_t last_desired_rf_protocol;
 
 	// Call hardware initialization routine
 	enter_DefaultMode_from_RESET();
@@ -139,7 +140,21 @@ int main (void)
 						case RF_CODE_RFOUT_NEW:
 							uart_state = RECEIVE_LEN;
 							break;
+						case RF_CODE_LEARN_NEW:
+							InitTimer_ms(1, 50);
+							BUZZER = BUZZER_ON;
+							// wait until timer has finished
+							WaitTimerFinished();
+							BUZZER = BUZZER_OFF;
 
+							// enable sniffing for all known protocols
+							last_desired_rf_protocol = desired_rf_protocol;
+							desired_rf_protocol = UNKNOWN_IDENTIFIER;
+							last_sniffing_command = PCA0_DoSniffing(RF_CODE_LEARN_NEW);
+
+							// start timeout timer
+							InitTimer_ms(1, 30000);
+							break;
 						case RF_CODE_ACK:
 							// re-enable default RF_CODE_RFIN sniffing
 							last_sniffing_command = PCA0_DoSniffing(last_sniffing_command);
@@ -374,6 +389,49 @@ int main (void)
 						// enable UART again
 						ReadUARTData = true;
 						break;
+				}
+				break;
+
+			// new RF code learning
+			case RF_CODE_LEARN_NEW:
+				// check if a RF signal got decoded
+				if ((RF_DATA_STATUS & RF_DATA_RECEIVED_MASK) != 0)
+				{
+					uint8_t used_protocol = RF_DATA_STATUS & 0x7F;
+
+					InitTimer_ms(1, 200);
+					BUZZER = BUZZER_ON;
+					// wait until timer has finished
+					WaitTimerFinished();
+					BUZZER = BUZZER_OFF;
+
+					desired_rf_protocol = last_desired_rf_protocol;
+					PCA0_DoSniffing(last_sniffing_command);
+
+					uart_put_RF_Data(RF_CODE_LEARN_OK_NEW, used_protocol);
+
+					// clear RF status
+					RF_DATA_STATUS = 0;
+
+					// enable UART again
+					ReadUARTData = true;
+				}
+				// check for learning timeout
+				else if (IsTimerFinished())
+				{
+					InitTimer_ms(1, 1000);
+					BUZZER = BUZZER_ON;
+					// wait until timer has finished
+					WaitTimerFinished();
+					BUZZER = BUZZER_OFF;
+
+					desired_rf_protocol = last_desired_rf_protocol;
+					PCA0_DoSniffing(last_sniffing_command);
+					// send not-acknowledge
+					uart_put_command(RF_CODE_LEARN_KO_NEW);
+
+					// enable UART again
+					ReadUARTData = true;
 				}
 				break;
 		}
