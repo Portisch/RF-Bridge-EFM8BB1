@@ -201,6 +201,7 @@ int main (void)
 							case RF_CODE_LEARN:
 							case RF_CODE_SNIFFING_ON:
 							case RF_CODE_SNIFFING_OFF:
+							case RF_CODE_RFIN:
 								// send acknowledge
 								uart_put_command(RF_CODE_ACK);
 							case RF_CODE_ACK:
