@@ -136,7 +136,7 @@ int main (void)
 							PCA0_DoSniffing(RF_CODE_RFIN);
 							last_sniffing_command = RF_CODE_RFIN;
 							break;
-						case RF_CODE_TRANSMIT_DATA_NEW:
+						case RF_CODE_RFOUT_NEW:
 							uart_state = RECEIVE_LEN;
 							break;
 
@@ -307,7 +307,7 @@ int main (void)
 				break;
 
 			// transmit data on RF
-			case RF_CODE_TRANSMIT_DATA_NEW:
+			case RF_CODE_RFOUT_NEW:
 				// only do the job if all data got received by UART
 				if (uart_state != IDLE)
 					break;
