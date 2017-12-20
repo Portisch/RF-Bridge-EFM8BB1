@@ -294,7 +294,7 @@ void SendRF_SYNC(void)
 	// switch to high
 	T_DATA = 1;
 	// start timer
-	InitTimer_us(10, 3000);
+	InitTimer_ms(1, 7);
 	// wait until timer has finished
 	WaitTimerFinished();
 	// switch to low

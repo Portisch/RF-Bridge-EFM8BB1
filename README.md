@@ -47,11 +47,12 @@ Hex: AA A5 24 E0 01 40 03 84 D0 03 58 55<br/>
 
 0xAA: uart sync init<br/>
 0x24-0xE0: Tsyn<br/>
-0x01-0x40 Tlow<br/>
-0x03-0x84 Thigh<br/>
-0xD0-0x58 24bit Data<br/>
+0x01-0x40: Tlow<br/>
+0x03-0x84: Thigh<br/>
+0xD0-0x58: 24bit Data<br/>
 
-The low time of the SYNC is default 1000µs, duty cycle of the high bit 75%, 25% of the low bit.<br/>
+The high time of the SYNC get calculated by the Tsyn (SYNC low time),<br/>
+duty cycle of the high bit is 75% and 25% of the low bit.<br/>
 
 ## Transmiting by command 0xA8
 There is a new command in the firmware to be able to send RF data.<br/>
