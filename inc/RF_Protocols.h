@@ -36,6 +36,7 @@ typedef struct
 } PROTOCOL_DATA_t;
 
 #define SYNC_TOLERANCE 			200
+#define SYNC_TOLERANCE_0xA1		1000
 #define DUTY_CYCLE_TOLERANCE 	8
 
 #define UNKNOWN_IDENTIFIER				0x00
@@ -54,9 +55,11 @@ typedef struct
  * Alpha = 2µs
  * Sync High: 128 * Alpha = 256µs
  * Sync Low: 3968 * Alpha = 7936µs
+ *
+ * Setting the range from 10000, 9000 - 11000
  */
 #define PT2260_IDENTIFIER				0x01
-#define PT2260				{PT2260_IDENTIFIER, 360, 11150, 0, 1080, 360, 75, 25, 24}
+#define PT2260				{PT2260_IDENTIFIER, 0, 10000, 0, 1080, 360, 75, 25, 24}
 
 /*
  * Rohrmotor24

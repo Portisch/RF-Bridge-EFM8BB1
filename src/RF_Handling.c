@@ -255,10 +255,10 @@ uint8_t RFInSync(uint8_t identifier, uint16_t period_pos, uint16_t period_neg)
 			if (PROTOCOL_DATA[used_protocol].SYNC_HIGH > 0)
 			{
 				if (
-					(period_pos > (PROTOCOL_DATA[used_protocol].SYNC_HIGH - SYNC_TOLERANCE)) &&
-					(period_pos < (PROTOCOL_DATA[used_protocol].SYNC_HIGH + SYNC_TOLERANCE)) &&
-					(period_neg > (PROTOCOL_DATA[used_protocol].SYNC_LOW - SYNC_TOLERANCE)) &&
-					(period_neg < (PROTOCOL_DATA[used_protocol].SYNC_LOW + SYNC_TOLERANCE))
+					(period_pos > (PROTOCOL_DATA[used_protocol].SYNC_HIGH - SYNC_TOLERANCE_0xA1)) &&
+					(period_pos < (PROTOCOL_DATA[used_protocol].SYNC_HIGH + SYNC_TOLERANCE_0xA1)) &&
+					(period_neg > (PROTOCOL_DATA[used_protocol].SYNC_LOW - SYNC_TOLERANCE_0xA1)) &&
+					(period_neg < (PROTOCOL_DATA[used_protocol].SYNC_LOW + SYNC_TOLERANCE_0xA1))
 				)
 				{
 					ret = used_protocol;
@@ -269,8 +269,8 @@ uint8_t RFInSync(uint8_t identifier, uint16_t period_pos, uint16_t period_neg)
 			else
 			{
 				if (
-					(period_neg > (PROTOCOL_DATA[used_protocol].SYNC_LOW - SYNC_TOLERANCE)) &&
-					(period_neg < (PROTOCOL_DATA[used_protocol].SYNC_LOW + SYNC_TOLERANCE))
+					(period_neg > (PROTOCOL_DATA[used_protocol].SYNC_LOW - SYNC_TOLERANCE_0xA1)) &&
+					(period_neg < (PROTOCOL_DATA[used_protocol].SYNC_LOW + SYNC_TOLERANCE_0xA1))
 				)
 				{
 					ret = used_protocol;
