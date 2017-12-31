@@ -110,6 +110,12 @@ Hex: AA B0 20 04 1A 0120 01C0 0300 2710 0121212201220121212121212122012121220121
 0x01-0x03: RF data to send (high/low nibbles denote buckets to use for RF high (on) and low (off))<br/>
 0x55: uart sync end
 
+Please note that currently, there is no learning mode for this!
+However, you can use, e.g., an Arduino with the [RFControl](https://github.com/pimatic/RFControl)
+library to learn the bucket times and sequences (the
+[compressed](https://github.com/pimatic/RFControl/tree/master/examples/compressed) example
+gives you everything you need if you convert the decimal numbers to hex).
+
 # Next Steps
 Add ESPurna support:<br/>
 A new protocol have to be implemented to support more RF signals -> have to be defined!
