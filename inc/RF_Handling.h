@@ -18,7 +18,7 @@ extern void PCA0_StartTransmit(void);
 extern void PCA0_StopTransmit(void);
 extern uint8_t PCA0_DoSniffing(uint8_t active_command);
 extern void PCA0_StopSniffing(void);
-extern void SendRFBuckets(uint16_t *buckets, uint8_t *rfdata, uint8_t n, uint8_t times);
+extern void SendRFBuckets(uint16_t *buckets, uint8_t *rfdata, uint8_t n, uint8_t repeats);
 
 // 64 byte == 512 bits, so a RF signal with maximum of 512 bits is possible
 #define RF_DATA_BUFFERSIZE		64

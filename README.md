@@ -89,6 +89,27 @@ With the new learning the RF Bridge will scan for all predefined protocols.
 The first received RF code will be sent by OK 0xAB.
 If a timeout happens 0xAA will be sent.
 
+## Bucket Transmitting using command 0xB0
+This command accommodates RF protocols that can have variable bit times.
+With this command, up to 16 time buckets can be defined, that denote the length of a high (mark) or low (space) transmission phase, e.g. for tri-state mode RF protocols.
+This command also accommodates code repetition often used for higher reliability.
+
+Hex: AA B0 20 04 1A 0120 01C0 0300 2710 01212122012201212121212121220121212201212203 55
+
+0xAA: uart sync init<br/>
+0xB0: transmit bucketed RF data<br/>
+0x20: data len: 32 bytes<br/>
+0x04: number of buckets: 4<br/>
+0x19: number of repetitions: (transmit 1+25 = 26 times)<br/>
+0x01-0x20: Bucket 1 length: 288µs<br/>
+0x01-0xC0: Bucket 2 length: 448µs<br/>
+0x03-0x00: Bucket 3 length: 768µs<br/>
+0x27-0x10: Bucket 4 length: 10ms (sync)<br/>
+0x05-0xDC: SYNC_LOW<br/>
+0x02-0xBC: BIT_HIGH_TIME<br/>
+0x01-0x03: RF data to send (high/low nibbles denote buckets to use for RF high (on) and low (off))<br/>
+0x55: uart sync end
+
 # Next Steps
 Add ESPurna support:<br/>
 A new protocol have to be implemented to support more RF signals -> have to be defined!

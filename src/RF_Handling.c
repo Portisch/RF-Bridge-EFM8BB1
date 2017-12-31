@@ -501,7 +501,7 @@ void usleep(uint16_t us)
 //-----------------------------------------------------------------------------
 // Send generic signal based on n time bucket pairs (high/low timing)
 //-----------------------------------------------------------------------------
-void SendRFBuckets(const uint16_t buckets[], const uint8_t rfdata[], uint8_t n, uint8_t times)
+void SendRFBuckets(const uint16_t buckets[], const uint8_t rfdata[], uint8_t n, uint8_t repeats)
 {
 	// disable interrupts for RF receiving and transmitting
 	PCA0CPM1 &= ~PCA0CPM1_ECCF__ENABLED;
@@ -518,7 +518,7 @@ void SendRFBuckets(const uint16_t buckets[], const uint8_t rfdata[], uint8_t n, 
 	InitTimer_us(10, 100);				// start timer (1ms)
 	WaitTimerFinished();				// wait until timer has finished
 
-	while (times-- != 0)				// how many times do I need to transmit?
+	do
 	{
 		uint8_t i;
 
@@ -528,12 +528,13 @@ void SendRFBuckets(const uint16_t buckets[], const uint8_t rfdata[], uint8_t n, 
 			T_DATA = 1;					// switch to high
 			usleep(j);
 
-			j = buckets[rfdata[i] & 0x0f];				// low bucket
+			j = buckets[rfdata[i] & 0x0f];			// low bucket
 			T_DATA = 0;					// switch to low
 			usleep(j);
 		}
 		LED = !LED;
 	}
+	while (repeats-- != 0);				// how many times do I need to repeat?
 
 	// disable P0.0 for I/O control, enter PCA mode
 	XBR1 |= XBR1_PCA0ME__CEX0_CEX1;
