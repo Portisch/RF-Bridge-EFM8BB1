@@ -1,4 +1,4 @@
-LX51 LINKER/LOCATER V4.66.30.0                                                          01/01/2018  05:43:56  PAGE 1
+LX51 LINKER/LOCATER V4.66.30.0                                                          01/01/2018  06:06:55  PAGE 1
 
 
 LX51 LINKER/LOCATER V4.66.30.0, INVOKED BY:
@@ -64,7 +64,7 @@ INPUT MODULES INCLUDED:
 
 ACTIVE MEMORY CLASSES OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
 
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 2
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 2
 
 
 BASE        START       END         USED      MEMORY CLASS
@@ -73,7 +73,7 @@ C:000000H   C:000000H   C:001FFEH   00129EH   CODE
 C:000000H   C:000000H   C:001FFEH   0000C3H   CONST
 C:000000H   C:000000H   C:001FFEH             ECODE
 B00:0000H   C:000000H   C:001FFEH             HCONST
-X:000000H   X:000000H   X:0000FFH   0000E9H   XDATA
+X:000000H   X:000000H   X:0000FFH   0000B9H   XDATA
 X:000000H   X:000000H   X:0000FFH             HDATA
 I:000000H   I:000000H   I:00007FH   000035H   DATA
 I:000020H.0 I:000020H.0 I:00002FH.7 000000H.1 BIT
@@ -129,7 +129,7 @@ START     STOP      LENGTH    ALIGN  RELOC    MEMORY CLASS   SEGMENT NAME
 0010A1H   0010C9H   000029H   BYTE   UNIT     CODE           ?PR?_USLEEP?RF_HANDLING
 0010CAH   0010F1H   000028H   BYTE   UNIT     CODE           ?PR?UART
 0010F2H   001118H   000027H   BYTE   UNIT     CODE           ?PR?ENTER_DEFAULTMODE_FROM_RESET?INITDEVICE
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 3
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 3
 
 
 001119H   00113DH   000025H   BYTE   UNIT     CODE           ?PR?GLOBALS
@@ -168,10 +168,10 @@ START     STOP      LENGTH    ALIGN  RELOC    MEMORY CLASS   SEGMENT NAME
 001320H   001360H   000041H   BYTE   UNIT     CONST          ?CO?UART
 
 * * * * * * * * * * *  X D A T A   M E M O R Y  * * * * * * * * * * * * *
-000000H   00008DH   00008EH   BYTE   UNIT     XDATA          ?XD?UART
-00008EH   0000E2H   000055H   BYTE   UNIT     XDATA          ?XD?RF_HANDLING
-0000E3H   0000E6H   000004H   BYTE   UNIT     XDATA          ?XD?GLOBALS
-0000E7H   0000E8H   000002H   BYTE   UNIT     XDATA          ?XD?RF_BRIDGE_MAIN
+000000H   000084H   000085H   BYTE   UNIT     XDATA          ?XD?RF_HANDLING
+000085H   0000B2H   00002EH   BYTE   UNIT     XDATA          ?XD?UART
+0000B3H   0000B6H   000004H   BYTE   UNIT     XDATA          ?XD?GLOBALS
+0000B7H   0000B8H   000002H   BYTE   UNIT     XDATA          ?XD?RF_BRIDGE_MAIN
 
 * * * * * * * * *   R E M O V E D     S E G M E N T S   * * * * * * * *
    *DEL*:           000001H   BYTE   UNIT     CODE           ?PR?UART0_RECEIVECOMPLETECB?UART
@@ -194,7 +194,7 @@ START     STOP      LENGTH    ALIGN  RELOC    MEMORY CLASS   SEGMENT NAME
    *DEL*:           000006H   BYTE   UNIT     CODE           ?PR?UART0_GETINTFLAGS?UART_0
    *DEL*:           000005H   BYTE   UNIT     CODE           ?PR?_UART0_CLEARINTFLAG?UART_0
    *DEL*:           00000CH   BYTE   UNIT     CODE           ?PR?_UART0_WRITEWITHEXTRABIT?UART_0
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 4
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 4
 
 
    *DEL*:           000011H   BYTE   UNIT     CODE           ?PR?UART0_READWITHEXTRABIT?UART_0
@@ -259,7 +259,7 @@ WDT_0_ENTER_DEFAULTMODE_FROM_RESET/INITD+     ----- -----  ----- -----
 PORTS_0_ENTER_DEFAULTMODE_FROM_RESET/INI+     ----- -----  ----- -----
 ... TDEVICE
 
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 5
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 5
 
 
 PORTS_1_ENTER_DEFAULTMODE_FROM_RESET/INI+     ----- -----  ----- -----
@@ -324,7 +324,7 @@ RF_HANDLING                                   ----- -----  ----- -----
 ?CO?RF_HANDLING                               ----- -----  ----- -----
 
 PCA0_RUN/PCA_0                                ----- -----  ----- -----
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 6
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 6
 
 
 
@@ -389,7 +389,7 @@ WAITTIMERFINISHED/GLOBALS                     ----- -----  ----- -----
 
 _INITTIMER_US/GLOBALS                         ----- -----  0035H 0038H
   +--> GLOBALS
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 7
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 7
 
 
 
@@ -454,7 +454,7 @@ PCA0_CHANNEL2EVENTCB/RF_HANDLING              ----- -----  ----- -----
 
 
 PUBLIC SYMBOLS OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 8
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 8
 
 
 
@@ -513,13 +513,13 @@ PUBLIC SYMBOLS OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
 *SFR* 000000E0H.5 DATA     BIT       ACC_ACC5
 *SFR* 000000E0H.6 DATA     BIT       ACC_ACC6
 *SFR* 000000E0H.7 DATA     BIT       ACC_ACC7
-      020000D3H   XDATA    BYTE      actual_bit
-      020000E0H   XDATA    BYTE      actual_bit_of_byte
-      020000D1H   XDATA    BYTE      actual_byte
-      020000D7H   XDATA    BYTE      actual_sync_bit
+      02000075H   XDATA    BYTE      actual_bit
+      02000082H   XDATA    BYTE      actual_bit_of_byte
+      02000073H   XDATA    BYTE      actual_byte
+      02000079H   XDATA    BYTE      actual_sync_bit
 *SFR* 000000BDH   DATA     WORD      ADC0
 *SFR* 000000B3H   DATA     BYTE      ADC0AC
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 9
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 9
 
 
 *SFR* 000000BCH   DATA     BYTE      ADC0CF
@@ -553,9 +553,9 @@ PUBLIC SYMBOLS OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
 *SFR* 000000F0H.5 DATA     BIT       B_B5
 *SFR* 000000F0H.6 DATA     BIT       B_B6
 *SFR* 000000F0H.7 DATA     BIT       B_B7
-      020000DAH   XDATA    BYTE      BIT_COUNT
-      020000DEH   XDATA    WORD      BIT_HIGH
-      020000D4H   XDATA    WORD      BIT_LOW
+      0200007CH   XDATA    BYTE      BIT_COUNT
+      02000080H   XDATA    WORD      BIT_HIGH
+      02000076H   XDATA    WORD      BIT_LOW
 *SFR* 00000090H.6 DATA     BIT       BUZZER
 *SFR* 0000008EH   DATA     BYTE      CKCON0
 *SFR* 000000A9H   DATA     BYTE      CLKSEL
@@ -573,18 +573,18 @@ PUBLIC SYMBOLS OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
 *SFR* 000000CFH   DATA     BYTE      CRC0FLIP
 *SFR* 000000DDH   DATA     BYTE      CRC0IN
 *SFR* 000000ADH   DATA     BYTE      DERIVID
-      020000E2H   XDATA    BYTE      desired_rf_protocol
+      02000084H   XDATA    BYTE      desired_rf_protocol
 *SFR* 000000B5H   DATA     BYTE      DEVICEID
 *SFR* 00000082H   DATA     WORD      DP
 *SFR* 00000083H   DATA     BYTE      DPH
 *SFR* 00000082H   DATA     BYTE      DPL
-      020000D2H   XDATA    BYTE      DUTY_CYCLE_HIGH
-      020000E1H   XDATA    BYTE      DUTY_CYLCE_LOW
+      02000074H   XDATA    BYTE      DUTY_CYCLE_HIGH
+      02000083H   XDATA    BYTE      DUTY_CYLCE_LOW
 *SFR* 000000E6H   DATA     BYTE      EIE1
 *SFR* 000000F3H   DATA     BYTE      EIP1
       010010F2H   CODE     ---       enter_DefaultMode_from_RESET
 *SFR* 000000B7H   DATA     BYTE      FLKEY
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 10
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 10
 
 
 *SFR* 000000C7H   DATA     BYTE      HFO0CAL
@@ -608,7 +608,7 @@ PUBLIC SYMBOLS OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
 *SFR* 000000B8H.2 DATA     BIT       IP_PX1
       01000053H   CODE     ---       IsTimerFinished
 *SFR* 000000E4H   DATA     BYTE      IT01CF
-      020000D6H   XDATA    BYTE      last_sniffing_command
+      02000078H   XDATA    BYTE      last_sniffing_command
 *SFR* 00000090H   DATA     BIT       LED
 *SFR* 000000B1H   DATA     BYTE      LFO0CN
       01000076H   CODE     ---       main
@@ -649,7 +649,7 @@ PUBLIC SYMBOLS OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       01000FEFH   CODE     ---       PCA0_channel0EventCb
       010007E3H   CODE     ---       PCA0_channel1EventCb
       0100129DH   CODE     ---       PCA0_channel2EventCb
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 11
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 11
 
 
 *DEL*:00000000H   CODE     ---       PCA0_getIntFlags
@@ -710,11 +710,11 @@ PUBLIC SYMBOLS OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
 *SFR* 000000D1H   DATA     BYTE      REF0CN
 *SFR* 000000C9H   DATA     BYTE      REG0CN
 *SFR* 000000B6H   DATA     BYTE      REVID
-      02000091H   XDATA    ---       RF_DATA
-      020000DCH   XDATA    BYTE      RF_DATA_STATUS
-      020000DDH   XDATA    BYTE      rf_state
+      02000003H   XDATA    ---       RF_DATA
+      0200007EH   XDATA    BYTE      RF_DATA_STATUS
+      0200007FH   XDATA    BYTE      rf_state
 *SFR* 000000EFH   DATA     BYTE      RSTSRC
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 12
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 12
 
 
 *SFR* 00000099H   DATA     BYTE      SBUF0
@@ -756,10 +756,10 @@ PUBLIC SYMBOLS OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
 *SFR* 000000F8H.1 DATA     BIT       SPI0CN0_TXBMT
 *SFR* 000000F8H.6 DATA     BIT       SPI0CN0_WCOL
 *SFR* 000000A3H   DATA     BYTE      SPI0DAT
-      020000D8H   XDATA    WORD      SYNC_HIGH
-      0200008FH   XDATA    WORD      SYNC_LOW
-      0200008EH   XDATA    BYTE      T0_HIGH
-      020000DBH   XDATA    BYTE      T0_LOW
+      0200007AH   XDATA    WORD      SYNC_HIGH
+      02000001H   XDATA    WORD      SYNC_LOW
+      02000000H   XDATA    BYTE      T0_HIGH
+      0200007DH   XDATA    BYTE      T0_LOW
 *SFR* 00000080H   DATA     BIT       T_DATA
 *SFR* 00000088H   DATA     BYTE      TCON
 *SFR* 00000088H.1 DATA     BIT       TCON_IE0
@@ -775,11 +775,11 @@ PUBLIC SYMBOLS OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       010011DBH   CODE     ---       TIMER01_0_enter_DefaultMode_from_RESET
       010011F1H   CODE     ---       TIMER16_3_enter_DefaultMode_from_RESET
       01000EF1H   CODE     ---       TIMER3_ISR
-      020000E3H   XDATA    WORD      Timer_3_Interval
-      020000E5H   XDATA    WORD      Timer_3_Timeout
+      020000B3H   XDATA    WORD      Timer_3_Interval
+      020000B5H   XDATA    WORD      Timer_3_Timeout
       01001243H   CODE     ---       TIMER_SETUP_0_enter_DefaultMode_from_RESET
 *SFR* 0000008AH   DATA     BYTE      TL0
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 13
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 13
 
 
 *SFR* 0000008BH   DATA     BYTE      TL1
@@ -815,12 +815,12 @@ PUBLIC SYMBOLS OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
 *DEL*:00000000H   CODE     ---       UART0_transmitCompleteCb
       01001286H   CODE     ---       UART_0_enter_DefaultMode_from_RESET
 *DEL*:00000000H   CODE     ---       uart_buffer_reset
-      020000E7H   XDATA    BYTE      uart_command
+      020000B7H   XDATA    BYTE      uart_command
       01000FB9H   CODE     ---       uart_getc
 *DEL*:00000000H   CODE     ---       uart_getlen
-      02000000H   XDATA    ---       UART_RX_Buffer
-      020000E8H   XDATA    BYTE      uart_state
-      02000044H   XDATA    ---       UART_TX_Buffer
+      02000085H   XDATA    ---       UART_RX_Buffer
+      020000B8H   XDATA    BYTE      uart_state
+      02000099H   XDATA    ---       UART_TX_Buffer
 *SFR* 000000FFH   DATA     BYTE      VDM0CN
       01001280H   CODE     ---       WaitTimerFinished
       01001256H   CODE     ---       WDT_0_enter_DefaultMode_from_RESET
@@ -836,15 +836,15 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       VALUE       REP       CLASS    TYPE      SYMBOL NAME
       ====================================================
       ---         MODULE    ---      ---       GLOBALS
-      020000E5H   PUBLIC    XDATA    WORD      Timer_3_Timeout
-      020000E3H   PUBLIC    XDATA    WORD      Timer_3_Interval
+      020000B5H   PUBLIC    XDATA    WORD      Timer_3_Timeout
+      020000B3H   PUBLIC    XDATA    WORD      Timer_3_Interval
       01000EF1H   PUBLIC    CODE     ---       TIMER3_ISR
       01000053H   PUBLIC    CODE     ---       IsTimerFinished
       01001280H   PUBLIC    CODE     ---       WaitTimerFinished
       01001049H   PUBLIC    CODE     ---       _InitTimer_ms
       01000026H   PUBLIC    CODE     ---       _InitTimer_us
       01001216H   PUBLIC    CODE     ---       _SetTimerReload
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 14
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 14
 
 
       000000A2H   SFRSYM    DATA     BYTE      SPI0CKR
@@ -909,7 +909,7 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       000000D1H   SFRSYM    DATA     BYTE      REF0CN
       0000008EH   SFRSYM    DATA     BYTE      CKCON0
       000000E0H.1 SFRSYM    DATA     BIT       ACC_ACC1
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 15
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 15
 
 
       000000C9H   SFRSYM    DATA     BYTE      REG0CN
@@ -974,7 +974,7 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       000000BDH   SFRSYM    DATA     BYTE      ADC0L
       00000092H   SFRSYM    DATA     WORD      TMR3RL
       000000D8H   SFRSYM    DATA     BYTE      PCA0CN0
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 16
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 16
 
 
       000000E0H   SFRSYM    DATA     BYTE      ACC
@@ -1039,7 +1039,7 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       00000088H.7 SFRSYM    DATA     BIT       TCON_TF1
       00000099H   SFRSYM    DATA     BYTE      SBUF0
       00000087H   SFRSYM    DATA     BYTE      PCON0
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 17
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 17
 
 
       000000C3H   SFRSYM    DATA     BYTE      ADC0GTL
@@ -1104,7 +1104,7 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       0100121AH   LINE      CODE     ---       #14
       0100121AH   LINE      CODE     ---       #18
       0100121DH   LINE      CODE     ---       #22
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 18
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 18
 
 
       01001221H   LINE      CODE     ---       #23
@@ -1169,7 +1169,7 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       010011F1H   PUBLIC    CODE     ---       TIMER16_3_enter_DefaultMode_from_RESET
       010011DBH   PUBLIC    CODE     ---       TIMER01_0_enter_DefaultMode_from_RESET
       0100006FH   PUBLIC    CODE     ---       CLOCK_0_enter_DefaultMode_from_RESET
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 19
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 19
 
 
       01001239H   PUBLIC    CODE     ---       PBCFG_0_enter_DefaultMode_from_RESET
@@ -1234,7 +1234,7 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       000000E2H   SFRSYM    DATA     BYTE      XBR1
       000000C0H.5 SFRSYM    DATA     BIT       SMB0CN0_STA
       000000E3H   SFRSYM    DATA     BYTE      XBR2
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 20
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 20
 
 
       000000BBH   SFRSYM    DATA     BYTE      ADC0MX
@@ -1299,7 +1299,7 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       000000F0H   SFRSYM    DATA     BYTE      B
       000000BEH   SFRSYM    DATA     BYTE      ADC0H
       000000D2H   SFRSYM    DATA     BYTE      CRC0AUTO
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 21
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 21
 
 
       000000E8H.6 SFRSYM    DATA     BIT       ADC0CN0_ADBMEN
@@ -1364,7 +1364,7 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       00000098H   SFRSYM    DATA     BIT       SCON0_RI
       00000082H   SFRSYM    DATA     BYTE      DPL
       00000088H.7 SFRSYM    DATA     BIT       TCON_TF1
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 22
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 22
 
 
       00000099H   SFRSYM    DATA     BYTE      SBUF0
@@ -1429,7 +1429,7 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       010010FBH   LINE      CODE     ---       #27
       010010FEH   LINE      CODE     ---       #28
       01001101H   LINE      CODE     ---       #29
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 23
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 23
 
 
       01001104H   LINE      CODE     ---       #30
@@ -1494,7 +1494,7 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       00000007H   SYMBOL    DATA     BYTE      TMR3CN0_TR3_save
       ---         BLOCKEND  ---      ---       LVL=1
       010011F1H   LINE      CODE     ---       #256
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 24
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 24
 
 
       010011F1H   LINE      CODE     ---       #260
@@ -1552,14 +1552,14 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       ---         BLOCKEND  ---      ---       LVL=0
 
       ---         MODULE    ---      ---       RF_BRIDGE_MAIN
-      020000E8H   PUBLIC    XDATA    BYTE      uart_state
-      020000E7H   PUBLIC    XDATA    BYTE      uart_command
+      020000B8H   PUBLIC    XDATA    BYTE      uart_state
+      020000B7H   PUBLIC    XDATA    BYTE      uart_command
       01000076H   PUBLIC    CODE     ---       main
       01000022H   PUBLIC    CODE     ---       SiLabs_Startup
       000000A2H   SFRSYM    DATA     BYTE      SPI0CKR
       00000080H   SFRSYM    DATA     BYTE      P0
       000000D0H.2 SFRSYM    DATA     BIT       PSW_OV
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 25
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 25
 
 
       00000090H   SFRSYM    DATA     BYTE      P1
@@ -1624,7 +1624,7 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       000000C9H   SFRSYM    DATA     BYTE      REG0CN
       000000DDH   SFRSYM    DATA     BYTE      CRC0IN
       000000C8H.2 SFRSYM    DATA     BIT       TMR2CN0_TR2
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 26
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 26
 
 
       000000E0H.2 SFRSYM    DATA     BIT       ACC_ACC2
@@ -1689,7 +1689,7 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       000000E0H   SFRSYM    DATA     BYTE      ACC
       000000FBH   SFRSYM    DATA     WORD      PCA0CP0
       000000E9H   SFRSYM    DATA     WORD      PCA0CP1
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 27
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 27
 
 
       000000EBH   SFRSYM    DATA     WORD      PCA0CP2
@@ -1754,7 +1754,7 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       000000C3H   SFRSYM    DATA     BYTE      ADC0GTL
       000000C8H.6 SFRSYM    DATA     BIT       TMR2CN0_TF2L
       00000098H.1 SFRSYM    DATA     BIT       SCON0_TI
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 28
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 28
 
 
       000000E8H   SFRSYM    DATA     BIT       ADC0CN0_ADCM0
@@ -1819,7 +1819,7 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
 
       01000076H   BLOCK     CODE     ---       LVL=0
       01000076H   BLOCK     CODE     NEAR LAB  LVL=1
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 29
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 29
 
 
       00000020H.0 SYMBOL    BIT      BIT       ReadUARTData
@@ -1884,7 +1884,7 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       01000103H   LINE      CODE     ---       #108
       01000103H   LINE      CODE     ---       #109
       01000106H   LINE      CODE     ---       #111
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 30
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 30
 
 
       01000106H   LINE      CODE     ---       #112
@@ -1949,7 +1949,7 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       010001E5H   LINE      CODE     ---       #193
       010001E5H   LINE      CODE     ---       #194
       010001E5H   LINE      CODE     ---       #197
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 31
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 31
 
 
       010001E5H   LINE      CODE     ---       #198
@@ -2014,7 +2014,7 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       010002AFH   LINE      CODE     ---       #292
       010002AFH   LINE      CODE     ---       #293
       010002AFH   LINE      CODE     ---       #294
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 32
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 32
 
 
       010002B1H   LINE      CODE     ---       #297
@@ -2079,7 +2079,7 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       01000447H   LINE      CODE     ---       #423
       0100044FH   LINE      CODE     ---       #424
       0100044FH   LINE      CODE     ---       #425
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 33
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 33
 
 
       01000453H   LINE      CODE     ---       #427
@@ -2130,27 +2130,27 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       ---         BLOCKEND  ---      ---       LVL=0
 
       ---         MODULE    ---      ---       RF_HANDLING
-      020000E2H   PUBLIC    XDATA    BYTE      desired_rf_protocol
-      020000E1H   PUBLIC    XDATA    BYTE      DUTY_CYLCE_LOW
-      020000E0H   PUBLIC    XDATA    BYTE      actual_bit_of_byte
-      020000DEH   PUBLIC    XDATA    WORD      BIT_HIGH
-      020000DDH   PUBLIC    XDATA    BYTE      rf_state
-      020000DCH   PUBLIC    XDATA    BYTE      RF_DATA_STATUS
-      020000DBH   PUBLIC    XDATA    BYTE      T0_LOW
-      020000DAH   PUBLIC    XDATA    BYTE      BIT_COUNT
-      020000D8H   PUBLIC    XDATA    WORD      SYNC_HIGH
-      020000D7H   PUBLIC    XDATA    BYTE      actual_sync_bit
-      020000D6H   PUBLIC    XDATA    BYTE      last_sniffing_command
-      020000D4H   PUBLIC    XDATA    WORD      BIT_LOW
-      020000D3H   PUBLIC    XDATA    BYTE      actual_bit
-      020000D2H   PUBLIC    XDATA    BYTE      DUTY_CYCLE_HIGH
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 34
+      02000084H   PUBLIC    XDATA    BYTE      desired_rf_protocol
+      02000083H   PUBLIC    XDATA    BYTE      DUTY_CYLCE_LOW
+      02000082H   PUBLIC    XDATA    BYTE      actual_bit_of_byte
+      02000080H   PUBLIC    XDATA    WORD      BIT_HIGH
+      0200007FH   PUBLIC    XDATA    BYTE      rf_state
+      0200007EH   PUBLIC    XDATA    BYTE      RF_DATA_STATUS
+      0200007DH   PUBLIC    XDATA    BYTE      T0_LOW
+      0200007CH   PUBLIC    XDATA    BYTE      BIT_COUNT
+      0200007AH   PUBLIC    XDATA    WORD      SYNC_HIGH
+      02000079H   PUBLIC    XDATA    BYTE      actual_sync_bit
+      02000078H   PUBLIC    XDATA    BYTE      last_sniffing_command
+      02000076H   PUBLIC    XDATA    WORD      BIT_LOW
+      02000075H   PUBLIC    XDATA    BYTE      actual_bit
+      02000074H   PUBLIC    XDATA    BYTE      DUTY_CYCLE_HIGH
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 34
 
 
-      020000D1H   PUBLIC    XDATA    BYTE      actual_byte
-      02000091H   PUBLIC    XDATA    ---       RF_DATA
-      0200008FH   PUBLIC    XDATA    WORD      SYNC_LOW
-      0200008EH   PUBLIC    XDATA    BYTE      T0_HIGH
+      02000073H   PUBLIC    XDATA    BYTE      actual_byte
+      02000003H   PUBLIC    XDATA    ---       RF_DATA
+      02000001H   PUBLIC    XDATA    WORD      SYNC_LOW
+      02000000H   PUBLIC    XDATA    BYTE      T0_HIGH
       0000002AH   PUBLIC    DATA     BYTE      ?_SendRFBuckets?BYTE
       01000C14H   PUBLIC    CODE     ---       _SendRFBuckets
       010010A1H   PUBLIC    CODE     ---       _usleep
@@ -2209,7 +2209,7 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       000000FBH   SFRSYM    DATA     BYTE      PCA0CPL0
       000000F0H.3 SFRSYM    DATA     BIT       B_B3
       000000D9H   SFRSYM    DATA     BYTE      PCA0MD
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 35
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 35
 
 
       000000DAH   SFRSYM    DATA     BYTE      PCA0CPM0
@@ -2274,7 +2274,7 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       000000D0H   SFRSYM    DATA     BIT       PSW_PARITY
       000000A8H.4 SFRSYM    DATA     BIT       IE_ES0
       0000009FH   SFRSYM    DATA     BYTE      CMP0MX
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 36
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 36
 
 
       000000A8H.1 SFRSYM    DATA     BIT       IE_ET0
@@ -2339,7 +2339,7 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       000000A0H.1 SFRSYM    DATA     BIT       P2_B1
       00000090H.2 SFRSYM    DATA     BIT       P1_B2
       00000080H.3 SFRSYM    DATA     BIT       P0_B3
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 37
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 37
 
 
       000000C0H   SFRSYM    DATA     BYTE      SMB0CN0
@@ -2404,7 +2404,7 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       000000F8H.7 SFRSYM    DATA     BIT       SPI0CN0_SPIF
       00000094H   SFRSYM    DATA     BYTE      TMR3L
       000000DFH   SFRSYM    DATA     BYTE      ADC0PWR
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 38
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 38
 
 
       000000A8H.7 SFRSYM    DATA     BIT       IE_EA
@@ -2469,7 +2469,7 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       00000008H   SYMBOL    DATA     WORD      current_capture_value
       0000000AH   SYMBOL    DATA     WORD      previous_capture_value_pos
       0000000CH   SYMBOL    DATA     WORD      previous_capture_value_neg
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 39
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 39
 
 
       0000000EH   SYMBOL    DATA     WORD      capture_period_pos
@@ -2534,7 +2534,7 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       0100097AH   LINE      CODE     ---       #178
       0100097DH   LINE      CODE     ---       #179
       0100097FH   LINE      CODE     ---       #180
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 40
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 40
 
 
       01000982H   LINE      CODE     ---       #181
@@ -2599,7 +2599,7 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       01000B6BH   LINE      CODE     ---       #265
       01000B6DH   LINE      CODE     ---       #266
       01000B6DH   LINE      CODE     ---       #267
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 41
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 41
 
 
       01000B6DH   LINE      CODE     ---       #270
@@ -2664,7 +2664,7 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       0000002CH   SYMBOL    DATA     WORD      sync_low
       00000002H   SYMBOL    DATA     WORD      BIT_HIGH_TIME
       00000030H   SYMBOL    DATA     BYTE      BIT_HIGH_DUTY
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 42
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 42
 
 
       00000031H   SYMBOL    DATA     WORD      BIT_LOW_TIME
@@ -2729,7 +2729,7 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       01000003H   LINE      CODE     ---       #423
       01000003H   LINE      CODE     ---       #425
       0100000AH   LINE      CODE     ---       #427
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 43
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 43
 
 
       0100000AH   LINE      CODE     ---       #428
@@ -2794,7 +2794,7 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       01000C3CH   BLOCK     CODE     NEAR LAB  LVL=2
       00000033H   SYMBOL    DATA     WORD      j
       ---         BLOCKEND  ---      ---       LVL=2
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 44
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 44
 
 
       ---         BLOCKEND  ---      ---       LVL=1
@@ -2859,7 +2859,7 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       01000B85H   BLOCK     CODE     NEAR LAB  LVL=0
       01000B85H   LINE      CODE     ---       #134
       01000B88H   LINE      CODE     ---       #138
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 45
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 45
 
 
       01000B8AH   LINE      CODE     ---       #139
@@ -2870,8 +2870,8 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       ---         BLOCKEND  ---      ---       LVL=0
 
       ---         MODULE    ---      ---       UART
-      02000044H   PUBLIC    XDATA    ---       UART_TX_Buffer
-      02000000H   PUBLIC    XDATA    ---       UART_RX_Buffer
+      02000099H   PUBLIC    XDATA    ---       UART_TX_Buffer
+      02000085H   PUBLIC    XDATA    ---       UART_RX_Buffer
       01000F3EH   PUBLIC    CODE     ---       _uart_put_RF_CODE_Data
       01000E9AH   PUBLIC    CODE     ---       _uart_put_RF_Data
       0100122EH   PUBLIC    CODE     ---       _uart_put_command
@@ -2924,7 +2924,7 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       000000EBH   SFRSYM    DATA     BYTE      PCA0CPL2
       000000F0H.5 SFRSYM    DATA     BIT       B_B5
       000000DCH   SFRSYM    DATA     BYTE      PCA0CPM2
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 46
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 46
 
 
       000000B8H   SFRSYM    DATA     BYTE      IP
@@ -2989,7 +2989,7 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       000000A8H.5 SFRSYM    DATA     BIT       IE_ET2
       000000D5H   SFRSYM    DATA     BYTE      P1SKIP
       000000E8H   SFRSYM    DATA     BYTE      ADC0CN0
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 47
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 47
 
 
       000000A8H   SFRSYM    DATA     BIT       IE_EX0
@@ -3054,7 +3054,7 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       00000080H.5 SFRSYM    DATA     BIT       P0_B5
       00000090H.5 SFRSYM    DATA     BIT       P1_B5
       00000080H.6 SFRSYM    DATA     BIT       P0_B6
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 48
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 48
 
 
       00000090H.6 SFRSYM    DATA     BIT       P1_B6
@@ -3119,7 +3119,7 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       000000D0H.7 SFRSYM    DATA     BIT       PSW_CY
       000000A3H   SFRSYM    DATA     BYTE      SPI0DAT
       000000F8H.3 SFRSYM    DATA     BIT       SPI0CN0_NSSMD1
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 49
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 49
 
 
       000000BDH   SFRSYM    DATA     WORD      ADC0
@@ -3128,12 +3128,12 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       000000B6H   SFRSYM    DATA     BYTE      REVID
       000000B7H   SFRSYM    DATA     BYTE      FLKEY
       000000B3H   SFRSYM    DATA     BYTE      ADC0AC
-      02000088H   SYMBOL    XDATA    BYTE      lastRxError
-      02000089H   SYMBOL    XDATA    BYTE      UART_Buffer_Read_Position
-      0200008AH   SYMBOL    XDATA    BYTE      UART_Buffer_Write_Position
-      0200008BH   SYMBOL    XDATA    BYTE      UART_RX_Buffer_Position
-      0200008CH   SYMBOL    XDATA    BYTE      UART_TX_Buffer_Position
-      0200008DH   SYMBOL    XDATA    BYTE      UART_Buffer_Write_Len
+      020000ADH   SYMBOL    XDATA    BYTE      lastRxError
+      020000AEH   SYMBOL    XDATA    BYTE      UART_Buffer_Read_Position
+      020000AFH   SYMBOL    XDATA    BYTE      UART_Buffer_Write_Position
+      020000B0H   SYMBOL    XDATA    BYTE      UART_RX_Buffer_Position
+      020000B1H   SYMBOL    XDATA    BYTE      UART_TX_Buffer_Position
+      020000B2H   SYMBOL    XDATA    BYTE      UART_Buffer_Write_Len
       01001320H   SYMBOL    CONST    ---       PROTOCOL_DATA
 
       010010CAH   BLOCK     CODE     ---       LVL=0
@@ -3184,7 +3184,7 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       01000FE8H   LINE      CODE     ---       #110
       01000FEAH   LINE      CODE     ---       #111
       01000FEEH   LINE      CODE     ---       #112
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 50
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 50
 
 
       ---         BLOCKEND  ---      ---       LVL=0
@@ -3249,7 +3249,7 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       01000F3EH   BLOCK     CODE     ---       LVL=0
       00000006H   SYMBOL    DATA     BYTE      Command
       01000F40H   BLOCK     CODE     NEAR LAB  LVL=1
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 51
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 51
 
 
       00000005H   SYMBOL    DATA     BYTE      i
@@ -3314,7 +3314,7 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       00000098H.3 SFRSYM    DATA     BIT       SCON0_TB8
       000000F0H   SFRSYM    DATA     BIT       B_B0
       00000082H   SFRSYM    DATA     WORD      DP
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 52
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 52
 
 
       000000ECH   SFRSYM    DATA     BYTE      PCA0CPH2
@@ -3379,7 +3379,7 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       0000009EH   SFRSYM    DATA     BYTE      PCA0CENT
       000000F8H.4 SFRSYM    DATA     BIT       SPI0CN0_RXOVRN
       000000D0H.4 SFRSYM    DATA     BIT       PSW_RS1
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 53
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 53
 
 
       000000E8H.7 SFRSYM    DATA     BIT       ADC0CN0_ADEN
@@ -3444,7 +3444,7 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       00000090H.1 SFRSYM    DATA     BIT       P1_B1
       00000080H.2 SFRSYM    DATA     BIT       P0_B2
       000000BFH   SFRSYM    DATA     BYTE      CMP1CN0
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 54
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 54
 
 
       00000088H.3 SFRSYM    DATA     BIT       TCON_IE1
@@ -3509,7 +3509,7 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       000000D3H   SFRSYM    DATA     BYTE      CRC0CNT
       00000096H   SFRSYM    DATA     BYTE      PCA0POL
       000000CCH   SFRSYM    DATA     BYTE      TMR2L
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 55
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 55
 
 
       000000F8H.7 SFRSYM    DATA     BIT       SPI0CN0_SPIF
@@ -3574,7 +3574,7 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       01001290H   LINE      CODE     ---       #105
       01001290H   LINE      CODE     ---       #106
       01001292H   LINE      CODE     ---       #107
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 56
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 56
 
 
       ---         BLOCKEND  ---      ---       LVL=0
@@ -3639,7 +3639,7 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       000000C0H.6 SFRSYM    DATA     BIT       SMB0CN0_TXMODE
       000000ADH   SFRSYM    DATA     BYTE      DERIVID
       000000A4H   SFRSYM    DATA     BYTE      P0MDOUT
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 57
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 57
 
 
       000000A5H   SFRSYM    DATA     BYTE      P1MDOUT
@@ -3704,7 +3704,7 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       000000CCH   SFRSYM    DATA     WORD      TMR2
       000000D8H.2 SFRSYM    DATA     BIT       PCA0CN0_CCF2
       000000E0H.7 SFRSYM    DATA     BIT       ACC_ACC7
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 58
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 58
 
 
       00000094H   SFRSYM    DATA     WORD      TMR3
@@ -3769,7 +3769,7 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       000000F8H.1 SFRSYM    DATA     BIT       SPI0CN0_TXBMT
       000000D0H.5 SFRSYM    DATA     BIT       PSW_F0
       000000A8H.6 SFRSYM    DATA     BIT       IE_ESPI0
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 59
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 59
 
 
       0000008BH   SFRSYM    DATA     BYTE      TL1
@@ -3834,7 +3834,7 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       000000D6H   SFRSYM    DATA     BYTE      SMB0ADM
       000000C5H   SFRSYM    DATA     BYTE      ADC0LTL
       000000F8H.5 SFRSYM    DATA     BIT       SPI0CN0_MODF
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 60
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 60
 
 
       000000B8H.6 SFRSYM    DATA     BIT       IP_PSPI0
@@ -3899,7 +3899,7 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       00000003H   SYMBOL    DATA     BYTE      mce
       0100124DH   LINE      CODE     ---       #44
       0100124DH   LINE      CODE     ---       #45
-LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  05:43:56  PAGE 61
+LX51 LINKER/LOCATER V4.66.30.0                                                        01/01/2018  06:06:55  PAGE 61
 
 
       0100124DH   LINE      CODE     ---       #46
@@ -3939,5 +3939,5 @@ SYMBOL TABLE OF MODULE:  RF_BRIDGE.OMF.CRBUILD (GLOBALS)
       ---         MODULE    ---      ---       ?C?MEMSET
       010007B7H   PUBLIC    CODE     ---       ?C?MEMSET
 
-Program Size: data=54.1 xdata=233 const=195 code=4766
+Program Size: data=54.1 xdata=185 const=195 code=4766
 LX51 RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)
