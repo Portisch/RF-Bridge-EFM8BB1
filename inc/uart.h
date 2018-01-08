@@ -14,7 +14,7 @@
 #define RF_CODE_START		0xAA
 #define RF_CODE_STOP		0x55
 
-#define UART_BUFFER_SIZE	64 + 4
+#define UART_BUFFER_SIZE	16 + 4
 
 /*
 ** high byte error return code of uart_getc()
@@ -52,7 +52,8 @@ typedef enum
 	RF_CODE_RFOUT_NEW = 0xA8,
 	RF_CODE_LEARN_NEW = 0xA9,
 	RF_CODE_LEARN_KO_NEW = 0xAA,
-	RF_CODE_LEARN_OK_NEW = 0xAB
+	RF_CODE_LEARN_OK_NEW = 0xAB,
+	RF_CODE_RFOUT_BUCKET = 0xB0
 } uart_command_t;
 
 

@@ -488,3 +488,55 @@ void PCA0_StopSniffing(void)
 
 	rf_state = RF_IDLE;
 }
+
+void usleep(uint16_t us)
+{
+	if (us < 20) return;
+	us -= 20;
+	us <<= 1;
+	while (us > 0) us--;
+}
+
+
+//-----------------------------------------------------------------------------
+// Send generic signal based on n time bucket pairs (high/low timing)
+//-----------------------------------------------------------------------------
+void SendRFBuckets(const uint16_t buckets[], const uint8_t rfdata[], uint8_t n, uint8_t repeats)
+{
+	// disable interrupts for RF receiving and transmitting
+	PCA0CPM1 &= ~PCA0CPM1_ECCF__ENABLED;
+	PCA0CPM0 &= ~PCA0CPM0_ECCF__ENABLED;
+	PCA0PWM &= ~PCA0PWM_ECOV__COVF_MASK_ENABLED;
+
+	XBR1 &= ~XBR1_PCA0ME__CEX0_CEX1;	// enable P0.0 for I/O control
+
+	T_DATA = 1;							// switch to high
+	InitTimer_ms(1, 7);					// start timer (7ms)
+	WaitTimerFinished();				// wait until timer has finished
+
+	T_DATA = 0;							// switch to low
+	InitTimer_us(10, 100);				// start timer (1ms)
+	WaitTimerFinished();				// wait until timer has finished
+
+	do
+	{
+		uint8_t i;
+
+		for (i = 0; i < n; i++)			// transmit n bucket pairs
+		{
+			uint16_t j = buckets[rfdata[i] >> 4];	// high bucket
+			T_DATA = 1;					// switch to high
+			usleep(j);
+
+			j = buckets[rfdata[i] & 0x0f];			// low bucket
+			T_DATA = 0;					// switch to low
+			usleep(j);
+		}
+		LED = !LED;
+	}
+	while (repeats-- != 0);				// how many times do I need to repeat?
+
+	// disable P0.0 for I/O control, enter PCA mode
+	XBR1 |= XBR1_PCA0ME__CEX0_CEX1;
+	LED = LED_OFF;
+}
