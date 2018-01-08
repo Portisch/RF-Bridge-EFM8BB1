@@ -73,6 +73,7 @@ int main (void)
 
 	for (l = 0; l < 10000; l++)
 		BUZZER = BUZZER_ON;
+
 	BUZZER = BUZZER_OFF;
 
 	while (1)
@@ -97,7 +98,9 @@ int main (void)
 				l = 0;
 			else
 			{
-				if (++l > 10000) BUZZER = BUZZER_ON;
+				if (++l > 10000)
+					BUZZER = BUZZER_ON;
+
 				if (l > 30000)
 				{
 					l = 0;
@@ -476,18 +479,20 @@ int main (void)
 				// byte 2*(1..k):		bucket time high
 				// byte 2*(1..k)+1:		bucket time low
 				// byte 2*k+2..N:		RF buckets to send
-				if (k == 0 || len < 4)
+				if ((k == 0) || (len < 4))
 				{
 					uart_command = NONE;
-					PCA0_DoSniffing(last_sniffing_command);
-					ReadUARTData = true;					// re-enable UART
 					break;
 				}
-				SendRFBuckets((uint16_t *)(RF_DATA+2), RF_DATA+k+2, len-k-2, RF_DATA[1]);
+				else
+				{
+					SendRFBuckets((uint16_t *)(RF_DATA+2), RF_DATA+k+2, len-k-2, RF_DATA[1]);
+					uart_put_command(RF_CODE_ACK);			// send acknowledgment
+				}
 
 				PCA0_DoSniffing(last_sniffing_command);
-				uart_put_command(RF_CODE_ACK);			// send acknowledgement
 				ReadUARTData = true;					// re-enable UART
+
 				break;
 			}
 		}
