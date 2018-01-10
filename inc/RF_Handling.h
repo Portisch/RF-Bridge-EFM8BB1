@@ -35,6 +35,15 @@ typedef enum
 	RF_FINISHED
 } rf_state_t;
 
+typedef enum
+{
+	// do sniffing by duty cycle
+	MODE_DUTY_CYCLE,
+	// do sniffing by bucket
+	// https://github.com/pimatic/RFControl
+	MODE_BUCKET
+} rf_sniffing_mode_t;
+
 #define RF_DATA_RECEIVED_MASK	0x80
 
 extern SI_SEGMENT_VARIABLE(RF_DATA[RF_DATA_BUFFERSIZE], uint8_t, SI_SEG_XDATA);
@@ -45,6 +54,7 @@ extern SI_SEGMENT_VARIABLE(RF_DATA[RF_DATA_BUFFERSIZE], uint8_t, SI_SEG_XDATA);
 extern SI_SEGMENT_VARIABLE(RF_DATA_STATUS, uint8_t, SI_SEG_XDATA);
 extern SI_SEGMENT_VARIABLE(rf_state, rf_state_t, SI_SEG_XDATA);
 extern SI_SEGMENT_VARIABLE(desired_rf_protocol, uint8_t, SI_SEG_XDATA);
+extern SI_SEGMENT_VARIABLE(rf_sniffing_mode, rf_sniffing_mode_t, SI_SEG_XDATA);
 
 extern SI_SEGMENT_VARIABLE(last_sniffing_command, uint8_t, SI_SEG_XDATA);
 

@@ -62,6 +62,7 @@ int main (void)
 	{
 		// set desired RF protocol PT2260
 		desired_rf_protocol = PT2260_IDENTIFIER;
+		rf_sniffing_mode = MODE_DUTY_CYCLE;
 		PCA0_DoSniffing(RF_CODE_RFIN);
 		last_sniffing_command = RF_CODE_RFIN;
 	}
@@ -140,6 +141,7 @@ int main (void)
 
 							// set desired RF protocol PT2260
 							desired_rf_protocol = PT2260_IDENTIFIER;
+							rf_sniffing_mode = MODE_DUTY_CYCLE;
 							last_sniffing_command = PCA0_DoSniffing(RF_CODE_LEARN);
 
 							// start timeout timer
@@ -153,6 +155,7 @@ int main (void)
 							break;
 						case RF_CODE_SNIFFING_ON:
 							desired_rf_protocol = UNKNOWN_IDENTIFIER;
+							rf_sniffing_mode = MODE_DUTY_CYCLE;
 							PCA0_DoSniffing(RF_CODE_SNIFFING_ON);
 							last_sniffing_command = RF_CODE_SNIFFING_ON;
 							break;
@@ -160,12 +163,17 @@ int main (void)
 							// set desired RF protocol PT2260
 							desired_rf_protocol = PT2260_IDENTIFIER;
 							// re-enable default RF_CODE_RFIN sniffing
+							rf_sniffing_mode = MODE_DUTY_CYCLE;
 							PCA0_DoSniffing(RF_CODE_RFIN);
 							last_sniffing_command = RF_CODE_RFIN;
 							break;
 						case RF_CODE_RFOUT_NEW:
 						case RF_CODE_RFOUT_BUCKET:
 							uart_state = RECEIVE_LEN;
+							break;
+						case RF_CODE_SNIFFING_ON_BUCKET:
+							rf_sniffing_mode = MODE_BUCKET;
+							last_sniffing_command = PCA0_DoSniffing(RF_CODE_SNIFFING_ON_BUCKET);
 							break;
 						case RF_CODE_LEARN_NEW:
 							InitTimer_ms(1, 50);
@@ -177,6 +185,7 @@ int main (void)
 							// enable sniffing for all known protocols
 							last_desired_rf_protocol = desired_rf_protocol;
 							desired_rf_protocol = UNKNOWN_IDENTIFIER;
+							rf_sniffing_mode = MODE_DUTY_CYCLE;
 							last_sniffing_command = PCA0_DoSniffing(RF_CODE_LEARN_NEW);
 
 							// start timeout timer
@@ -229,6 +238,7 @@ int main (void)
 							case RF_CODE_SNIFFING_ON:
 							case RF_CODE_SNIFFING_OFF:
 							case RF_CODE_RFIN:
+							case RF_CODE_SNIFFING_ON_BUCKET:
 								// send acknowledge
 								uart_put_command(RF_CODE_ACK);
 							case RF_CODE_ACK:
@@ -495,6 +505,17 @@ int main (void)
 
 				break;
 			}
+
+			case RF_CODE_SNIFFING_ON_BUCKET:
+				// check if a RF signal got decoded
+				if ((RF_DATA_STATUS & RF_DATA_RECEIVED_MASK) != 0)
+				{
+					// to do ...
+
+					// clear RF status
+					RF_DATA_STATUS = 0;
+				}
+				break;
 		}
 	}
 }

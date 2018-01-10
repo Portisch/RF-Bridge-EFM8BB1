@@ -17,6 +17,7 @@ SI_SEGMENT_VARIABLE(RF_DATA[RF_DATA_BUFFERSIZE], uint8_t, SI_SEG_XDATA);
 SI_SEGMENT_VARIABLE(RF_DATA_STATUS, uint8_t, SI_SEG_XDATA) = 0;
 SI_SEGMENT_VARIABLE(rf_state, rf_state_t, SI_SEG_XDATA) = RF_IDLE;
 SI_SEGMENT_VARIABLE(desired_rf_protocol, uint8_t, SI_SEG_XDATA) = UNKNOWN_IDENTIFIER;
+SI_SEGMENT_VARIABLE(rf_sniffing_mode, rf_sniffing_mode_t, SI_SEG_XDATA) = MODE_DUTY_CYCLE;
 
 SI_SEGMENT_VARIABLE(last_sniffing_command, uint8_t, SI_SEG_XDATA) = NONE;
 
@@ -101,85 +102,97 @@ void PCA0_channel1EventCb()
 		// Calculate capture period from last two values.
 		capture_period_neg = current_capture_value - previous_capture_value_neg;
 
-		switch (rf_state)
+		// do sniffing by mode
+		switch (rf_sniffing_mode)
 		{
-			// check if we receive a sync
-			case RF_IDLE:
-				// check first if last decoded RF signal was cleared
-				if (RF_DATA_STATUS != 0)
-					break;
-
-				// check all protocols in the list
-				used_protocol = RFInSync(desired_rf_protocol, capture_period_pos, capture_period_neg);
-
-				// check if a matching protocol got found
-				if (used_protocol != 0x80)
+			// do sniffing by duty cycle mode
+			case MODE_DUTY_CYCLE:
+				switch (rf_state)
 				{
-					// backup sync time
-					SYNC_HIGH = capture_period_pos;
-					SYNC_LOW = capture_period_neg;
-					actual_bit_of_byte = 8;
-					actual_byte = 0;
-					actual_bit = 0;
-					actual_sync_bit = 0;
-					low_pulse_time = 0;
-					memset(RF_DATA, 0, sizeof(RF_DATA));
-					rf_state = RF_IN_SYNC;
-					break;
+					// check if we receive a sync
+					case RF_IDLE:
+						// check first if last decoded RF signal was cleared
+						if (RF_DATA_STATUS != 0)
+							break;
+
+						// check all protocols in the list
+						used_protocol = RFInSync(desired_rf_protocol, capture_period_pos, capture_period_neg);
+
+						// check if a matching protocol got found
+						if (used_protocol != 0x80)
+						{
+							// backup sync time
+							SYNC_HIGH = capture_period_pos;
+							SYNC_LOW = capture_period_neg;
+							actual_bit_of_byte = 8;
+							actual_byte = 0;
+							actual_bit = 0;
+							actual_sync_bit = 0;
+							low_pulse_time = 0;
+							memset(RF_DATA, 0, sizeof(RF_DATA));
+							rf_state = RF_IN_SYNC;
+							break;
+						}
+						break;
+
+					// one matching sync got received
+					case RF_IN_SYNC:
+						// at first skip SYNC bits
+						if ((PROTOCOL_DATA[used_protocol].SYNC_BIT_COUNT > 0) &&
+							(actual_sync_bit < PROTOCOL_DATA[used_protocol].SYNC_BIT_COUNT))
+						{
+							actual_sync_bit++;
+							break;
+						}
+
+						// check the rest of the bits
+						actual_bit_of_byte--;
+						actual_bit++;
+
+						// calculate current duty cycle
+						current_duty_cycle = (100 * (uint32_t)capture_period_pos) / ((uint32_t)capture_period_pos + (uint32_t)capture_period_neg);
+
+						if (((current_duty_cycle > (PROTOCOL_DATA[used_protocol].BIT_HIGH_DUTY - DUTY_CYCLE_TOLERANCE)) &&
+							(current_duty_cycle < (PROTOCOL_DATA[used_protocol].BIT_HIGH_DUTY + DUTY_CYCLE_TOLERANCE)) &&
+							(actual_bit < PROTOCOL_DATA[used_protocol].BIT_COUNT)) ||
+							// the duty cycle can not be used for the last bit because of the missing rising edge on the end
+							((capture_period_pos > low_pulse_time) && (actual_bit == PROTOCOL_DATA[used_protocol].BIT_COUNT))
+							)
+						{
+							// backup last bit high time
+							BIT_HIGH = capture_period_pos;
+							LED = LED_ON;
+							RF_DATA[(actual_bit - 1) / 8] |= (1 << actual_bit_of_byte);
+						}
+						else
+						{
+							// backup last bit high time
+							BIT_LOW = capture_period_pos;
+							LED = LED_OFF;
+							// backup low bit pulse time to be able to determine the last bit
+							if (capture_period_pos > low_pulse_time)
+								low_pulse_time = capture_period_pos;
+						}
+
+						if (actual_bit_of_byte == 0)
+							actual_bit_of_byte = 8;
+
+						// check if all bits for this protocol got received
+						if (actual_bit == PROTOCOL_DATA[used_protocol].BIT_COUNT)
+						{
+							RF_DATA_STATUS = used_protocol;
+							RF_DATA_STATUS |= RF_DATA_RECEIVED_MASK;
+							LED = LED_OFF;
+							rf_state = RF_IDLE;
+						}
+						break;
 				}
 				break;
 
-			// one matching sync got received
-			case RF_IN_SYNC:
-				// at first skip SYNC bits
-				if ((PROTOCOL_DATA[used_protocol].SYNC_BIT_COUNT > 0) &&
-					(actual_sync_bit < PROTOCOL_DATA[used_protocol].SYNC_BIT_COUNT))
-				{
-					actual_sync_bit++;
+				// do sniffing by bucket mode
+				case MODE_BUCKET:
+					// to do ...
 					break;
-				}
-
-				// check the rest of the bits
-				actual_bit_of_byte--;
-				actual_bit++;
-
-				// calculate current duty cycle
-				current_duty_cycle = (100 * (uint32_t)capture_period_pos) / ((uint32_t)capture_period_pos + (uint32_t)capture_period_neg);
-
-				if (((current_duty_cycle > (PROTOCOL_DATA[used_protocol].BIT_HIGH_DUTY - DUTY_CYCLE_TOLERANCE)) &&
-					(current_duty_cycle < (PROTOCOL_DATA[used_protocol].BIT_HIGH_DUTY + DUTY_CYCLE_TOLERANCE)) &&
-					(actual_bit < PROTOCOL_DATA[used_protocol].BIT_COUNT)) ||
-					// the duty cycle can not be used for the last bit because of the missing rising edge on the end
-					((capture_period_pos > low_pulse_time) && (actual_bit == PROTOCOL_DATA[used_protocol].BIT_COUNT))
-					)
-				{
-					// backup last bit high time
-					BIT_HIGH = capture_period_pos;
-					LED = LED_ON;
-					RF_DATA[(actual_bit - 1) / 8] |= (1 << actual_bit_of_byte);
-				}
-				else
-				{
-					// backup last bit high time
-					BIT_LOW = capture_period_pos;
-					LED = LED_OFF;
-					// backup low bit pulse time to be able to determine the last bit
-					if (capture_period_pos > low_pulse_time)
-						low_pulse_time = capture_period_pos;
-				}
-
-				if (actual_bit_of_byte == 0)
-					actual_bit_of_byte = 8;
-
-				// check if all bits for this protocol got received
-				if (actual_bit == PROTOCOL_DATA[used_protocol].BIT_COUNT)
-				{
-					RF_DATA_STATUS = used_protocol;
-					RF_DATA_STATUS |= RF_DATA_RECEIVED_MASK;
-					LED = LED_OFF;
-					rf_state = RF_IDLE;
-				}
-				break;
 		}
 	}
 	// negative edge
@@ -190,6 +203,15 @@ void PCA0_channel1EventCb()
 
 		// Calculate capture period from last two values.
 		capture_period_pos = current_capture_value - previous_capture_value_pos;
+
+		// do sniffing by mode
+		switch (rf_sniffing_mode)
+		{
+			// do sniffing by bucket mode
+			case MODE_BUCKET:
+				// to do ...
+				break;
+		}
 	}
 }
 
