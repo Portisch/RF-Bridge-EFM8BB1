@@ -13,6 +13,10 @@
 //-----------------------------------------------------------------------------
 #include <stdint.h>
 
+#define MIN_FOOTER_LENGTH	3500
+#define MIN_PULSE_LENGTH	100
+#define MAX_BUCKETS			8
+
 typedef struct
 {
 	// Protocol specific identifier

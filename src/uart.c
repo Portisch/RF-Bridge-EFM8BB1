@@ -16,8 +16,8 @@
 //-----------------------------------------------------------------------------
 // Global Variables
 //-----------------------------------------------------------------------------
-SI_SEGMENT_VARIABLE(UART_RX_Buffer[UART_BUFFER_SIZE], uint8_t, SI_SEG_XDATA);
-SI_SEGMENT_VARIABLE(UART_TX_Buffer[UART_BUFFER_SIZE], uint8_t, SI_SEG_XDATA);
+SI_SEGMENT_VARIABLE(UART_RX_Buffer[UART_RX_BUFFER_SIZE], uint8_t, SI_SEG_XDATA);
+SI_SEGMENT_VARIABLE(UART_TX_Buffer[UART_TX_BUFFER_SIZE], uint8_t, SI_SEG_DATA);
 SI_SEGMENT_VARIABLE(UART_RX_Buffer_Position, static volatile uint8_t,  SI_SEG_XDATA)=0;
 SI_SEGMENT_VARIABLE(UART_TX_Buffer_Position, static volatile uint8_t,  SI_SEG_XDATA)=0;
 SI_SEGMENT_VARIABLE(UART_Buffer_Read_Position, static volatile uint8_t,  SI_SEG_XDATA)=0;
@@ -53,7 +53,7 @@ SI_INTERRUPT(UART0_ISR, UART0_IRQn)
         UART_RX_Buffer_Position++;
 
         // set to beginning of buffer if end is reached
-        if ( UART_RX_Buffer_Position == UART_BUFFER_SIZE )
+        if ( UART_RX_Buffer_Position == UART_RX_BUFFER_SIZE )
 	    	UART_RX_Buffer_Position = 0;
 	}
 
@@ -67,7 +67,7 @@ SI_INTERRUPT(UART0_ISR, UART0_IRQn)
 			UART_Buffer_Write_Len--;
 		}
 
-		if (UART_Buffer_Write_Position == UART_BUFFER_SIZE)
+		if (UART_Buffer_Write_Position == UART_TX_BUFFER_SIZE)
 			UART_Buffer_Write_Position = 0;
 	}
 }
@@ -78,6 +78,11 @@ void uart_buffer_reset(void)
 	UART_Buffer_Read_Position = 0;
 	UART_TX_Buffer_Position = 0;
 	UART_Buffer_Write_Position = 0;
+}
+
+void uart_wait_until_TX_finished(void)
+{
+	while(UART_Buffer_Write_Len > 0);
 }
 
 uint8_t uart_getlen(void)
@@ -103,7 +108,7 @@ unsigned int uart_getc(void)
     rxdata = UART_RX_Buffer[UART_Buffer_Read_Position];
     UART_Buffer_Read_Position++;
 
-    if (UART_Buffer_Read_Position == UART_BUFFER_SIZE)
+    if (UART_Buffer_Read_Position == UART_RX_BUFFER_SIZE)
     	UART_Buffer_Read_Position = 0;
 
     rxdata |= (lastRxError << 8);
@@ -119,7 +124,7 @@ Returns:  none
 **************************************************************************/
 void uart_putc(uint8_t txdata)
 {
-	if (UART_TX_Buffer_Position == UART_BUFFER_SIZE)
+	if (UART_TX_Buffer_Position == UART_TX_BUFFER_SIZE)
 		UART_TX_Buffer_Position = 0;
 
 	UART_TX_Buffer[UART_TX_Buffer_Position] = txdata;
@@ -200,6 +205,57 @@ void uart_put_RF_CODE_Data(uint8_t Command)
 		uart_putc(RF_DATA[i]);
 		i++;
 	}
+	uart_putc(RF_CODE_STOP);
+
+	UART0_initTxPolling();
+}
+
+void uart_put_RF_buckets(uint8_t Command)
+{
+	uint8_t i = 0;
+
+	uart_putc(RF_CODE_START);
+	uart_putc(Command);
+	uart_putc(bucket_count);
+	// start and wait for transmit
+	UART0_initTxPolling();
+	uart_wait_until_TX_finished();
+
+	// send up to 16 buckets
+	while (i < bucket_count)
+	{
+		uart_putc((buckets[i] >> 8) & 0xFF);
+		uart_putc(buckets[i] & 0xFF);
+		i++;
+	}
+
+	// add sync bucket
+	uart_putc((bucket_sync >> 8) & 0xFF);
+	uart_putc(bucket_sync & 0xFF);
+
+	// start and wait for transmit
+	UART0_initTxPolling();
+	uart_wait_until_TX_finished();
+
+	// increment byte position if only high nibble got filled
+	if (actual_bit_of_byte == 0)
+		actual_byte++;
+
+	i = 0;
+	while(i < actual_byte)
+	{
+		uart_putc(RF_DATA[i]);
+		i++;
+
+		// be safe to have no buffer overflow
+		if ((i % UART_TX_BUFFER_SIZE) == 0)
+		{
+			// start and wait for transmit
+			UART0_initTxPolling();
+			uart_wait_until_TX_finished();
+		}
+	}
+
 	uart_putc(RF_CODE_STOP);
 
 	UART0_initTxPolling();

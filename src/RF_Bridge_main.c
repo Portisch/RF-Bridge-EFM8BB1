@@ -510,7 +510,7 @@ int main (void)
 				// check if a RF signal got decoded
 				if ((RF_DATA_STATUS & RF_DATA_RECEIVED_MASK) != 0)
 				{
-					// to do ...
+					uart_put_RF_buckets(RF_CODE_SNIFFING_ON_BUCKET);
 
 					// clear RF status
 					RF_DATA_STATUS = 0;

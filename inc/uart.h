@@ -14,7 +14,8 @@
 #define RF_CODE_START		0xAA
 #define RF_CODE_STOP		0x55
 
-#define UART_BUFFER_SIZE	16 + 4
+#define UART_RX_BUFFER_SIZE	16 + 4
+#define UART_TX_BUFFER_SIZE	32
 
 /*
 ** high byte error return code of uart_getc()
@@ -61,12 +62,13 @@ typedef enum
 //-----------------------------------------------------------------------------
 // Global Variables
 //-----------------------------------------------------------------------------
-extern SI_SEGMENT_VARIABLE(UART_RX_Buffer[UART_BUFFER_SIZE], uint8_t, SI_SEG_XDATA);
-extern SI_SEGMENT_VARIABLE(UART_TX_Buffer[UART_BUFFER_SIZE], uint8_t, SI_SEG_XDATA);
+extern SI_SEGMENT_VARIABLE(UART_RX_Buffer[UART_RX_BUFFER_SIZE], uint8_t, SI_SEG_XDATA);
+extern SI_SEGMENT_VARIABLE(UART_TX_Buffer[UART_TX_BUFFER_SIZE], uint8_t, SI_SEG_DATA);
 extern SI_SEGMENT_VARIABLE(uart_state, uart_state_t, SI_SEG_XDATA);
 extern SI_SEGMENT_VARIABLE(uart_command, uart_command_t, SI_SEG_XDATA);
 
 extern void uart_buffer_reset(void);
+extern void uart_wait_until_TX_finished(void);
 extern uint8_t uart_getlen(void);
 extern bool uart_transfer_finished(void);
 extern unsigned int uart_getc(void);
@@ -75,6 +77,7 @@ extern void uart_put_command(uint8_t command);
 extern void uart_put_uint16_t(uint8_t command, uint16_t value);
 extern void uart_put_RF_Data(uint8_t Command, uint8_t used_protocol);
 extern void uart_put_RF_CODE_Data(uint8_t Command);
+extern void uart_put_RF_buckets(uint8_t Command);
 
 
 #endif /* INC_UART_H_ */

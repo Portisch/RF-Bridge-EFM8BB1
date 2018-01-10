@@ -36,6 +36,11 @@ SI_SEGMENT_VARIABLE(actual_bit, uint8_t, SI_SEG_XDATA) = 0;
 SI_SEGMENT_VARIABLE(actual_sync_bit, uint8_t, SI_SEG_XDATA) = 0;
 SI_SEGMENT_VARIABLE(actual_byte, uint8_t, SI_SEG_XDATA) = 0;
 
+// up to 8 timing buckets for MODE_BUCKET
+SI_SEGMENT_VARIABLE(bucket_sync, uint16_t, SI_SEG_XDATA);
+SI_SEGMENT_VARIABLE(buckets[15], uint16_t, SI_SEG_XDATA);	// -1 because of the bucket_sync
+SI_SEGMENT_VARIABLE(bucket_count, uint8_t, SI_SEG_XDATA) = 0;
+
 //-----------------------------------------------------------------------------
 // Callbacks
 //-----------------------------------------------------------------------------
@@ -191,7 +196,7 @@ void PCA0_channel1EventCb()
 
 				// do sniffing by bucket mode
 				case MODE_BUCKET:
-					// to do ...
+					Bucket_Received(capture_period_neg);
 					break;
 		}
 	}
@@ -209,7 +214,7 @@ void PCA0_channel1EventCb()
 		{
 			// do sniffing by bucket mode
 			case MODE_BUCKET:
-				// to do ...
+				Bucket_Received(capture_period_pos);
 				break;
 		}
 	}
@@ -561,4 +566,150 @@ void SendRFBuckets(const uint16_t buckets[], const uint8_t rfdata[], uint8_t n, 
 	// disable P0.0 for I/O control, enter PCA mode
 	XBR1 |= XBR1_PCA0ME__CEX0_CEX1;
 	LED = LED_OFF;
+}
+
+
+bool probablyFooter(uint16_t duration)
+{
+	return duration >= MIN_FOOTER_LENGTH;
+}
+
+bool matchesFooter(uint16_t duration)
+{
+  uint16_t footer_delta = bucket_sync / 4;
+  return (((bucket_sync - footer_delta) < duration) && (duration < (bucket_sync + footer_delta)));
+}
+
+bool findBucket(uint16_t duration, uint8_t *index)
+{
+	bool ret = false;
+	uint8_t i;
+	for (i = 0; i < bucket_count; i++)
+	{
+		uint16_t delta = duration / 4 + duration / 8;
+		if (((buckets[i] - delta) < duration) && (duration < (buckets[i] + delta)))
+		{
+			if (index != NULL)
+				*index = i;
+
+			ret = true;
+			break;
+		}
+	}
+
+	return ret;
+}
+
+void Bucket_Received(uint16_t duration)
+{
+	uint8_t bucket_index;
+
+	switch (rf_state)
+	{
+		// check if we receive a sync
+		case RF_IDLE:
+			LED = LED_OFF;
+			// check first if last decoded RF signal was cleared
+			if (RF_DATA_STATUS != 0)
+				break;
+
+			if (probablyFooter(duration))
+			{
+				bucket_count = 0;
+				bucket_sync = duration;
+				rf_state = RF_IN_SYNC;
+				LED = LED_ON;
+			}
+			break;
+		// one matching sync got received
+		case RF_IN_SYNC:
+			// check if duration is longer than sync bucket +25% and restart
+			if (duration > (bucket_sync + bucket_sync / 4))
+			{
+				// this bucket looks like the sync bucket
+				bucket_sync = duration;
+				bucket_count = 0;
+			}
+			// check if this bucket is a sync bucket, receive is complete
+			else if (matchesFooter(duration) && (bucket_count > 0))
+			{
+				// all buckets got received, start decoding on the next repeat
+				actual_byte = 0;
+				actual_bit_of_byte = 4;
+				rf_state = RF_DECODE_BUCKET;
+			}
+			// check if useful bucket got received
+			else if (duration >= MIN_PULSE_LENGTH)
+			{
+				// check if bucket was already received
+				if (findBucket(duration, &bucket_index))
+				{
+					// make new average of this bucket
+					buckets[bucket_index] = (buckets[bucket_index] + duration) / 2;
+				}
+				else
+				{
+					// new bucket received, add to array
+					buckets[bucket_count] = duration;
+					bucket_count++;
+
+					// check if maximum of array got reached
+					if (bucket_count > sizeof(buckets))
+					{
+						bucket_count = 0;
+						// restart sync
+						rf_state = RF_IDLE;
+					}
+				}
+			}
+			else
+			{
+				// restart sync
+				rf_state = RF_IDLE;
+			}
+			break;
+
+		// do decoding of the received buckets
+		case RF_DECODE_BUCKET:
+			// toggle led
+			LED = !LED;
+			// check if sync bucket got received
+			if (matchesFooter(duration))
+			{
+				RF_DATA_STATUS |= RF_DATA_RECEIVED_MASK;
+				LED = LED_OFF;
+				rf_state = RF_IDLE;
+			}
+			// check if bucket can be decoded
+			else if (findBucket(duration, &bucket_index))
+			{
+				if (actual_bit_of_byte == 4)
+				{
+					RF_DATA[actual_byte] = bucket_index << 4;
+					actual_bit_of_byte = 0;
+				}
+				else
+				{
+					RF_DATA[actual_byte] |= (bucket_index & 0x0F);
+					actual_byte++;
+					actual_bit_of_byte = 4;
+
+					// check if maximum of array got reached
+					if (actual_byte > sizeof(RF_DATA))
+					{
+						bucket_count = 0;
+						// restart sync
+						rf_state = RF_IDLE;
+					}
+				}
+			}
+			else
+			{
+				// bucket not found in list, restart
+				bucket_count = 0;
+				// restart sync
+				rf_state = RF_IDLE;
+			}
+			break;
+	}
 }
