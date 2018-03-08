@@ -82,7 +82,7 @@ SI_INTERRUPT (TIMER3_ISR, TIMER3_IRQn)
 	}
 
 	if (Timer_3_Timeout < Timer_3_Interval)
-		Timer_3_Interval = 0;
+		Timer_3_Timeout = 0;
 	else
 		Timer_3_Timeout -= Timer_3_Interval;
 }
