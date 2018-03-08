@@ -157,12 +157,22 @@ void PCA0_channel1EventCb()
 						// calculate current duty cycle
 						current_duty_cycle = (100 * (uint32_t)capture_period_pos) / ((uint32_t)capture_period_pos + (uint32_t)capture_period_neg);
 
-						if (((current_duty_cycle > (PROTOCOL_DATA[used_protocol].BIT_HIGH_DUTY - DUTY_CYCLE_TOLERANCE)) &&
-							(current_duty_cycle < (PROTOCOL_DATA[used_protocol].BIT_HIGH_DUTY + DUTY_CYCLE_TOLERANCE)) &&
-							(actual_bit < PROTOCOL_DATA[used_protocol].BIT_COUNT)) ||
-							// the duty cycle can not be used for the last bit because of the missing rising edge on the end
-							((capture_period_pos > low_pulse_time) && (actual_bit == PROTOCOL_DATA[used_protocol].BIT_COUNT))
-							)
+						// check if high or low duty cylce fits
+						// ignor last bit because of wrong duty cycle
+						if (!CheckDutyCycle(current_duty_cycle, PROTOCOL_DATA[used_protocol].BIT_HIGH_DUTY) &&
+								!CheckDutyCycle(current_duty_cycle, PROTOCOL_DATA[used_protocol].BIT_LOW_DUTY) &&
+								actual_bit != PROTOCOL_DATA[used_protocol].BIT_COUNT)
+						{
+							RF_DATA_STATUS = 0;
+							LED = LED_OFF;
+							rf_state = RF_IDLE;
+							break;
+						}
+
+						if ((CheckDutyCycle(current_duty_cycle, PROTOCOL_DATA[used_protocol].BIT_HIGH_DUTY) &&
+								(actual_bit < PROTOCOL_DATA[used_protocol].BIT_COUNT)) ||
+								// the duty cycle can not be used for the last bit because of the missing rising edge on the end
+								((capture_period_pos > low_pulse_time) && (actual_bit == PROTOCOL_DATA[used_protocol].BIT_COUNT)))
 						{
 							// backup last bit high time
 							BIT_HIGH = capture_period_pos;
@@ -291,6 +301,15 @@ uint8_t RFInSync(uint8_t identifier, uint16_t period_pos, uint16_t period_neg)
 	}
 
 	return ret;
+}
+
+//-----------------------------------------------------------------------------
+// check given duty cycle by tolerance
+//-----------------------------------------------------------------------------
+uint8_t CheckDutyCycle(uint8_t current_duty_cycle, uint8_t desired_duty_cycle)
+{
+	return ((current_duty_cycle > (desired_duty_cycle - DUTY_CYCLE_TOLERANCE)) &&
+			(current_duty_cycle < (desired_duty_cycle + DUTY_CYCLE_TOLERANCE))) ? 1 : 0;
 }
 
 //-----------------------------------------------------------------------------
