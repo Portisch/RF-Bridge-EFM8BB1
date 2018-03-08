@@ -221,7 +221,8 @@ void uart_put_RF_buckets(uint8_t Command)
 
 	uart_putc(RF_CODE_START);
 	uart_putc(Command);
-	uart_putc(bucket_count);
+	// put bucket count + sync bucket
+	uart_putc(bucket_count + 1);
 	// start and wait for transmit
 	UART0_initTxPolling();
 	uart_wait_until_TX_finished();
