@@ -24,6 +24,7 @@ SI_SEGMENT_VARIABLE(UART_Buffer_Read_Position, static volatile uint8_t,  SI_SEG_
 SI_SEGMENT_VARIABLE(UART_Buffer_Write_Position, static volatile uint8_t,  SI_SEG_XDATA)=0;
 SI_SEGMENT_VARIABLE(UART_Buffer_Write_Len, static volatile uint8_t,  SI_SEG_XDATA)=0;
 SI_SEGMENT_VARIABLE(lastRxError, static volatile uint8_t,  SI_SEG_XDATA)=0;
+SI_SEGMENT_VARIABLE(TX_Finished, bool,  SI_SEG_XDATA)=false;
 
 //-----------------------------------------------------------------------------
 // UART ISR Callbacks
@@ -66,6 +67,8 @@ SI_INTERRUPT(UART0_ISR, UART0_IRQn)
 			UART_Buffer_Write_Position++;
 			UART_Buffer_Write_Len--;
 		}
+		else
+			TX_Finished = true;
 
 		if (UART_Buffer_Write_Position == UART_TX_BUFFER_SIZE)
 			UART_Buffer_Write_Position = 0;
@@ -82,7 +85,7 @@ void uart_buffer_reset(void)
 
 void uart_wait_until_TX_finished(void)
 {
-	while(UART_Buffer_Write_Len > 0);
+	while(!TX_Finished);
 }
 
 uint8_t uart_getlen(void)
@@ -124,6 +127,8 @@ Returns:  none
 **************************************************************************/
 void uart_putc(uint8_t txdata)
 {
+	TX_Finished = false;
+
 	if (UART_TX_Buffer_Position == UART_TX_BUFFER_SIZE)
 		UART_TX_Buffer_Position = 0;
 
