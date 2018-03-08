@@ -75,11 +75,14 @@ SI_INTERRUPT (TIMER3_ISR, TIMER3_IRQn)
 	TMR3CN0 &= ~TMR3CN0_TF3H__SET;
 
 	// check if pulse time is over
-	if(Timer_3_Timeout <= 0)
+	if(Timer_3_Timeout == 0)
 	{
 		// stop timer
 		TMR3CN0 &= ~TMR3CN0_TR3__RUN;
 	}
 
-	Timer_3_Timeout -= Timer_3_Interval;
+	if (Timer_3_Timeout < Timer_3_Interval)
+		Timer_3_Interval = 0;
+	else
+		Timer_3_Timeout -= Timer_3_Interval;
 }
