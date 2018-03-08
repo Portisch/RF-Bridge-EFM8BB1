@@ -157,8 +157,8 @@ void PCA0_channel1EventCb()
 						// calculate current duty cycle
 						current_duty_cycle = (100 * (uint32_t)capture_period_pos) / ((uint32_t)capture_period_pos + (uint32_t)capture_period_neg);
 
-						// check if high or low duty cylce fits
-						// ignor last bit because of wrong duty cycle
+						// check if high or low duty cycle fits
+						// ignore last bit because of wrong duty cycle
 						if (!CheckDutyCycle(current_duty_cycle, PROTOCOL_DATA[used_protocol].BIT_HIGH_DUTY) &&
 								!CheckDutyCycle(current_duty_cycle, PROTOCOL_DATA[used_protocol].BIT_LOW_DUTY) &&
 								actual_bit != PROTOCOL_DATA[used_protocol].BIT_COUNT)
@@ -306,10 +306,10 @@ uint8_t RFInSync(uint8_t identifier, uint16_t period_pos, uint16_t period_neg)
 //-----------------------------------------------------------------------------
 // check given duty cycle by tolerance
 //-----------------------------------------------------------------------------
-uint8_t CheckDutyCycle(uint8_t current_duty_cycle, uint8_t desired_duty_cycle)
+bool CheckDutyCycle(uint8_t current_duty_cycle, uint8_t desired_duty_cycle)
 {
 	return ((current_duty_cycle > (desired_duty_cycle - DUTY_CYCLE_TOLERANCE)) &&
-			(current_duty_cycle < (desired_duty_cycle + DUTY_CYCLE_TOLERANCE))) ? 1 : 0;
+			(current_duty_cycle < (desired_duty_cycle + DUTY_CYCLE_TOLERANCE)));
 }
 
 //-----------------------------------------------------------------------------

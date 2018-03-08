@@ -9,7 +9,7 @@
 #define INC_RF_HANDLING_H_
 
 extern uint8_t RFInSync(uint8_t identifier, uint16_t period_pos, uint16_t period_neg);
-extern uint8_t CheckDutyCycle(uint8_t current_duty_cycle, uint8_t desired_duty_cycle);
+extern bool CheckDutyCycle(uint8_t current_duty_cycle, uint8_t desired_duty_cycle);
 extern uint8_t PCA0_GetProtocolIndex(uint8_t identifier);
 extern void PCA0_InitTransmit(uint16_t sync_high, uint16_t sync_low, uint16_t BIT_HIGH_TIME, uint8_t BIT_HIGH_DUTY,
 		uint16_t BIT_LOW_TIME, uint8_t BIT_LOW_DUTY, uint8_t bitcount);
