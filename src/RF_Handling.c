@@ -278,30 +278,13 @@ uint8_t RFInSync(uint8_t identifier, uint16_t period_pos, uint16_t period_neg)
 			if (used_protocol == 0xFF)
 				break;
 
-			// check if SYNC high and SYNC low should be compared
-			if (PROTOCOL_DATA[used_protocol].SYNC_HIGH > 0)
+			if ((period_neg > PT226x_SYNC_MIN) && (period_neg < PT226x_SYNC_MAX))
 			{
-				if (
-					(period_pos > (PROTOCOL_DATA[used_protocol].SYNC_HIGH - SYNC_TOLERANCE_0xA1)) &&
-					(period_pos < (PROTOCOL_DATA[used_protocol].SYNC_HIGH + SYNC_TOLERANCE_0xA1)) &&
-					(period_neg > (PROTOCOL_DATA[used_protocol].SYNC_LOW - SYNC_TOLERANCE_0xA1)) &&
-					(period_neg < (PROTOCOL_DATA[used_protocol].SYNC_LOW + SYNC_TOLERANCE_0xA1))
-				)
+				uint16_t period_pos_snyc = period_neg / 31;
+				if ((period_pos > (period_pos_snyc - (period_pos_snyc / 10))) &&
+						(period_pos < (period_pos_snyc + (period_pos_snyc / 10))))
 				{
 					ret = used_protocol;
-					break;
-				}
-			}
-			// only SYNC low should be checked
-			else
-			{
-				if (
-					(period_neg > (PROTOCOL_DATA[used_protocol].SYNC_LOW - SYNC_TOLERANCE_0xA1)) &&
-					(period_neg < (PROTOCOL_DATA[used_protocol].SYNC_LOW + SYNC_TOLERANCE_0xA1))
-				)
-				{
-					ret = used_protocol;
-					break;
 				}
 			}
 			break;

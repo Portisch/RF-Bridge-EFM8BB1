@@ -63,7 +63,9 @@ typedef struct
  * Setting the range from 10000, 9000 - 11000
  */
 #define PT2260_IDENTIFIER				0x01
-#define PT2260				{PT2260_IDENTIFIER, 0, 10000, 0, 1080, 360, 75, 25, 24}
+#define PT226x_SYNC_MIN					6000
+#define PT226x_SYNC_MAX					18000
+#define PT2260				{PT2260_IDENTIFIER, 0, 0, 0, 0, 0, 75, 25, 24}
 
 /*
  * Rohrmotor24
