@@ -326,7 +326,7 @@ int main (void)
 						PCA0_InitTransmit((uint16_t)((((uint32_t)(*(uint16_t *)&RF_DATA[0])) * 128) / 3968),
 								*(uint16_t *)&RF_DATA[0], *(uint16_t *)&RF_DATA[4], 75, *(uint16_t *)&RF_DATA[2], 25, 24);
 
-						actual_byte = 7;
+						actual_byte = 6;
 
 						// start RF transmit
 						PCA0_StartTransmit();
