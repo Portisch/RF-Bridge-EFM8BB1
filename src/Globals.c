@@ -29,7 +29,8 @@ void InitTimer_us(uint16_t interval, uint16_t timeout)
 {
 	SetTimerReload((uint16_t)(0x10000 - ((uint32_t)SYSCLK / (1000000 / (uint32_t)interval))));
 
-	Timer_3_Timeout = timeout;
+	// remove 150µs because of startup delay
+	Timer_3_Timeout = timeout - 150;
 	Timer_3_Interval = interval;
 
 	// start timer
