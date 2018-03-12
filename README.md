@@ -25,16 +25,16 @@ Receiving AKN: 0xAA 0xA0 0x55<br/>
 0xAA: uart sync init<br/>
 0xA6: sniffing active<br/>
 0x06: data len<br/>
-0x01: protocol identifier<br/>
+0x02: protocol identifier<br/>
 0xD0-0x55: data<br/>
 0x55: uart sync end
 
 STOP:<br/>
 Binary: 10101010 10100110 00000110 00000001 11010000 11111001 00110010 00010001 01010101 01010101<br/>
-Hex: AA A6 06 01 D0 F9 32 11 55 55<br/>
+Hex: AA A6 06 02 D0 F9 32 11 55 55<br/>
 DOWN:<br/>
 Binary: 10101010 10100110 00000110 00000001 11010000 11111001 00110010 00010001 00110011 01010101<br/>
-Hex: AA A6 06 01 D0 F9 32 11 33 55<br/>
+Hex: AA A6 06 02 D0 F9 32 11 33 55<br/>
 
 ## RF decode from Seamaid_PAR_56_RGB remote (24 bit of data):
 Light ON:<br/>
