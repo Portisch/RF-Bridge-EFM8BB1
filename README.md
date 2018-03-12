@@ -57,12 +57,12 @@ duty cycle of the high bit is 75% and 25% of the low bit.<br/>
 ## Transmiting by command 0xA8
 There is a new command in the firmware to be able to send RF data.<br/>
 
-Hex: AA A8 06 01 D0 F9 32 11 33 55<br/>
+Hex: AA A8 06 02 D0 F9 32 11 33 55<br/>
 
 0xAA: uart sync init<br/>
 0xA8: transmit RF data<br/>
 0x06: data len<br/>
-0x01: protocol identifier (ROHRMOTOR24)<br/>
+0x02: protocol identifier (ROHRMOTOR24)<br/>
 0xD0-0x55: data<br/>
 0x55: uart sync end
 
