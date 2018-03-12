@@ -397,7 +397,8 @@ void PCA0_InitTransmit(uint16_t sync_high, uint16_t sync_low, uint16_t BIT_HIGH_
 
 	// enable interrupt for RF transmitting
 	PCA0CPM0 |= PCA0CPM0_ECCF__ENABLED;
-
+	// clear Cycle Overflow Flag
+	PCA0PWM &= ~PCA0PWM_COVF__OVERFLOW;
 	PCA0PWM |= PCA0PWM_ECOV__COVF_MASK_ENABLED;
 
 	// disable interrupt for RF receiving
@@ -454,6 +455,8 @@ void PCA0_StopTransmit(void)
 	PCA0_writeChannel(PCA0_CHAN0, 0x0000);
 	// disable interrupt for RF transmitting
 	PCA0CPM0 &= ~PCA0CPM0_ECCF__ENABLED;
+	// clear Cycle Overflow Flag
+	PCA0PWM &= ~PCA0PWM_COVF__OVERFLOW;
 	PCA0PWM &= ~PCA0PWM_ECOV__COVF_MASK_ENABLED;
 	// stop PCA
 	PCA0_halt();
@@ -484,6 +487,8 @@ uint8_t PCA0_DoSniffing(uint8_t active_command)
 	PCA0CPM1 |= PCA0CPM1_ECCF__ENABLED;
 	// disable interrupt for RF transmitting
 	PCA0CPM0 &= ~PCA0CPM0_ECCF__ENABLED;
+	// clear Cycle Overflow Flag
+	PCA0PWM &= ~PCA0PWM_COVF__OVERFLOW;
 	PCA0PWM &= ~PCA0PWM_ECOV__COVF_MASK_ENABLED;
 
 	// start PCA
@@ -535,6 +540,8 @@ void SendRFBuckets(const uint16_t buckets[], const uint8_t rfdata[], uint8_t n, 
 	// disable interrupts for RF receiving and transmitting
 	PCA0CPM1 &= ~PCA0CPM1_ECCF__ENABLED;
 	PCA0CPM0 &= ~PCA0CPM0_ECCF__ENABLED;
+	// clear Cycle Overflow Flag
+	PCA0PWM &= ~PCA0PWM_COVF__OVERFLOW;
 	PCA0PWM &= ~PCA0PWM_ECOV__COVF_MASK_ENABLED;
 
 	XBR1 &= ~XBR1_PCA0ME__CEX0_CEX1;	// enable P0.0 for I/O control
