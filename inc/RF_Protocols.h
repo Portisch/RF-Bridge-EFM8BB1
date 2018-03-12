@@ -43,6 +43,8 @@ typedef struct
 #define SYNC_TOLERANCE_0xA1		1000
 #define DUTY_CYCLE_TOLERANCE 	8
 
+#define RF_TRANSMIT_REPEATS		4
+
 #define UNKNOWN_IDENTIFIER				0x00
 
 /*

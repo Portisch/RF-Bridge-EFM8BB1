@@ -44,6 +44,7 @@ int main (void)
 	bool ReadUARTData = true;
 	uint8_t last_desired_rf_protocol;
 	uint16_t l;
+	uint8_t tr_repeats;
 
 	// Call hardware initialization routine
 	enter_DefaultMode_from_RESET();
@@ -150,6 +151,7 @@ int main (void)
 						case RF_CODE_RFOUT:
 							PCA0_StopSniffing();
 							uart_state = RECEIVING;
+							tr_repeats = RF_TRANSMIT_REPEATS;
 							position = 0;
 							len = 9;
 							break;
@@ -173,6 +175,7 @@ int main (void)
 							last_sniffing_command = RF_CODE_RFIN;
 							break;
 						case RF_CODE_RFOUT_NEW:
+							tr_repeats = RF_TRANSMIT_REPEATS;
 						case RF_CODE_RFOUT_BUCKET:
 							uart_state = RECEIVE_LEN;
 							break;
@@ -322,6 +325,7 @@ int main (void)
 				{
 					// init and start RF transmit
 					case RF_IDLE:
+						tr_repeats--;
 						// byte 0..1:	Tsyn
 						// byte 2..3:	Tlow
 						// byte 4..5:	Thigh
@@ -339,14 +343,21 @@ int main (void)
 
 					// wait until data got transfered
 					case RF_FINISHED:
-						// restart sniffing if it was active
-						PCA0_DoSniffing(last_sniffing_command);
+						if (tr_repeats != 0)
+						{
+							rf_state = RF_IDLE;
+						}
+						else
+						{
+							// restart sniffing if it was active
+							PCA0_DoSniffing(last_sniffing_command);
 
-						// send acknowledge
-						uart_put_command(RF_CODE_ACK);
+							// send acknowledge
+							uart_put_command(RF_CODE_ACK);
 
-						// enable UART again
-						ReadUARTData = true;
+							// enable UART again
+							ReadUARTData = true;
+						}
 						break;
 				}
 				break;
@@ -395,8 +406,8 @@ int main (void)
 				{
 					// init and start RF transmit
 					case RF_IDLE:
+						tr_repeats--;
 						PCA0_StopSniffing();
-
 						// check if unknown protocol should be used
 						// byte 0:		0x7F Protocol identifier
 						// byte 1..2:	SYNC_HIGH
@@ -443,14 +454,21 @@ int main (void)
 
 					// wait until data got transfered
 					case RF_FINISHED:
-						// restart sniffing if it was active
-						PCA0_DoSniffing(last_sniffing_command);
+						if (tr_repeats != 0)
+						{
+							rf_state = RF_IDLE;
+						}
+						else
+						{
+							// restart sniffing if it was active
+							PCA0_DoSniffing(last_sniffing_command);
 
-						// send acknowledge
-						uart_put_command(RF_CODE_ACK);
+							// send acknowledge
+							uart_put_command(RF_CODE_ACK);
 
-						// enable UART again
-						ReadUARTData = true;
+							// enable UART again
+							ReadUARTData = true;
+						}
 						break;
 				}
 				break;

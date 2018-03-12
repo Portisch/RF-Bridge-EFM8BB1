@@ -50,15 +50,22 @@ void PCA0_overflowCb()
 
 void PCA0_intermediateOverflowCb()
 {
-	if(((RF_DATA[actual_byte] >> actual_bit_of_byte) & 0x01) == 0x01)
+	if (actual_bit > BIT_COUNT)
 	{
-		// bit 1
-		SetTimer0Overflow(T0_HIGH);
+		PCA0_StopTransmit();
 	}
 	else
 	{
-		// bit 0
-		SetTimer0Overflow(T0_LOW);
+		if(((RF_DATA[actual_byte] >> actual_bit_of_byte) & 0x01) == 0x01)
+		{
+			// bit 1
+			SetTimer0Overflow(T0_HIGH);
+		}
+		else
+		{
+			// bit 0
+			SetTimer0Overflow(T0_LOW);
+		}
 	}
 }
 
@@ -71,17 +78,21 @@ void PCA0_channel0EventCb()
 		actual_bit_of_byte = 8;
 	}
 
-	if (actual_bit == BIT_COUNT)
+	actual_bit++;
+	actual_bit_of_byte--;
+
+	// set duty cycle for the next bit...
+	if (actual_bit <= BIT_COUNT)
 	{
-		PCA0_StopTransmit();
+		SetPCA0DutyCylce();
 	}
 	else
 	{
-		actual_bit++;
-		actual_bit_of_byte--;
-
-		// set duty cycle for the next bit...
-		SetPCA0DutyCylce();
+		// remove spike on end of transmission
+		// enable P0.0 for I/O control
+		XBR1 &= ~XBR1_PCA0ME__CEX0_CEX1;
+		// switch to low
+		T_DATA = 0;
 	}
 }
 
@@ -319,19 +330,6 @@ void SendRF_SYNC(void)
 {
 	// enable P0.0 for I/O control
 	XBR1 &= ~XBR1_PCA0ME__CEX0_CEX1;
-	// do activate the SYN115 chip
-	// switch to high
-	T_DATA = 1;
-	// start timer
-	InitTimer_ms(1, 7);
-	// wait until timer has finished
-	WaitTimerFinished();
-	// switch to low
-	T_DATA = 0;
-	// start timer
-	InitTimer_us(10, 100);
-	// wait until timer has finished
-	WaitTimerFinished();
 	// switch to high
 	T_DATA = 1;
 	// do high time
