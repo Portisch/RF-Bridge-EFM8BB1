@@ -38,8 +38,8 @@ Hex: AA A6 06 02 D0 F9 32 11 33 55<br/>
 
 ## RF decode from Seamaid_PAR_56_RGB remote (24 bit of data):
 Light ON:<br/>
-Binary: 10101010 10100110 00000100 00000010 00110010 11111010 10001111 01010101<br/>
-Hex: AA A6 04 02 32 FA 8F 55<br/>
+Binary: 10101010 10100110 00000100 00000011 00110010 11111010 10001111 01010101<br/>
+Hex: AA A6 04 03 32 FA 8F 55<br/>
 
 ## Transmiting by command 0xA5
 This is the original implemented RF transmit command<br/>
@@ -54,6 +54,24 @@ Hex: AA A5 24 E0 01 40 03 84 D0 03 58 55<br/>
 The high time of the SYNC get calculated by the Tsyn (SYNC low time),<br/>
 duty cycle of the high bit is 75% and 25% of the low bit.<br/>
 
+## Sniffing by command 0xA6
+With the command the standard PT226x sniffing gets disabled and the sniffing of the defined protocols in RF_Protocols.h is starting.<br/>
+<br/>
+Hex: AA A6 55
+
+Example of a received decoded protocol:<br/>
+Hex: AA A6 04 03 32 FA 80 55<br/>
+
+0xAA: uart sync init<br/>
+0xA6: sniffed RF data<br/>
+0x04: data len<br/>
+0x03: protocol identifier (Seamaid_PAR_56_RGB)<br/>
+0x32-0x80: data<br/>
+0x55: uart sync end
+
+## Stop sniffing by command 0xA7
+Stop the 0xA6 sniffing and restart the PT226x sniffing.
+
 ## Transmiting by command 0xA8
 There is a new command in the firmware to be able to send RF data.<br/>
 
@@ -63,11 +81,11 @@ Hex: AA A8 06 02 D0 F9 32 11 33 55<br/>
 0xA8: transmit RF data<br/>
 0x06: data len<br/>
 0x02: protocol identifier (ROHRMOTOR24)<br/>
-0xD0-0x55: data<br/>
+0xD0-0x33: data<br/>
 0x55: uart sync end
 
 Universal transmit by command 0xA8<br/>
-Hex: AA A8 0D 7F 12 C0 05 DC 02 BC 46 01 2C 1E 08 AA 55<br/>
+Hex: AA A8 0D 7F 12 C0 05 DC 02 BC 46 01 2C 1E 08 1E 55<br/>
 
 0xAA: uart sync init<br/>
 0xA8: transmit RF data<br/>
