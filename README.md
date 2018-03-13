@@ -116,6 +116,11 @@ library to learn the bucket times and sequences (the
 [compressed](https://github.com/pimatic/RFControl/tree/master/examples/compressed) example
 gives you everything you need if you convert the decimal numbers to hex).
 
+## Beep by command 0xC0
+Hex: AA C0 xx xx 55<br/>
+
+Do beep xxxx miliseconds (uint16_t). Like AA C0 03 E8 55 will beep for ~1000ms.
+
 # Next Steps
 Add ESPurna support:<br/>
 A new protocol have to be implemented to support more RF signals -> have to be defined!

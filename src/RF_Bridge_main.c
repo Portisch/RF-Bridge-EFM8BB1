@@ -153,6 +153,11 @@ int main (void)
 							position = 0;
 							len = 9;
 							break;
+						case RF_DO_BEEP:
+							uart_state = RECEIVING;
+							position = 0;
+							len = 2;
+							break;
 						case RF_CODE_SNIFFING_ON:
 							desired_rf_protocol = UNKNOWN_IDENTIFIER;
 							rf_sniffing_mode = MODE_DUTY_CYCLE;
@@ -344,6 +349,26 @@ int main (void)
 						ReadUARTData = true;
 						break;
 				}
+				break;
+
+			// do a beep
+			case RF_DO_BEEP:
+				// only do the job if all data got received by UART
+				if (uart_state != IDLE)
+					break;
+
+				InitTimer_ms(1, *(uint16_t *)&RF_DATA[0]);
+				BUZZER = BUZZER_ON;
+				// wait until timer has finished
+				WaitTimerFinished();
+				BUZZER = BUZZER_OFF;
+
+				// send acknowledge
+				uart_put_command(RF_CODE_ACK);
+
+				// enable UART again
+				ReadUARTData = true;
+				uart_command = NONE;
 				break;
 
 			// do new sniffing
