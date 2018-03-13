@@ -334,7 +334,7 @@ void SendRF_SYNC(void)
 	T_DATA = 1;
 	// do high time
 	// start timer
-	InitTimer_us(5, SYNC_HIGH);
+	InitTimer_us(10, SYNC_HIGH);
 	// wait until timer has finished
 	WaitTimerFinished();
 	// switch to low
@@ -342,7 +342,7 @@ void SendRF_SYNC(void)
 
 	// do low time
 	// start timer
-	InitTimer_us(5, SYNC_LOW);
+	InitTimer_us(10, SYNC_LOW);
 	// wait until timer has finished
 	WaitTimerFinished();
 	// disable P0.0 for I/O control, enter PCA mode
