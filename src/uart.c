@@ -24,7 +24,7 @@ SI_SEGMENT_VARIABLE(UART_Buffer_Read_Position, static volatile uint8_t,  SI_SEG_
 SI_SEGMENT_VARIABLE(UART_Buffer_Write_Position, static volatile uint8_t,  SI_SEG_XDATA)=0;
 SI_SEGMENT_VARIABLE(UART_Buffer_Write_Len, static volatile uint8_t,  SI_SEG_XDATA)=0;
 SI_SEGMENT_VARIABLE(lastRxError, static volatile uint8_t,  SI_SEG_XDATA)=0;
-SI_SEGMENT_VARIABLE(TX_Finished, bool,  SI_SEG_XDATA)=false;
+SI_SEGMENT_VARIABLE(TX_Finished, bool,  SI_SEG_DATA)=false;
 
 //-----------------------------------------------------------------------------
 // UART ISR Callbacks
