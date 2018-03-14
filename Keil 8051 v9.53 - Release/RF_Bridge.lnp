@@ -1,9 +1,0 @@
-"./lib/efm8bb1/peripheralDrivers/src/pca_0.OBJ",
-"./lib/efm8bb1/peripheralDrivers/src/uart_0.OBJ",
-"./src/Globals.OBJ",
-"./src/InitDevice.OBJ",
-"./src/RF_Bridge_main.OBJ",
-"./src/RF_Handling.OBJ",
-"./src/SILABS_STARTUP.OBJ",
-"./src/uart.OBJ"
-TO "RF_BRIDGE.OMF.CRBUILD" REMOVEUNUSED PRINT(.\RF_Bridge.m51) PAGEWIDTH (120) PAGELENGTH (65) CLASSES( CODE(C:0x0 - C:0x1ffe), CONST(C:0x0 - C:0x1ffe), ECODE(C:0x0 - C:0x1ffe), HCONST(C:0x0 - C:0x1ffe), XDATA(X:0x0 - X:0xff), HDATA(X:0x0 - X:0xff))
