@@ -475,7 +475,8 @@ void PCA0_StopTransmit(void)
 	T_DATA = 0;
 	LED = LED_OFF;
 	// disable P0.0 for I/O control, enter PCA mode
-	XBR1 |= XBR1_PCA0ME__CEX0_CEX1;
+	//XBR1 |= XBR1_PCA0ME__CEX0_CEX1;
+	// let it disabled to avoid a spike on the end
 
 	rf_state = RF_FINISHED;
 }
@@ -483,6 +484,10 @@ void PCA0_StopTransmit(void)
 uint8_t PCA0_DoSniffing(uint8_t active_command)
 {
 	uint8_t ret = last_sniffing_command;
+
+	// disable P0.0 for I/O control, enter PCA mode
+	XBR1 |= XBR1_PCA0ME__CEX0_CEX1;
+
 	// restore timer to 100000Hz, 10µs interval
 	SetTimer0Overflow(0x0B);
 

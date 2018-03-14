@@ -345,6 +345,13 @@ int main (void)
 					case RF_FINISHED:
 						if (tr_repeats != 0)
 						{
+							if (PROTOCOL_DATA[PT2260_IDENTIFIER].REPEAT_DELAY > 0)
+							{
+								InitTimer_ms(1, PROTOCOL_DATA[PT2260_IDENTIFIER].REPEAT_DELAY);
+								// wait until timer has finished
+								WaitTimerFinished();
+							}
+
 							rf_state = RF_IDLE;
 						}
 						else
@@ -456,6 +463,13 @@ int main (void)
 					case RF_FINISHED:
 						if (tr_repeats != 0)
 						{
+							if (PROTOCOL_DATA[protocol_index].REPEAT_DELAY > 0)
+							{
+								InitTimer_ms(1, PROTOCOL_DATA[protocol_index].REPEAT_DELAY);
+								// wait until timer has finished
+								WaitTimerFinished();
+							}
+
 							rf_state = RF_IDLE;
 						}
 						else

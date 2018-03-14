@@ -37,6 +37,8 @@ typedef struct
 	uint8_t BIT_LOW_DUTY;
 	// bit count for this protocol
 	uint8_t BIT_COUNT;
+	// delay in microseconds between the repeats
+	uint8_t REPEAT_DELAY;
 } PROTOCOL_DATA_t;
 
 #define SYNC_TOLERANCE 			200
@@ -67,33 +69,33 @@ typedef struct
 #define PT2260_IDENTIFIER				0x01
 #define PT226x_SYNC_MIN					6000
 #define PT226x_SYNC_MAX					18000
-#define PT2260				{PT2260_IDENTIFIER, 0, 0, 0, 0, 0, 75, 25, 24}
+#define PT2260				{PT2260_IDENTIFIER, 0, 0, 0, 0, 0, 75, 25, 24, 0}
 
 /*
  * Rohrmotor24
  * https://github.com/bjwelker/Raspi-Rollo/tree/master/Arduino/Rollo_Code_Receiver
  */
 #define ROHRMOTOR24_IDENTIFIER			0x02
-#define ROHRMOTOR24			{ROHRMOTOR24_IDENTIFIER, 4800, 1500, 0, 700, 300, 70, 30, 40}
+#define ROHRMOTOR24			{ROHRMOTOR24_IDENTIFIER, 4800, 1500, 0, 700, 300, 70, 30, 40, 8}
 
 /*
  * UNDERWATER PAR56 LED LAMP, 502266
  * http://www.seamaid-lighting.com/de/produit/lampe-par56/
  */
 #define Seamaid_PAR_56_RGB_IDENTIFIER	0x03
-#define Seamaid_PAR_56_RGB	{Seamaid_PAR_56_RGB_IDENTIFIER, 3000, 9000, 0, 1100, 400, 75, 25, 24}
+#define Seamaid_PAR_56_RGB	{Seamaid_PAR_56_RGB_IDENTIFIER, 3000, 9000, 0, 1100, 400, 75, 25, 24, 0}
 
 /*
  * Wall plug Noru
   */
 #define NORU_IDENTIFIER					0x04
-#define NORU				{NORU_IDENTIFIER, 9500, 3000, 0, 900, 320, 70, 30, 24}
+#define NORU				{NORU_IDENTIFIER, 9500, 3000, 0, 900, 320, 70, 30, 24, 0}
 
 /*
  * WS-1200 Series Wireless Weather Station
   */
 #define WS_1200_IDENTIFIER				0x05
-#define WS_1200				{WS_1200_IDENTIFIER, 0, 29400, 7, 700, 300, 38, 64, 64}
+#define WS_1200				{WS_1200_IDENTIFIER, 0, 29400, 7, 700, 300, 38, 64, 64, 0}
 
 
 /*
