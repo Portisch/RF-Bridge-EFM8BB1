@@ -21,6 +21,13 @@ Receiving AKN: 0xAA 0xA0 0x55<br/>
 Sending stop sniffing: 0xAA 0xA7 0x55<br/>
 Receiving AKN: 0xAA 0xA0 0x55<br/>
 
+## Firmware identify by command 0xFF
+If you get a response to this command the EFM8 chip is running this alternative firmware
+<br/>
+Hex: AA FF 55<br/>
+<br/>
+Receiving AKN: AA A0 55<br/>
+
 ## RF decode from Rohrmotor24.de remote (40 bit of data):
 0xAA: uart sync init<br/>
 0xA6: sniffing active<br/>
