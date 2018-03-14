@@ -60,11 +60,13 @@ void PCA0_intermediateOverflowCb()
 		{
 			// bit 1
 			SetTimer0Overflow(T0_HIGH);
+			LED = LED_ON;
 		}
 		else
 		{
 			// bit 0
 			SetTimer0Overflow(T0_LOW);
+			LED = LED_OFF;
 		}
 	}
 }
@@ -328,6 +330,7 @@ bool CheckDutyCycle(uint8_t current_duty_cycle, uint8_t desired_duty_cycle)
 //-----------------------------------------------------------------------------
 void SendRF_SYNC(void)
 {
+	LED = LED_ON;
 	// enable P0.0 for I/O control
 	XBR1 &= ~XBR1_PCA0ME__CEX0_CEX1;
 	// switch to high
@@ -337,6 +340,7 @@ void SendRF_SYNC(void)
 	InitTimer_us(10, SYNC_HIGH);
 	// wait until timer has finished
 	WaitTimerFinished();
+	LED = LED_OFF;
 	// switch to low
 	T_DATA = 0;
 
@@ -469,6 +473,7 @@ void PCA0_StopTransmit(void)
 	XBR1 &= ~XBR1_PCA0ME__CEX0_CEX1;
 	// switch to low
 	T_DATA = 0;
+	LED = LED_OFF;
 	// disable P0.0 for I/O control, enter PCA mode
 	XBR1 |= XBR1_PCA0ME__CEX0_CEX1;
 
