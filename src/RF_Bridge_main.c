@@ -160,6 +160,8 @@ int main (void)
 							position = 0;
 							len = 2;
 							break;
+						case RF_ALTERNATIVE_FIRMWARE:
+							break;
 						case RF_CODE_SNIFFING_ON:
 							desired_rf_protocol = UNKNOWN_IDENTIFIER;
 							rf_sniffing_mode = MODE_DUTY_CYCLE;
@@ -247,6 +249,7 @@ int main (void)
 							case RF_CODE_SNIFFING_OFF:
 							case RF_CODE_RFIN:
 							case RF_CODE_SNIFFING_ON_BUCKET:
+							case RF_ALTERNATIVE_FIRMWARE:
 								// send acknowledge
 								uart_put_command(RF_CODE_ACK);
 							case RF_CODE_ACK:
