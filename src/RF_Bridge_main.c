@@ -134,10 +134,10 @@ int main (void)
 					switch(uart_command)
 					{
 						case RF_CODE_LEARN:
-							InitTimer_ms(1, 50);
+							InitTimer3_ms(1, 50);
 							BUZZER = BUZZER_ON;
 							// wait until timer has finished
-							WaitTimerFinished();
+							WaitTimer3Finished();
 							BUZZER = BUZZER_OFF;
 
 							// set desired RF protocol PT2260
@@ -146,7 +146,7 @@ int main (void)
 							last_sniffing_command = PCA0_DoSniffing(RF_CODE_LEARN);
 
 							// start timeout timer
-							InitTimer_ms(1, 30000);
+							InitTimer3_ms(1, 30000);
 							break;
 						case RF_CODE_RFOUT:
 							PCA0_StopSniffing();
@@ -186,10 +186,10 @@ int main (void)
 							last_sniffing_command = PCA0_DoSniffing(RF_CODE_SNIFFING_ON_BUCKET);
 							break;
 						case RF_CODE_LEARN_NEW:
-							InitTimer_ms(1, 50);
+							InitTimer3_ms(1, 50);
 							BUZZER = BUZZER_ON;
 							// wait until timer has finished
-							WaitTimerFinished();
+							WaitTimer3Finished();
 							BUZZER = BUZZER_OFF;
 
 							// enable sniffing for all known protocols
@@ -199,7 +199,7 @@ int main (void)
 							last_sniffing_command = PCA0_DoSniffing(RF_CODE_LEARN_NEW);
 
 							// start timeout timer
-							InitTimer_ms(1, 30000);
+							InitTimer3_ms(1, 30000);
 							break;
 						case RF_CODE_ACK:
 							// re-enable default RF_CODE_RFIN sniffing
@@ -272,10 +272,10 @@ int main (void)
 				// check if a RF signal got decoded
 				if ((RF_DATA_STATUS & RF_DATA_RECEIVED_MASK) != 0)
 				{
-					InitTimer_ms(1, 200);
+					InitTimer3_ms(1, 200);
 					BUZZER = BUZZER_ON;
 					// wait until timer has finished
-					WaitTimerFinished();
+					WaitTimer3Finished();
 					BUZZER = BUZZER_OFF;
 
 					PCA0_DoSniffing(last_sniffing_command);
@@ -288,12 +288,12 @@ int main (void)
 					ReadUARTData = true;
 				}
 				// check for learning timeout
-				else if (IsTimerFinished())
+				else if (IsTimer3Finished())
 				{
-					InitTimer_ms(1, 1000);
+					InitTimer3_ms(1, 1000);
 					BUZZER = BUZZER_ON;
 					// wait until timer has finished
-					WaitTimerFinished();
+					WaitTimer3Finished();
 					BUZZER = BUZZER_OFF;
 
 					PCA0_DoSniffing(last_sniffing_command);
@@ -350,9 +350,9 @@ int main (void)
 						{
 							if (PROTOCOL_DATA[PCA0_GetProtocolIndex(PT2260_IDENTIFIER)].REPEAT_DELAY > 0)
 							{
-								InitTimer_ms(1, PROTOCOL_DATA[PCA0_GetProtocolIndex(PT2260_IDENTIFIER)].REPEAT_DELAY);
+								InitTimer3_ms(1, PROTOCOL_DATA[PCA0_GetProtocolIndex(PT2260_IDENTIFIER)].REPEAT_DELAY);
 								// wait until timer has finished
-								WaitTimerFinished();
+								WaitTimer3Finished();
 							}
 
 							rf_state = RF_IDLE;
@@ -378,10 +378,10 @@ int main (void)
 				if (uart_state != IDLE)
 					break;
 
-				InitTimer_ms(1, *(uint16_t *)&RF_DATA[0]);
+				InitTimer3_ms(1, *(uint16_t *)&RF_DATA[0]);
 				BUZZER = BUZZER_ON;
 				// wait until timer has finished
-				WaitTimerFinished();
+				WaitTimer3Finished();
 				BUZZER = BUZZER_OFF;
 
 				// send acknowledge
@@ -468,9 +468,9 @@ int main (void)
 						{
 							if (PROTOCOL_DATA[protocol_index].REPEAT_DELAY > 0)
 							{
-								InitTimer_ms(1, PROTOCOL_DATA[protocol_index].REPEAT_DELAY);
+								InitTimer3_ms(1, PROTOCOL_DATA[protocol_index].REPEAT_DELAY);
 								// wait until timer has finished
-								WaitTimerFinished();
+								WaitTimer3Finished();
 							}
 
 							rf_state = RF_IDLE;
@@ -497,10 +497,10 @@ int main (void)
 				{
 					uint8_t used_protocol = RF_DATA_STATUS & 0x7F;
 
-					InitTimer_ms(1, 200);
+					InitTimer3_ms(1, 200);
 					BUZZER = BUZZER_ON;
 					// wait until timer has finished
-					WaitTimerFinished();
+					WaitTimer3Finished();
 					BUZZER = BUZZER_OFF;
 
 					desired_rf_protocol = last_desired_rf_protocol;
@@ -515,12 +515,12 @@ int main (void)
 					ReadUARTData = true;
 				}
 				// check for learning timeout
-				else if (IsTimerFinished())
+				else if (IsTimer3Finished())
 				{
-					InitTimer_ms(1, 1000);
+					InitTimer3_ms(1, 1000);
 					BUZZER = BUZZER_ON;
 					// wait until timer has finished
-					WaitTimerFinished();
+					WaitTimer3Finished();
 					BUZZER = BUZZER_OFF;
 
 					desired_rf_protocol = last_desired_rf_protocol;

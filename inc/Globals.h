@@ -28,10 +28,16 @@ SI_SBIT(T_DATA, SFR_P0, 0);		// T_DATA
 SI_SBIT(R_DATA, SFR_P1, 3);		// R_DATA
 SI_SBIT(BUZZER, SFR_P1, 6);		// BUZZER
 
-extern void InitTimer_us(uint16_t interval, uint16_t timeout);
-extern void InitTimer_ms(uint16_t interval, uint16_t timeout);
-extern void WaitTimerFinished(void);
-extern bool IsTimerFinished(void);
+extern void InitTimer2_us(uint16_t interval, uint16_t timeout);
+extern void InitTimer3_us(uint16_t interval, uint16_t timeout);
+extern void InitTimer2_ms(uint16_t interval, uint16_t timeout);
+extern void InitTimer3_ms(uint16_t interval, uint16_t timeout);
+extern void WaitTimer2Finished(void);
+extern void WaitTimer3Finished(void);
+extern void StopTimer2(void);
+extern void StopTimer3(void);
+extern bool IsTimer2Finished(void);
+extern bool IsTimer3Finished(void);
 
 
 

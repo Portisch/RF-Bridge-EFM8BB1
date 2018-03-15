@@ -8,6 +8,7 @@
 #ifndef INC_RF_HANDLING_H_
 #define INC_RF_HANDLING_H_
 
+extern uint8_t Compute_CRC8_Simple_OneByte(uint8_t byteVal);
 extern uint8_t RFInSync(uint8_t identifier, uint16_t period_pos, uint16_t period_neg);
 extern bool CheckDutyCycle(uint8_t current_duty_cycle, uint8_t desired_duty_cycle);
 extern uint8_t PCA0_GetProtocolIndex(uint8_t identifier);

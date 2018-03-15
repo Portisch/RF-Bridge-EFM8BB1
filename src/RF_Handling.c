@@ -36,6 +36,9 @@ SI_SEGMENT_VARIABLE(actual_bit, uint8_t, SI_SEG_XDATA) = 0;
 SI_SEGMENT_VARIABLE(actual_sync_bit, uint8_t, SI_SEG_XDATA) = 0;
 SI_SEGMENT_VARIABLE(actual_byte, uint8_t, SI_SEG_XDATA) = 0;
 
+SI_SEGMENT_VARIABLE(old_crc, uint8_t, SI_SEG_XDATA) = 0;
+SI_SEGMENT_VARIABLE(crc, uint8_t, SI_SEG_XDATA) = 0;
+
 // up to 8 timing buckets for MODE_BUCKET
 SI_SEGMENT_VARIABLE(bucket_sync, uint16_t, SI_SEG_XDATA);
 SI_SEGMENT_VARIABLE(buckets[15], uint16_t, SI_SEG_XDATA);	// -1 because of the bucket_sync
@@ -148,6 +151,7 @@ void PCA0_channel1EventCb()
 							actual_sync_bit = 0;
 							low_pulse_time = 0;
 							memset(RF_DATA, 0, sizeof(RF_DATA));
+							crc = 0x00;
 							rf_state = RF_IN_SYNC;
 							break;
 						}
@@ -202,14 +206,31 @@ void PCA0_channel1EventCb()
 								low_pulse_time = capture_period_pos;
 						}
 
+						// 8 bits are done, compute crc of data
 						if (actual_bit_of_byte == 0)
+						{
+							crc = Compute_CRC8_Simple_OneByte(crc ^ RF_DATA[(actual_bit - 1) / 8]);
 							actual_bit_of_byte = 8;
+						}
 
 						// check if all bits for this protocol got received
 						if (actual_bit == PROTOCOL_DATA[used_protocol].BIT_COUNT)
 						{
-							RF_DATA_STATUS = used_protocol;
-							RF_DATA_STATUS |= RF_DATA_RECEIVED_MASK;
+							// check if timeout timer for crc is finished
+							if (IsTimer2Finished())
+								old_crc = 0;
+
+							// check new crc on last received data for debounce
+							if (crc != old_crc)
+							{
+								// new data, restart crc timeout
+								StopTimer2();
+								InitTimer2_ms(1, 500);
+								old_crc = crc;
+								RF_DATA_STATUS = used_protocol;
+								RF_DATA_STATUS |= RF_DATA_RECEIVED_MASK;
+							}
+
 							LED = LED_OFF;
 							rf_state = RF_IDLE;
 						}
@@ -246,6 +267,27 @@ void PCA0_channel1EventCb()
 void PCA0_channel2EventCb()
 {
 
+}
+
+uint8_t Compute_CRC8_Simple_OneByte(uint8_t byteVal)
+{
+    const uint8_t generator = 0x1D;
+    uint8_t i;
+    uint8_t crc = byteVal; /* init crc directly with input byte instead of 0, avoid useless 8 bitshifts until input byte is in crc register */
+
+    for (i = 0; i < 8; i++)
+    {
+        if ((crc & 0x80) != 0)
+        { /* most significant bit set, shift crc register and perform XOR operation, taking not-saved 9th set bit into account */
+            crc = (uint8_t)((crc << 1) ^ generator);
+        }
+        else
+        { /* most significant bit not set, go to next bit */
+            crc <<= 1;
+        }
+    }
+
+    return crc;
 }
 
 //-----------------------------------------------------------------------------
@@ -337,18 +379,18 @@ void SendRF_SYNC(void)
 	T_DATA = 1;
 	// do high time
 	// start timer
-	InitTimer_us(10, SYNC_HIGH);
+	InitTimer3_us(10, SYNC_HIGH);
 	// wait until timer has finished
-	WaitTimerFinished();
+	WaitTimer3Finished();
 	LED = LED_OFF;
 	// switch to low
 	T_DATA = 0;
 
 	// do low time
 	// start timer
-	InitTimer_us(10, SYNC_LOW);
+	InitTimer3_us(10, SYNC_LOW);
 	// wait until timer has finished
-	WaitTimerFinished();
+	WaitTimer3Finished();
 	// disable P0.0 for I/O control, enter PCA mode
 	XBR1 |= XBR1_PCA0ME__CEX0_CEX1;
 }
@@ -499,9 +541,9 @@ uint8_t PCA0_DoSniffing(uint8_t active_command)
 	// start PCA
 	PCA0_run();
 
-	InitTimer_ms(1, 10);
+	InitTimer3_ms(1, 10);
 	// wait until timer has finished
-	WaitTimerFinished();
+	WaitTimer3Finished();
 
 	// disable P0.0 for I/O control, enter PCA mode
 	XBR1 |= XBR1_PCA0ME__CEX0_CEX1;
@@ -532,6 +574,9 @@ void PCA0_StopSniffing(void)
 	// disable interrupt for RF receiving
 	PCA0CPM1 &= ~PCA0CPM1_ECCF__ENABLED;
 
+	// be sure the timeout timer is stopped
+	StopTimer2();
+
 	rf_state = RF_IDLE;
 }
 
@@ -559,12 +604,12 @@ void SendRFBuckets(const uint16_t buckets[], const uint8_t rfdata[], uint8_t n, 
 	XBR1 &= ~XBR1_PCA0ME__CEX0_CEX1;	// enable P0.0 for I/O control
 
 	T_DATA = 1;							// switch to high
-	InitTimer_ms(1, 7);					// start timer (7ms)
-	WaitTimerFinished();				// wait until timer has finished
+	InitTimer3_ms(1, 7);				// start timer (7ms)
+	WaitTimer3Finished();				// wait until timer has finished
 
 	T_DATA = 0;							// switch to low
-	InitTimer_us(10, 100);				// start timer (1ms)
-	WaitTimerFinished();				// wait until timer has finished
+	InitTimer3_us(10, 100);				// start timer (1ms)
+	WaitTimer3Finished();				// wait until timer has finished
 
 	do
 	{
