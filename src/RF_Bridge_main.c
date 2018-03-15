@@ -348,9 +348,9 @@ int main (void)
 					case RF_FINISHED:
 						if (tr_repeats != 0)
 						{
-							if (PROTOCOL_DATA[PT2260_IDENTIFIER].REPEAT_DELAY > 0)
+							if (PROTOCOL_DATA[PCA0_GetProtocolIndex(PT2260_IDENTIFIER)].REPEAT_DELAY > 0)
 							{
-								InitTimer_ms(1, PROTOCOL_DATA[PT2260_IDENTIFIER].REPEAT_DELAY);
+								InitTimer_ms(1, PROTOCOL_DATA[PCA0_GetProtocolIndex(PT2260_IDENTIFIER)].REPEAT_DELAY);
 								// wait until timer has finished
 								WaitTimerFinished();
 							}
