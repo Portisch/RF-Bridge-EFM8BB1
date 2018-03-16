@@ -346,8 +346,8 @@ uint8_t RFInSync(uint8_t identifier, uint16_t period_pos, uint16_t period_neg)
 			if ((period_neg > PT226x_SYNC_MIN) && (period_neg < PT226x_SYNC_MAX))
 			{
 				uint16_t period_pos_snyc = period_neg / 31;
-				if ((period_pos > (period_pos_snyc - (period_pos_snyc / 10))) &&
-						(period_pos < (period_pos_snyc + (period_pos_snyc / 10))))
+				if ((period_pos > (period_pos_snyc - (period_pos_snyc / 5))) &&
+						(period_pos < (period_pos_snyc + (period_pos_snyc / 5))))
 				{
 					ret = used_protocol;
 				}
