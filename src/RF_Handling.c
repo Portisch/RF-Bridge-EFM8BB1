@@ -592,15 +592,6 @@ void PCA0_StopSniffing(void)
 	rf_state = RF_IDLE;
 }
 
-void usleep(uint16_t us)
-{
-	if (us < 20) return;
-	us -= 20;
-	us <<= 1;
-	while (us > 0) us--;
-}
-
-
 //-----------------------------------------------------------------------------
 // Send generic signal based on n time bucket pairs (high/low timing)
 //-----------------------------------------------------------------------------
@@ -615,14 +606,6 @@ void SendRFBuckets(const uint16_t buckets[], const uint8_t rfdata[], uint8_t n, 
 
 	XBR1 &= ~XBR1_PCA0ME__CEX0_CEX1;	// enable P0.0 for I/O control
 
-	T_DATA = 1;							// switch to high
-	InitTimer3_ms(1, 7);				// start timer (7ms)
-	WaitTimer3Finished();				// wait until timer has finished
-
-	T_DATA = 0;							// switch to low
-	InitTimer3_us(10, 100);				// start timer (1ms)
-	WaitTimer3Finished();				// wait until timer has finished
-
 	do
 	{
 		uint8_t i;
@@ -631,11 +614,15 @@ void SendRFBuckets(const uint16_t buckets[], const uint8_t rfdata[], uint8_t n, 
 		{
 			uint16_t j = buckets[rfdata[i] >> 4];	// high bucket
 			T_DATA = 1;					// switch to high
-			usleep(j);
+			InitTimer3_us(10, j);
+			// wait until timer has finished
+			WaitTimer3Finished();
 
 			j = buckets[rfdata[i] & 0x0f];			// low bucket
 			T_DATA = 0;					// switch to low
-			usleep(j);
+			InitTimer3_us(10, j);
+			// wait until timer has finished
+			WaitTimer3Finished();
 		}
 		LED = !LED;
 	}
