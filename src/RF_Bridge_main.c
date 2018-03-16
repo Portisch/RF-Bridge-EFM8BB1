@@ -161,6 +161,7 @@ int main (void)
 							len = 2;
 							break;
 						case RF_ALTERNATIVE_FIRMWARE:
+							PCA0_DoSniffing(last_sniffing_command);
 							break;
 						case RF_CODE_SNIFFING_ON:
 							desired_rf_protocol = UNKNOWN_IDENTIFIER;
@@ -389,7 +390,7 @@ int main (void)
 
 				// enable UART again
 				ReadUARTData = true;
-				uart_command = NONE;
+				PCA0_DoSniffing(last_sniffing_command);
 				break;
 
 			// do new sniffing
