@@ -26,7 +26,9 @@ If you get a response to this command the EFM8 chip is running this alternative 
 <br/>
 Hex: AA FF 55<br/>
 <br/>
-Receiving AKN: AA A0 55<br/>
+Receiving AKN: AA xx 55<br/>
+
+The xx is the firmware version (0x00-0xFF)
 
 ## RF decode from Rohrmotor24.de remote (40 bit of data):
 0xAA: uart sync init<br/>
