@@ -161,7 +161,6 @@ int main (void)
 							len = 2;
 							break;
 						case RF_ALTERNATIVE_FIRMWARE:
-							PCA0_DoSniffing(last_sniffing_command);
 							break;
 						case RF_CODE_SNIFFING_ON:
 							desired_rf_protocol = UNKNOWN_IDENTIFIER;
@@ -250,7 +249,6 @@ int main (void)
 							case RF_CODE_SNIFFING_OFF:
 							case RF_CODE_RFIN:
 							case RF_CODE_SNIFFING_ON_BUCKET:
-							case RF_ALTERNATIVE_FIRMWARE:
 								// send acknowledge
 								uart_put_command(RF_CODE_ACK);
 							case RF_CODE_ACK:
@@ -387,6 +385,17 @@ int main (void)
 
 				// send acknowledge
 				uart_put_command(RF_CODE_ACK);
+
+				// enable UART again
+				ReadUARTData = true;
+				PCA0_DoSniffing(last_sniffing_command);
+				break;
+
+			case RF_ALTERNATIVE_FIRMWARE:
+				// send firmware version
+				uart_put_command(FIRMWARE_VERSION);
+
+				uart_state = IDLE;
 
 				// enable UART again
 				ReadUARTData = true;
