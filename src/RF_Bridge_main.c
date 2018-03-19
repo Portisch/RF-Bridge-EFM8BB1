@@ -334,8 +334,16 @@ int main (void)
 						// byte 6..7:	24bit Data
 						// set high time of sync to (Tsyn / 3968) * 128
 						// set duty cycle of high and low bit to 75 and 25 % - unknown
-						PCA0_InitTransmit((uint16_t)((((uint32_t)(*(uint16_t *)&RF_DATA[0])) * 128) / 3968),
-								*(uint16_t *)&RF_DATA[0], *(uint16_t *)&RF_DATA[4], 75, *(uint16_t *)&RF_DATA[2], 25, 24);
+						PCA0_InitTransmit(
+								*(uint16_t *)&RF_DATA[2],	// sync high
+								*(uint16_t *)&RF_DATA[0], 	// sync low time
+								*(uint16_t *)&RF_DATA[4],	// bit 1 high time
+								(uint32_t)((100) * (uint32_t)*(uint16_t *)&RF_DATA[4])
+									/ (*(uint16_t *)&RF_DATA[4] + *(uint16_t *)&RF_DATA[2]),	// calculate duty cycle for high bit
+								*(uint16_t *)&RF_DATA[2],	// bit 0 high time
+								(uint32_t)((100) * (uint32_t)*(uint16_t *)&RF_DATA[2])
+									/ (*(uint16_t *)&RF_DATA[4] + *(uint16_t *)&RF_DATA[2]),	// calculate duty cycle for low bit
+								24);
 
 						actual_byte = 6;
 
