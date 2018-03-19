@@ -9,6 +9,15 @@ All original commands 0xA0 to 0xA5 are supported!
 # Hardware
 There are the pins C2 & C2CK on the board. With a Arduino you can build a programmer to read/erase and program the flash.
 Software for the Arduino: https://github.com/conorpp/efm8-arduino-programmer
+<br/>
+![RF Bridge v1.0](https://raw.github.com/Portisch/RF-Bridge-EFM8BB1/master/doc/Bridge_v1_0.jpg)
+<br/>
+**C2 Interface**
+Use this header to program the firmware on the EFM8BB1.
+
+**RS232**
+Use this RS232 connection for debug/testing. Put the switch S2 to OFF when connecting.
+For normal operation the switch S2 have to be in ON position.
 
 # Software
 The project is written with Simplicity Studio 4. The resulting *.hex file can be programmed on the EFM8BB1.
