@@ -12,10 +12,10 @@ Software for the Arduino: https://github.com/conorpp/efm8-arduino-programmer
 <br/>
 ![RF Bridge v1.0](https://raw.github.com/Portisch/RF-Bridge-EFM8BB1/master/doc/Bridge_v1_0.jpg)
 <br/>
-**C2 Interface**
+**C2 Interface**<br/>
 Use this header to program the firmware on the EFM8BB1.
 
-**RS232**
+**RS232**<br/>
 Use this RS232 connection for debug/testing. Put the switch S2 to OFF when connecting.
 For normal operation the switch S2 have to be in ON position.
 
