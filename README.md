@@ -152,6 +152,21 @@ library to learn the bucket times and sequences (the
 [compressed](https://github.com/pimatic/RFControl/tree/master/examples/compressed) example
 gives you everything you need if you convert the decimal numbers to hex).
 
+## Bucket sniffing using command 0xB1
+This command will do bucket sniffing.<br/>
+<br/>
+Hex: AA B0 04 0120 01C0 0300 2710 01212122012201212121212121220121212201212203 55
+<br/>
+0xAA: uart sync init<br/>
+0xB1: bucket sniffing<br/>
+0x04: bucket count including sync bucket<br/>
+0x01-0x20: Bucket 1 length: 288µs<br/>
+0x01-0xC0: Bucket 2 length: 448µs<br/>
+0x03-0x00: Bucket 3 length: 768µs<br/>
+0x27-0x10: Bucket 4 length: 10ms (sync)<br/>
+0x01-0x03: RF data received (high/low nibbles denote buckets)<br/>
+0x55: uart sync end
+
 ## Beep by command 0xC0
 Hex: AA C0 xx xx 55<br/>
 
