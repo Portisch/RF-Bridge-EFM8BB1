@@ -42,7 +42,6 @@ typedef struct
 } PROTOCOL_DATA_t;
 
 #define SYNC_TOLERANCE 			200
-#define SYNC_TOLERANCE_0xA1		1000
 #define DUTY_CYCLE_TOLERANCE 	8
 
 #define RF_TRANSMIT_REPEATS		8
@@ -52,24 +51,11 @@ typedef struct
 /*
  * PT2260, EV1527,... original RF bridge protocol
  * http://www.princeton.com.tw/Portals/0/Product/PT2260_4.pdf
- * The built-in oscillator circuitry of PT2260 allows a frequency in a range about 100-500kHz.
- *
- * 100kHz:
- * Alpha = 10탎
- * Sync High: 128 * Alpha = 1.28ms
- * Sync Low: 3968 * Alpha = 39.68ms
- *
- * 500kHz:
- * Alpha = 2탎
- * Sync High: 128 * Alpha = 256탎
- * Sync Low: 3968 * Alpha = 7936탎
- *
- * Setting the range from 10000, 9000 - 11000
  */
 #define PT2260_IDENTIFIER				0x01
 #define PT226x_SYNC_MIN					6000
 #define PT226x_SYNC_MAX					18000
-#define PT2260				{PT2260_IDENTIFIER, 0, 0, 0, 0, 0, 75, 25, 24, 0}
+#define PT2260				{PT2260_IDENTIFIER, 400, 12400, 0, 1600, 400, 75, 25, 24, 0}
 
 /*
  * Rohrmotor24

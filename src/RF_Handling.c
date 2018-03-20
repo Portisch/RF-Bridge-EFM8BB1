@@ -306,35 +306,37 @@ uint8_t RFInSync(uint8_t identifier, uint16_t period_pos, uint16_t period_neg)
 			// check all protocols
 			for (used_protocol = 0x00 ; used_protocol < PROTOCOLCOUNT; used_protocol++)
 			{
-				// check if SYNC high and SYNC low should be compared
-				if (PROTOCOL_DATA[used_protocol].SYNC_HIGH > 0)
+				// check if used_protocol is for PT226x devices
+				if (used_protocol == PCA0_GetProtocolIndex(PT2260_IDENTIFIER))
 				{
-					if (
-						(period_pos > (PROTOCOL_DATA[used_protocol].SYNC_HIGH - SYNC_TOLERANCE)) &&
-						(period_pos < (PROTOCOL_DATA[used_protocol].SYNC_HIGH + SYNC_TOLERANCE)) &&
-						(period_neg > (PROTOCOL_DATA[used_protocol].SYNC_LOW - SYNC_TOLERANCE)) &&
-						(period_neg < (PROTOCOL_DATA[used_protocol].SYNC_LOW + SYNC_TOLERANCE))
-					)
+					if ((period_neg > PT226x_SYNC_MIN) && (period_neg < PT226x_SYNC_MAX))
 					{
-						ret = used_protocol;
-						break;
-					}
-				}
-				// only SYNC low should be checked
-				else
-				{
-					if (used_protocol == PCA0_GetProtocolIndex(PT2260_IDENTIFIER))
-					{
-						if ((period_neg > PT226x_SYNC_MIN) && (period_neg < PT226x_SYNC_MAX))
+						uint16_t period_pos_snyc = period_neg / 31;
+						if ((period_pos > (period_pos_snyc - (period_pos_snyc / 5))) &&
+								(period_pos < (period_pos_snyc + (period_pos_snyc / 5))))
 						{
-							uint16_t period_pos_snyc = period_neg / 31;
-							if ((period_pos > (period_pos_snyc - (period_pos_snyc / 5))) &&
-									(period_pos < (period_pos_snyc + (period_pos_snyc / 5))))
-							{
-								ret = used_protocol;
-							}
+							ret = used_protocol;
+							break;
 						}
 					}
+				}
+				else
+				{
+					// check if SYNC high and SYNC low should be compared
+					if (PROTOCOL_DATA[used_protocol].SYNC_HIGH > 0)
+					{
+						if (
+							(period_pos > (PROTOCOL_DATA[used_protocol].SYNC_HIGH - SYNC_TOLERANCE)) &&
+							(period_pos < (PROTOCOL_DATA[used_protocol].SYNC_HIGH + SYNC_TOLERANCE)) &&
+							(period_neg > (PROTOCOL_DATA[used_protocol].SYNC_LOW - SYNC_TOLERANCE)) &&
+							(period_neg < (PROTOCOL_DATA[used_protocol].SYNC_LOW + SYNC_TOLERANCE))
+						)
+						{
+							ret = used_protocol;
+							break;
+						}
+					}
+					// only SYNC low should be checked
 					else
 					if ((period_neg > (PROTOCOL_DATA[used_protocol].SYNC_LOW - SYNC_TOLERANCE)) &&
 						(period_neg < (PROTOCOL_DATA[used_protocol].SYNC_LOW + SYNC_TOLERANCE))
@@ -352,7 +354,7 @@ uint8_t RFInSync(uint8_t identifier, uint16_t period_pos, uint16_t period_neg)
 			used_protocol = PCA0_GetProtocolIndex(identifier);
 
 			// check if identifier got found in list
-			if (used_protocol == 0xFF)
+			if (used_protocol != PCA0_GetProtocolIndex(PT2260_IDENTIFIER))
 				break;
 
 			if ((period_neg > PT226x_SYNC_MIN) && (period_neg < PT226x_SYNC_MAX))
