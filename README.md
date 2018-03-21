@@ -50,17 +50,17 @@ If the data is only including 01, 10 and 23 at the end than it should be possibl
 But for this the protocol have to be defined in the RF_Protocols.h file.
 
 01 means:</br>
-<img src="https://raw.github.com/Portisch/RF-Bridge-EFM8BB1/master/doc/01_Bit_1.png" width="100" ></br>
+<img src="https://raw.github.com/Portisch/RF-Bridge-EFM8BB1/master/doc/01_Bit_1.png" width="400" ></br>
 BIT_HIGH_TIME is 1081µs.</br>
 BIT_HIGH_DUTY = 100% / (1081µs + 453µS) * 1081µs =~ 70%. </br>
 
 10 means:</br>
-<img src="https://raw.github.com/Portisch/RF-Bridge-EFM8BB1/master/doc/10_Bit_0.png" width="100" ></br>
+<img src="https://raw.github.com/Portisch/RF-Bridge-EFM8BB1/master/doc/10_Bit_0.png" width="400" ></br>
 BIT_LOW_TIME is 453µs.</br>
 BIT_LOW_DUTY = 100% / (1081µs + 453µS) * 453µs =~ 30%.</br>
 
 23 means:</br>
-<img src="https://raw.github.com/Portisch/RF-Bridge-EFM8BB1/master/doc/23_Sync_Bit.png" width="100" ></br>
+<img src="https://raw.github.com/Portisch/RF-Bridge-EFM8BB1/master/doc/23_Sync_Bit.png" width="400" ></br>
 SYNC_HIGH is 2990µs.</br>
 SYNC_LOW is 7230µs.</br>
 SYNC_BIT_COUNT is default 0.</br>
