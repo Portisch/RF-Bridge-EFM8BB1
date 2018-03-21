@@ -245,20 +245,12 @@ void uart_put_RF_buckets(uint8_t Command)
 
 	// add sync bucket on data
 	if (actual_bit_of_byte == 4)
-	{
 		RF_DATA[actual_byte] = bucket_count << 4;
-	}
 	else
-	{
 		RF_DATA[actual_byte] |= (bucket_count & 0x0F);
-	}
-
-	// increment byte position if only high nibble got filled
-	if (actual_bit_of_byte == 0)
-		actual_byte++;
 
 	i = 0;
-	while(i < actual_byte)
+	while(i < (actual_byte + 1))
 	{
 		uart_putc(RF_DATA[i]);
 		i++;
