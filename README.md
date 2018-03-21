@@ -11,6 +11,7 @@ There are the pins C2 & C2CK on the board. With a Arduino you can build a progra
 Software for the Arduino: https://github.com/conorpp/efm8-arduino-programmer
 <br/>
 ![RF Bridge v1.0](https://raw.github.com/Portisch/RF-Bridge-EFM8BB1/master/doc/Bridge_v1_0.jpg)
+![RF Bridge R2 v1.0](https://raw.github.com/Portisch/RF-Bridge-EFM8BB1/master/doc/Bridge_R2_v1_0.jpg)
 <br/>
 **C2 Interface**<br/>
 Use this header to program the firmware on the EFM8BB1.
@@ -155,7 +156,7 @@ gives you everything you need if you convert the decimal numbers to hex).
 ## Bucket sniffing using command 0xB1
 This command will do bucket sniffing.<br/>
 <br/>
-Hex: AA B0 04 0120 01C0 0300 2710 01212122012201212121212121220121212201212203 55
+Hex: AA B1 04 0120 01C0 0300 2710 01212122012201212121212121220121212201212203 55
 <br/>
 0xAA: uart sync init<br/>
 0xB1: bucket sniffing<br/>
