@@ -703,6 +703,7 @@ void Bucket_Received(uint16_t duration)
 				// all buckets got received, start decoding on the next repeat
 				actual_byte = 0;
 				actual_bit_of_byte = 4;
+				crc = 0x00;
 				rf_state = RF_DECODE_BUCKET;
 			}
 			// check if useful bucket got received
@@ -743,7 +744,20 @@ void Bucket_Received(uint16_t duration)
 			// check if sync bucket got received
 			if (matchesFooter(duration))
 			{
-				RF_DATA_STATUS |= RF_DATA_RECEIVED_MASK;
+				// check if timeout timer for crc is finished
+				if (IsTimer2Finished())
+					old_crc = 0;
+
+				// check new crc on last received data for debounce
+				if (crc != old_crc)
+				{
+					// new data, restart crc timeout
+					StopTimer2();
+					InitTimer2_ms(1, 500);
+					old_crc = crc;
+					RF_DATA_STATUS |= RF_DATA_RECEIVED_MASK;
+				}
+
 				LED = LED_OFF;
 				rf_state = RF_IDLE;
 			}
@@ -761,9 +775,13 @@ void Bucket_Received(uint16_t duration)
 					actual_byte++;
 					actual_bit_of_byte = 4;
 
+					// 8 bits are done, compute crc of data
+					crc = Compute_CRC8_Simple_OneByte(crc ^ RF_DATA[actual_byte]);
+
 					// check if maximum of array got reached
 					if (actual_byte > sizeof(RF_DATA))
 					{
+						StopTimer2();
 						bucket_count = 0;
 						// restart sync
 						rf_state = RF_IDLE;
@@ -772,6 +790,7 @@ void Bucket_Received(uint16_t duration)
 			}
 			else
 			{
+				StopTimer2();
 				// bucket not found in list, restart
 				bucket_count = 0;
 				// restart sync
