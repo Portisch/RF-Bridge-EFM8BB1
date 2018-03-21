@@ -83,11 +83,17 @@ typedef struct
 #define WS_1200_IDENTIFIER				0x05
 #define WS_1200				{WS_1200_IDENTIFIER, 0, 29400, 7, 700, 300, 38, 64, 64, 0}
 
+/*
+ * ALDI Remote controlled wall sockets, 4x
+  */
+#define ALDI_RCWS_IDENTIFIER			0x06
+#define ALDI_RCWS			{ALDI_RCWS_IDENTIFIER, 2990, 7230, 0, 1081, 453, 70, 30, 24, 0}
+
 
 /*
  * Protocol array
  */
-#define PROTOCOLCOUNT	5
+#define PROTOCOLCOUNT	6
 #if PROTOCOLCOUNT > 0x7F
 #error Too much protocols are defined, stop!
 #endif
@@ -98,7 +104,8 @@ SI_SEGMENT_VARIABLE(PROTOCOL_DATA[PROTOCOLCOUNT], static const PROTOCOL_DATA_t, 
 		ROHRMOTOR24,
 		Seamaid_PAR_56_RGB,
 		NORU,
-		WS_1200
+		WS_1200,
+		ALDI_RCWS
 };
 
 #endif /* INC_RF_PROTOCOLS_H_ */
