@@ -31,6 +31,50 @@ Receiving AKN: 0xAA 0xA0 0x55<br/>
 Sending stop sniffing: 0xAA 0xA7 0x55<br/>
 Receiving AKN: 0xAA 0xA0 0x55<br/>
 
+# Defining new RF protocols in RF_Protocols.h
+If your remote can't be sniffed with the command 0xA6 please use command 0xB1.</br>
+This will do bucket sniffing and give maybe a result like this:</br>
+Hex: AA B1 04 0439 01C5 0BAE 1C3E 01 10 10 10 10 01 01 01 10 10 01 01 10 10 01 01 01 10 01 01 10 10 10 10 23 55</br>
+</br>
+0xAA: uart sync init<br/>
+0xB1: bucket sniffing<br/>
+0x04: bucket count including sync bucket<br/>
+0x0439: Bucket 1 length: 1081µs<br/>
+0x01C5: Bucket 2 length: 453µs<br/>
+0x0BAE: Bucket 3 length: 2990µs<br/>
+0x1C3E: Bucket 4 length: 7230µs<br/>
+0x01-0x23: RF data received (high/low nibbles denote buckets)<br/>
+0x55: uart sync end</br>
+</br>
+If the data is only including 01, 10 and 23 at the end than it should be possible to decode the signal by command 0xA6.</br>
+But for this the protocol have to be defined in the RF_Protocols.h file.
+
+01 means:</br>
+<img src="https://raw.github.com/Portisch/RF-Bridge-EFM8BB1/master/doc/01_Bit_1.png" width="100" ></br>
+BIT_HIGH_TIME is 1081µs.</br>
+BIT_HIGH_DUTY = 100% / (1081µs + 453µS) * 1081µs =~ 70%. </br>
+
+10 means:</br>
+<img src="https://raw.github.com/Portisch/RF-Bridge-EFM8BB1/master/doc/10_Bit_0.png" width="100" ></br>
+BIT_LOW_TIME is 453µs.</br>
+BIT_LOW_DUTY = 100% / (1081µs + 453µS) * 453µs =~ 30%.</br>
+
+23 means:</br>
+<img src="https://raw.github.com/Portisch/RF-Bridge-EFM8BB1/master/doc/23_Sync_Bit.png" width="100" ></br>
+SYNC_HIGH is 2990µs.</br>
+SYNC_LOW is 7230µs.</br>
+SYNC_BIT_COUNT is default 0.</br>
+
+The bitcount can be counted like this:</br>
+
+| data 1 | data 2 | data 3 | data 4 | data 5 | data 6 | data 7 | data 8 | data 9 | data 10 | data 11 | data 12 | data 13 | data 14 | data 15 | data 16 | data 17 | data 18 | data 19 | data 20 | data 21 | data 22 | data 23 | data 24 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 01 | 10 | 10 | 10 | 10 | 01 | 01 | 01 | 10 | 10 | 01 | 01 | 10 | 10 | 01 | 01 | 01 | 10 | 01 | 01 | 10 | 10 | 10 | 10 |
+| bit 1 | bit 2 | bit 3 | bit 4 | bit 5 | bit 6 | bit 7 | bit 8 | bit 9 | bit 10 | bit 11 | bit 12 | bit 13 | bit 14 | bit 15 | bit 16 | bit 17 | bit 18 | bit 19 | bit 20 | bit 21 | bit 22 | bit 23 | bit 24 |
+
+BIT_COUNT = 24.</br>
+REPEAT_DELAY is default 0.</br>
+
 ## Firmware identify by command 0xFF
 If you get a response to this command the EFM8 chip is running this alternative firmware
 <br/>
