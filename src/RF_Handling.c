@@ -7,6 +7,7 @@
 
 #include <SI_EFM8BB1_Register_Enums.h>
 #include <string.h>
+#include <stdlib.h>
 #include "Globals.h"
 #include "RF_Handling.h"
 #include "RF_Protocols.h"
@@ -159,80 +160,157 @@ void PCA0_channel1EventCb()
 
 					// one matching sync got received
 					case RF_IN_SYNC:
-						// at first skip SYNC bits
-						if ((PROTOCOL_DATA[used_protocol].SYNC_BIT_COUNT > 0) &&
-							(actual_sync_bit < PROTOCOL_DATA[used_protocol].SYNC_BIT_COUNT))
+						switch (PROTOCOL_DATA[used_protocol].protocol_type)
 						{
-							actual_sync_bit++;
-							break;
-						}
-
-						// check the rest of the bits
-						actual_bit_of_byte--;
-						actual_bit++;
-
-						// calculate current duty cycle
-						current_duty_cycle = (100 * (uint32_t)capture_period_pos) / ((uint32_t)capture_period_pos + (uint32_t)capture_period_neg);
-
-						// check if high or low duty cycle fits
-						// ignore last bit because of wrong duty cycle
-						if (!CheckDutyCycle(current_duty_cycle, PROTOCOL_DATA[used_protocol].BIT_HIGH_DUTY) &&
-								!CheckDutyCycle(current_duty_cycle, PROTOCOL_DATA[used_protocol].BIT_LOW_DUTY) &&
-								actual_bit != PROTOCOL_DATA[used_protocol].BIT_COUNT)
-						{
-							RF_DATA_STATUS = 0;
-							LED = LED_OFF;
-							rf_state = RF_IDLE;
-							break;
-						}
-
-						if ((CheckDutyCycle(current_duty_cycle, PROTOCOL_DATA[used_protocol].BIT_HIGH_DUTY) &&
-								(actual_bit < PROTOCOL_DATA[used_protocol].BIT_COUNT)) ||
-								// the duty cycle can not be used for the last bit because of the missing rising edge on the end
-								((capture_period_pos > low_pulse_time) && (actual_bit == PROTOCOL_DATA[used_protocol].BIT_COUNT)))
-						{
-							// backup last bit high time
-							BIT_HIGH = capture_period_pos;
-							LED = LED_ON;
-							RF_DATA[(actual_bit - 1) / 8] |= (1 << actual_bit_of_byte);
-						}
-						else
-						{
-							// backup last bit high time
-							BIT_LOW = capture_period_pos;
-							LED = LED_OFF;
-							// backup low bit pulse time to be able to determine the last bit
-							if (capture_period_pos > low_pulse_time)
-								low_pulse_time = capture_period_pos;
-						}
-
-						// 8 bits are done, compute crc of data
-						if (actual_bit_of_byte == 0)
-						{
-							crc = Compute_CRC8_Simple_OneByte(crc ^ RF_DATA[(actual_bit - 1) / 8]);
-							actual_bit_of_byte = 8;
-						}
-
-						// check if all bits for this protocol got received
-						if (actual_bit == PROTOCOL_DATA[used_protocol].BIT_COUNT)
-						{
-							// check if timeout timer for crc is finished
-							if (IsTimer2Finished())
-								old_crc = 0;
-
-							// check new crc on last received data for debounce
-							if (crc != old_crc)
+							case DUTY_CYCLE:
 							{
-								// new data, restart crc timeout
-								StopTimer2();
-								InitTimer2_ms(1, 500);
-								old_crc = crc;
-								RF_DATA_STATUS = used_protocol;
-								RF_DATA_STATUS |= RF_DATA_RECEIVED_MASK;
+								// at first skip SYNC bits
+								if ((((DUTY_CYLCE_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->SYNC_BIT_COUNT > 0) &&
+									(actual_sync_bit < ((DUTY_CYLCE_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->SYNC_BIT_COUNT))
+								{
+									actual_sync_bit++;
+									break;
+								}
+
+								// check the rest of the bits
+								actual_bit_of_byte--;
+								actual_bit++;
+
+								// calculate current duty cycle
+								current_duty_cycle = (100 * (uint32_t)capture_period_pos) / ((uint32_t)capture_period_pos + (uint32_t)capture_period_neg);
+
+								// check if high or low duty cycle fits
+								// ignore last bit because of wrong duty cycle
+								if (!CheckDutyCycle(current_duty_cycle, ((DUTY_CYLCE_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->BIT_HIGH_DUTY) &&
+										!CheckDutyCycle(current_duty_cycle, ((DUTY_CYLCE_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->BIT_LOW_DUTY) &&
+										actual_bit != ((DUTY_CYLCE_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->BIT_COUNT)
+								{
+									RF_DATA_STATUS = 0;
+									LED = LED_OFF;
+									rf_state = RF_IDLE;
+									break;
+								}
+
+								if ((CheckDutyCycle(current_duty_cycle, ((DUTY_CYLCE_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->BIT_HIGH_DUTY) &&
+										(actual_bit < ((DUTY_CYLCE_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->BIT_COUNT)) ||
+										// the duty cycle can not be used for the last bit because of the missing rising edge on the end
+										((capture_period_pos > low_pulse_time) && (actual_bit == ((DUTY_CYLCE_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->BIT_COUNT)))
+								{
+									// backup last bit high time
+									BIT_HIGH = capture_period_pos;
+									LED = LED_ON;
+									RF_DATA[(actual_bit - 1) / 8] |= (1 << actual_bit_of_byte);
+								}
+								else
+								{
+									// backup last bit high time
+									BIT_LOW = capture_period_pos;
+									LED = LED_OFF;
+									// backup low bit pulse time to be able to determine the last bit
+									if (capture_period_pos > low_pulse_time)
+										low_pulse_time = capture_period_pos;
+								}
+
+								// 8 bits are done, compute crc of data
+								if (actual_bit_of_byte == 0)
+								{
+									crc = Compute_CRC8_Simple_OneByte(crc ^ RF_DATA[(actual_bit - 1) / 8]);
+									actual_bit_of_byte = 8;
+								}
+
+								// check if all bits for this protocol got received
+								if (actual_bit == ((DUTY_CYLCE_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->BIT_COUNT)
+								{
+									// check if timeout timer for crc is finished
+									if (IsTimer2Finished())
+										old_crc = 0;
+
+									// check new crc on last received data for debounce
+									if (crc != old_crc)
+									{
+										// new data, restart crc timeout
+										StopTimer2();
+										InitTimer2_ms(1, 800);
+										old_crc = crc;
+										RF_DATA_STATUS = used_protocol;
+										RF_DATA_STATUS |= RF_DATA_RECEIVED_MASK;
+									}
+
+									LED = LED_OFF;
+									rf_state = RF_IDLE;
+								}
+								break;
 							}
 
-							LED = LED_OFF;
-							rf_state = RF_IDLE;
+							case TIMING:
+							{
+								uint16_t delayTolerance = ((TIMING_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->PULSE_TIME *
+										((TIMING_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->TOLERANCE / 100;
+
+								// check the rest of the bits
+								actual_bit_of_byte--;
+								actual_bit++;
+
+								// check if bit is a logic 0 or 1
+								if((abs(capture_period_pos -
+										((TIMING_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->PULSE_TIME *
+										((TIMING_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->bit0.high) < delayTolerance) &&
+									(abs(capture_period_neg -
+										((TIMING_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->PULSE_TIME *
+										((TIMING_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->bit0.low) < delayTolerance)
+										)
+								{
+									LED = LED_OFF;
+								}
+								else if((abs(capture_period_pos -
+										((TIMING_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->PULSE_TIME *
+										((TIMING_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->bit1.high) < delayTolerance) &&
+									(abs(capture_period_neg -
+										((TIMING_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->PULSE_TIME *
+										((TIMING_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->bit1.low) < delayTolerance)
+										)
+								{
+									LED = LED_ON;
+									RF_DATA[(actual_bit - 1) / 8] |= (1 << actual_bit_of_byte);
+								}
+								else
+								{
+									RF_DATA_STATUS = 0;
+									LED = LED_OFF;
+									rf_state = RF_IDLE;
+									break;
+								}
+
+								// 8 bits are done, compute crc of data
+								if (actual_bit_of_byte == 0)
+								{
+									crc = Compute_CRC8_Simple_OneByte(crc ^ RF_DATA[(actual_bit - 1) / 8]);
+									actual_bit_of_byte = 8;
+								}
+
+								// check if all bits for this protocol got received
+								if (actual_bit == ((TIMING_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->BIT_COUNT)
+								{
+									// check if timeout timer for crc is finished
+									if (IsTimer2Finished())
+										old_crc = 0;
+
+									// check new crc on last received data for debounce
+									if (crc != old_crc)
+									{
+										// new data, restart crc timeout
+										StopTimer2();
+										InitTimer2_ms(1, 800);
+										old_crc = crc;
+										RF_DATA_STATUS = used_protocol;
+										RF_DATA_STATUS |= RF_DATA_RECEIVED_MASK;
+									}
+
+									LED = LED_OFF;
+									rf_state = RF_IDLE;
+								}
+								break;
+							}
 						}
 						break;
 				}
@@ -290,6 +368,35 @@ uint8_t Compute_CRC8_Simple_OneByte(uint8_t byteVal)
     return crc;
 }
 
+bool CheckSyncTiming(uint16_t period_pos, uint16_t period_neg, uint16_t SYNC_HIGH, uint16_t SYNC_LOW)
+{
+	bool ret = false;
+
+	// check if SYNC high and SYNC low should be compared
+	if (SYNC_HIGH > 0)
+	{
+		if (
+			(period_pos > (SYNC_HIGH - SYNC_TOLERANCE)) &&
+			(period_pos < (SYNC_HIGH + SYNC_TOLERANCE)) &&
+			(period_neg > (SYNC_LOW - SYNC_TOLERANCE)) &&
+			(period_neg < (SYNC_LOW + SYNC_TOLERANCE))
+		)
+		{
+			ret = true;
+		}
+	}
+	// only SYNC low should be checked
+	else
+	if ((period_neg > (SYNC_LOW - SYNC_TOLERANCE)) &&
+		(period_neg < (SYNC_LOW + SYNC_TOLERANCE))
+	)
+	{
+		ret = true;
+	}
+
+	return ret;
+}
+
 //-----------------------------------------------------------------------------
 // Check for a RF sync
 //-----------------------------------------------------------------------------
@@ -322,28 +429,29 @@ uint8_t RFInSync(uint8_t identifier, uint16_t period_pos, uint16_t period_neg)
 				}
 				else
 				{
-					// check if SYNC high and SYNC low should be compared
-					if (PROTOCOL_DATA[used_protocol].SYNC_HIGH > 0)
+					switch (PROTOCOL_DATA[used_protocol].protocol_type)
 					{
-						if (
-							(period_pos > (PROTOCOL_DATA[used_protocol].SYNC_HIGH - SYNC_TOLERANCE)) &&
-							(period_pos < (PROTOCOL_DATA[used_protocol].SYNC_HIGH + SYNC_TOLERANCE)) &&
-							(period_neg > (PROTOCOL_DATA[used_protocol].SYNC_LOW - SYNC_TOLERANCE)) &&
-							(period_neg < (PROTOCOL_DATA[used_protocol].SYNC_LOW + SYNC_TOLERANCE))
-						)
+						case DUTY_CYCLE:
 						{
-							ret = used_protocol;
+							if (CheckSyncTiming(period_pos, period_neg,
+									((DUTY_CYLCE_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->SYNC_HIGH,
+									((DUTY_CYLCE_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->SYNC_LOW))
+							{
+								ret = used_protocol;
+							}
 							break;
 						}
-					}
-					// only SYNC low should be checked
-					else
-					if ((period_neg > (PROTOCOL_DATA[used_protocol].SYNC_LOW - SYNC_TOLERANCE)) &&
-						(period_neg < (PROTOCOL_DATA[used_protocol].SYNC_LOW + SYNC_TOLERANCE))
-					)
-					{
-						ret = used_protocol;
-						break;
+
+						case TIMING:
+						{
+							if (CheckSyncTiming(period_pos, period_neg,
+									((TIMING_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->SYNC_HIGH,
+									((TIMING_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->SYNC_LOW))
+							{
+								ret = used_protocol;
+							}
+							break;
+						}
 					}
 				}
 			}

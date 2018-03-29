@@ -159,15 +159,32 @@ void uart_put_RF_Data(uint8_t Command, uint8_t used_protocol)
 {
 	uint8_t i = 0;
 	uint8_t b = 0;
+	uint8_t bits = 0;
 
 	uart_putc(RF_CODE_START);
 	uart_putc(Command);
 
-	while(i < PROTOCOL_DATA[used_protocol].BIT_COUNT)
+	switch (PROTOCOL_DATA[used_protocol].protocol_type)
+	{
+		case DUTY_CYCLE:
+		{
+			bits = ((DUTY_CYLCE_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->BIT_COUNT;
+			break;
+		}
+
+		case TIMING:
+		{
+			bits = ((TIMING_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->BIT_COUNT;
+			break;
+		}
+	}
+
+	while(i < bits)
 	{
 		i += 8;
 		b++;
 	}
+
 	uart_putc(b+1);
 
 	// set identifier for this protocol

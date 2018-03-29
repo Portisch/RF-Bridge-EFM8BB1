@@ -353,27 +353,34 @@ int main (void)
 
 					// wait until data got transfered
 					case RF_FINISHED:
-						if (tr_repeats != 0)
+						switch (PROTOCOL_DATA[PCA0_GetProtocolIndex(PT2260_IDENTIFIER)].protocol_type)
 						{
-							if (PROTOCOL_DATA[PCA0_GetProtocolIndex(PT2260_IDENTIFIER)].REPEAT_DELAY > 0)
+							case DUTY_CYCLE:
 							{
-								InitTimer3_ms(1, PROTOCOL_DATA[PCA0_GetProtocolIndex(PT2260_IDENTIFIER)].REPEAT_DELAY);
-								// wait until timer has finished
-								WaitTimer3Finished();
+								if (tr_repeats != 0)
+								{
+									if (((DUTY_CYLCE_PROTOCOL_DATA *)PROTOCOL_DATA[PCA0_GetProtocolIndex(PT2260_IDENTIFIER)].protocol_data)->REPEAT_DELAY > 0)
+									{
+										InitTimer3_ms(1, ((DUTY_CYLCE_PROTOCOL_DATA *)PROTOCOL_DATA[PCA0_GetProtocolIndex(PT2260_IDENTIFIER)].protocol_data)->REPEAT_DELAY);
+										// wait until timer has finished
+										WaitTimer3Finished();
+									}
+
+									rf_state = RF_IDLE;
+								}
+								else
+								{
+									// restart sniffing if it was active
+									PCA0_DoSniffing(last_sniffing_command);
+
+									// send acknowledge
+									uart_put_command(RF_CODE_ACK);
+
+									// enable UART again
+									ReadUARTData = true;
+								}
+								break;
 							}
-
-							rf_state = RF_IDLE;
-						}
-						else
-						{
-							// restart sniffing if it was active
-							PCA0_DoSniffing(last_sniffing_command);
-
-							// send acknowledge
-							uart_put_command(RF_CODE_ACK);
-
-							// enable UART again
-							ReadUARTData = true;
 						}
 						break;
 				}
@@ -434,75 +441,93 @@ int main (void)
 				{
 					// init and start RF transmit
 					case RF_IDLE:
-						tr_repeats--;
-						PCA0_StopSniffing();
-						// check if unknown protocol should be used
-						// byte 0:		0x7F Protocol identifier
-						// byte 1..2:	SYNC_HIGH
-						// byte 3..4:	SYNC_LOW
-						// byte 5..6:	BIT_HIGH_TIME
-						// byte 7:		BIT_HIGH_DUTY
-						// byte 8..9:	BIT_LOW_TIME
-						// byte 10:		BIT_LOW_DUTY
-						// byte 11:		BIT_COUNT + SYNC_BIT_COUNT in front of RF data
-						// byte 12..N:	RF data to send
-						if (RF_DATA[0] == 0x7F)
+						switch (PROTOCOL_DATA[protocol_index].protocol_type)
 						{
-							PCA0_InitTransmit(*(uint16_t *)&RF_DATA[1], *(uint16_t *)&RF_DATA[3],
-									*(uint16_t *)&RF_DATA[5], RF_DATA[7], *(uint16_t *)&RF_DATA[8], RF_DATA[10], RF_DATA[11]);
-
-							actual_byte = 12;
-						}
-						// byte 0:		Protocol identifier 0x01..0x7E
-						// byte 1..N:	data to be transmitted
-						else
-						{
-							protocol_index = PCA0_GetProtocolIndex(RF_DATA[0]);
-
-							if (protocol_index != 0xFF)
+							case DUTY_CYCLE:
 							{
-								PCA0_InitTransmit(PROTOCOL_DATA[protocol_index].SYNC_HIGH, PROTOCOL_DATA[protocol_index].SYNC_LOW,
-										PROTOCOL_DATA[protocol_index].BIT_HIGH_TIME, PROTOCOL_DATA[protocol_index].BIT_HIGH_DUTY,
-										PROTOCOL_DATA[protocol_index].BIT_LOW_TIME, PROTOCOL_DATA[protocol_index].BIT_LOW_DUTY,
-										PROTOCOL_DATA[protocol_index].BIT_COUNT);
+								tr_repeats--;
+								PCA0_StopSniffing();
+								// check if unknown protocol should be used
+								// byte 0:		0x7F Protocol identifier
+								// byte 1..2:	SYNC_HIGH
+								// byte 3..4:	SYNC_LOW
+								// byte 5..6:	BIT_HIGH_TIME
+								// byte 7:		BIT_HIGH_DUTY
+								// byte 8..9:	BIT_LOW_TIME
+								// byte 10:		BIT_LOW_DUTY
+								// byte 11:		BIT_COUNT + SYNC_BIT_COUNT in front of RF data
+								// byte 12..N:	RF data to send
+								if (RF_DATA[0] == 0x7F)
+								{
+									PCA0_InitTransmit(*(uint16_t *)&RF_DATA[1], *(uint16_t *)&RF_DATA[3],
+											*(uint16_t *)&RF_DATA[5], RF_DATA[7], *(uint16_t *)&RF_DATA[8], RF_DATA[10], RF_DATA[11]);
 
-								actual_byte = 1;
-							}
-							else
-							{
-								uart_command = NONE;
+									actual_byte = 12;
+								}
+								// byte 0:		Protocol identifier 0x01..0x7E
+								// byte 1..N:	data to be transmitted
+								else
+								{
+									protocol_index = PCA0_GetProtocolIndex(RF_DATA[0]);
+
+									if (protocol_index != 0xFF)
+									{
+										PCA0_InitTransmit(
+												((DUTY_CYLCE_PROTOCOL_DATA *)PROTOCOL_DATA[protocol_index].protocol_data)->SYNC_HIGH,
+												((DUTY_CYLCE_PROTOCOL_DATA *)PROTOCOL_DATA[protocol_index].protocol_data)->SYNC_LOW,
+												((DUTY_CYLCE_PROTOCOL_DATA *)PROTOCOL_DATA[protocol_index].protocol_data)->BIT_HIGH_TIME,
+												((DUTY_CYLCE_PROTOCOL_DATA *)PROTOCOL_DATA[protocol_index].protocol_data)->BIT_HIGH_DUTY,
+												((DUTY_CYLCE_PROTOCOL_DATA *)PROTOCOL_DATA[protocol_index].protocol_data)->BIT_LOW_TIME,
+												((DUTY_CYLCE_PROTOCOL_DATA *)PROTOCOL_DATA[protocol_index].protocol_data)->BIT_LOW_DUTY,
+												((DUTY_CYLCE_PROTOCOL_DATA *)PROTOCOL_DATA[protocol_index].protocol_data)->BIT_COUNT
+												);
+
+										actual_byte = 1;
+									}
+									else
+									{
+										uart_command = NONE;
+									}
+								}
+
+								// if valid RF protocol start RF transmit
+								if (uart_command != NONE)
+									PCA0_StartTransmit();
+								break;
 							}
 						}
-
-						// if valid RF protocol start RF transmit
-						if (uart_command != NONE)
-							PCA0_StartTransmit();
-
 						break;
 
 					// wait until data got transfered
 					case RF_FINISHED:
-						if (tr_repeats != 0)
+						switch (PROTOCOL_DATA[protocol_index].protocol_type)
 						{
-							if (PROTOCOL_DATA[protocol_index].REPEAT_DELAY > 0)
+							case DUTY_CYCLE:
 							{
-								InitTimer3_ms(1, PROTOCOL_DATA[protocol_index].REPEAT_DELAY);
-								// wait until timer has finished
-								WaitTimer3Finished();
+								if (tr_repeats != 0)
+								{
+									if (((DUTY_CYLCE_PROTOCOL_DATA *)PROTOCOL_DATA[protocol_index].protocol_data)->REPEAT_DELAY > 0)
+									{
+										InitTimer3_ms(1, ((DUTY_CYLCE_PROTOCOL_DATA *)PROTOCOL_DATA[protocol_index].protocol_data)->REPEAT_DELAY);
+										// wait until timer has finished
+										WaitTimer3Finished();
+									}
+
+									rf_state = RF_IDLE;
+								}
+								else
+								{
+									// restart sniffing if it was active
+									PCA0_DoSniffing(last_sniffing_command);
+
+									// send acknowledge
+									uart_put_command(RF_CODE_ACK);
+
+									// enable UART again
+									ReadUARTData = true;
+								}
+								break;
 							}
-
-							rf_state = RF_IDLE;
-						}
-						else
-						{
-							// restart sniffing if it was active
-							PCA0_DoSniffing(last_sniffing_command);
-
-							// send acknowledge
-							uart_put_command(RF_CODE_ACK);
-
-							// enable UART again
-							ReadUARTData = true;
 						}
 						break;
 				}
