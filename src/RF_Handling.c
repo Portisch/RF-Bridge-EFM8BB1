@@ -863,6 +863,17 @@ void Bucket_Received(uint16_t duration)
 					StopTimer2();
 					InitTimer2_ms(1, 500);
 					old_crc = crc;
+
+					// add sync bucket number to data
+					if (actual_bit_of_byte == 0)
+					{
+						RF_DATA[actual_byte] |= (bucket_count & 0x0F);
+					}
+					else
+					{
+						RF_DATA[actual_byte] = (bucket_count << 4) | 0x0F;
+					}
+
 					RF_DATA_STATUS |= RF_DATA_RECEIVED_MASK;
 				}
 
@@ -880,11 +891,12 @@ void Bucket_Received(uint16_t duration)
 				else
 				{
 					RF_DATA[actual_byte] |= (bucket_index & 0x0F);
-					actual_byte++;
-					actual_bit_of_byte = 4;
 
 					// 8 bits are done, compute crc of data
 					crc = Compute_CRC8_Simple_OneByte(crc ^ RF_DATA[actual_byte]);
+
+					actual_byte++;
+					actual_bit_of_byte = 4;
 
 					// check if maximum of array got reached
 					if (actual_byte > sizeof(RF_DATA))

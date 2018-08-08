@@ -260,12 +260,6 @@ void uart_put_RF_buckets(uint8_t Command)
 	UART0_initTxPolling();
 	uart_wait_until_TX_finished();
 
-	// add sync bucket on data
-	if (actual_bit_of_byte == 4)
-		RF_DATA[actual_byte] = bucket_count << 4;
-	else
-		RF_DATA[actual_byte] |= (bucket_count & 0x0F);
-
 	i = 0;
 	while(i < (actual_byte + 1))
 	{
