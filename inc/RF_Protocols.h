@@ -97,7 +97,7 @@ typedef struct
  * http://www.princeton.com.tw/Portals/0/Product/PT2260_4.pdf
  */
 #define PT2260_IDENTIFIER				0x01
-#define PT226x_SYNC_MIN					6000
+#define PT226x_SYNC_MIN					4500
 #define PT226x_SYNC_MAX					18000
 
 SI_SEGMENT_VARIABLE(PT2260, static DUTY_CYLCE_PROTOCOL_DATA, SI_SEG_CODE) =
