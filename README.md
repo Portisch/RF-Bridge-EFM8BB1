@@ -186,8 +186,6 @@ Hex: AA B0 20 04 1A 0120 01C0 0300 2710 0121212201220121212121212122012121220121
 0x01-0xC0: Bucket 2 length: 448µs<br/>
 0x03-0x00: Bucket 3 length: 768µs<br/>
 0x27-0x10: Bucket 4 length: 10ms (sync)<br/>
-0x05-0xDC: SYNC_LOW<br/>
-0x02-0xBC: BIT_HIGH_TIME<br/>
 0x01-0x03: RF data to send (high/low nibbles denote buckets to use for RF high (on) and low (off))<br/>
 0x55: uart sync end
 
