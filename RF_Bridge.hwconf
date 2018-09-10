@@ -85,9 +85,9 @@
     <property object="UART_0" propertyId="ABPeripheral.included" value="true"/>
     <property object="UART_0" propertyId="uart.serialportcontrol.enablereceive" value="Enabled"/>
     <property object="WDT_0" propertyId="ABPeripheral.included" value="true"/>
-    <property object="WDT_0" propertyId="wdt.watchdogcontrol.wdtenable" value="Disable"/>
-    <property object="WDT_0" propertyId="wdt.watchdogcontrol.wdtinitialvalue" value="5"/>
-    <property object="WDT_0" propertyId="wdt.watchdogcontrol.wdtperiodactual" value="6.554 s"/>
+    <property object="WDT_0" propertyId="wdt.watchdogcontrol.wdtinitialvalue" value="4"/>
+    <property object="WDT_0" propertyId="wdt.watchdogcontrol.wdtperiodactual" value="1.638 s"/>
+    <property object="WDT_0" propertyId="wdt.watchdogcontrol.wdtperiodtargetms" value="2000"/>
   </mode>
   <modeTransition>
     <property object="RESET &#x2192; DefaultMode" propertyId="modeTransition.source" value="RESET"/>

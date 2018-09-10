@@ -44,9 +44,6 @@ extern void enter_DefaultMode_from_RESET(void) {
 //================================================================================
 extern void WDT_0_enter_DefaultMode_from_RESET(void) {
 	// $[WDTCN - Watchdog Timer Control]
-	//Disable Watchdog with key sequence
-	WDTCN = 0xDE; //First key
-	WDTCN = 0xAD; //Second key
 	// [WDTCN - Watchdog Timer Control]$
 
 }

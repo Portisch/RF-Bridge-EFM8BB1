@@ -14,6 +14,7 @@
 #include "InitDevice.h"
 #include "uart_0.h"
 #include "pca_0.h"
+#include "wdt_0.h"
 #include "uart.h"
 #include "RF_Handling.h"
 #include "RF_Protocols.h"
@@ -80,14 +81,17 @@ int main (void)
 
 	while (1)
 	{
-		/*------------------------------------------
-		 * check if something got received by UART
-		 ------------------------------------------*/
 		unsigned int rxdata;
 		uint8_t len;
 		uint8_t position;
 		uint8_t protocol_index;
 
+		/* reset Watch Dog Timer */
+		WDT0_feed();
+
+		/*------------------------------------------
+		 * check if something got received by UART
+		 ------------------------------------------*/
 		// read only data from uart if idle
 		if (ReadUARTData)
 			rxdata = uart_getc();
