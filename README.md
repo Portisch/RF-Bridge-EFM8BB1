@@ -210,6 +210,19 @@ Hex: AA B1 04 0120 01C0 0300 2710 01212122012201212121212121220121212201212203 5
 0x01-0x03: RF data received (high/low nibbles denote buckets)<br/>
 0x55: uart sync end
 
+## 0xB1 to 0xB0 helping tool
+After learning how bit bucket works from here https://github.com/Portisch/RF-Bridge-EFM8BB1/issues/23 this is a python script to help calculate the right 'B0' message to send using 'RfRaw' command in Tasmota from the received 'B1' sniffing message.
+
+[BitBucketConverter.py by gerardovf](https://gist.github.com/gerardovf/15109405e8a53dd075bbe650d70fafc6)
+
+In the command line give the 'B1' message string and the retries value (in decimal):<br/>
+i.e. BitBucketConverter.py "AA B1 04 07EB 0157 00FD 3EBC 010101010101101001010101101010100103 55" 20
+
+Command Line : "AA B1 04 07EB 0157 00FD 3EBC 010101010101101001010101101010100103 55" 20<br/>
+Result: 'RfRaw AAB01C041407EB015700FD3EBC01010101010110100101010110101010010355'
+
+For support/help take a look [here](https://github.com/Portisch/RF-Bridge-EFM8BB1/issues/31) or contact gerardovf.
+
 ## Beep by command 0xC0
 Hex: AA C0 xx xx 55<br/>
 
