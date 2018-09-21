@@ -234,8 +234,15 @@ int main (void)
 					RF_DATA[position] = rxdata & 0xFF;
 					position++;
 
-					if (position == len || position >= RF_DATA_BUFFERSIZE)
+					if (position == len)
+					{
 						uart_state = SYNC_FINISH;
+					}
+					else if (position >= RF_DATA_BUFFERSIZE)
+					{
+						len = RF_DATA_BUFFERSIZE;
+						uart_state = SYNC_FINISH;
+					}
 					break;
 
 				// wait and check for UART_SYNC_END
