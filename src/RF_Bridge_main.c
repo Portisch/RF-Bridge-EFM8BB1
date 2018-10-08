@@ -450,9 +450,16 @@ int main (void)
 				// do transmit of the data
 				switch(rf_state)
 				{
+					protocol_type_t RF_CODE_RFOUT_NEW_PROTOCOL_TYPE = DUTY_CYCLE;
+
 					// init and start RF transmit
 					case RF_IDLE:
-						switch (PROTOCOL_DATA[protocol_index].protocol_type)
+						protocol_index = PCA0_GetProtocolIndex(RF_DATA[0]);
+
+						if (protocol_index != 0xFF)
+							RF_CODE_RFOUT_NEW_PROTOCOL_TYPE = PROTOCOL_DATA[protocol_index].protocol_type;
+
+						switch (RF_CODE_RFOUT_NEW_PROTOCOL_TYPE)
 						{
 							case DUTY_CYCLE:
 							{
@@ -479,8 +486,6 @@ int main (void)
 								// byte 1..N:	data to be transmitted
 								else
 								{
-									protocol_index = PCA0_GetProtocolIndex(RF_DATA[0]);
-
 									if (protocol_index != 0xFF)
 									{
 										PCA0_InitTransmit(
@@ -511,7 +516,10 @@ int main (void)
 
 					// wait until data got transfered
 					case RF_FINISHED:
-						switch (PROTOCOL_DATA[protocol_index].protocol_type)
+						if (protocol_index != 0xFF)
+							RF_CODE_RFOUT_NEW_PROTOCOL_TYPE = PROTOCOL_DATA[protocol_index].protocol_type;
+
+						switch (RF_CODE_RFOUT_NEW_PROTOCOL_TYPE)
 						{
 							case DUTY_CYCLE:
 							{
