@@ -107,6 +107,7 @@ void PCA0_channel1EventCb()
 	static uint16_t current_capture_value;
 	static uint16_t previous_capture_value_pos, previous_capture_value_neg;
 	static uint16_t capture_period_pos, capture_period_neg;
+	static int32_t capture_period_pos_s, capture_period_neg_s;
 
 	static uint8_t used_protocol;
 	static uint16_t low_pulse_time;
@@ -251,21 +252,25 @@ void PCA0_channel1EventCb()
 								actual_bit_of_byte--;
 								actual_bit++;
 
+								// use signed variables
+								capture_period_pos_s = capture_period_pos;
+								capture_period_neg_s = capture_period_neg;
+
 								// check if bit is a logic 0 or 1
-								if((abs(capture_period_pos -
+								if((abs(capture_period_pos_s -
 										((TIMING_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->PULSE_TIME *
 										((TIMING_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->bit0.high) < delayTolerance) &&
-									(abs(capture_period_neg -
+									(abs(capture_period_neg_s -
 										((TIMING_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->PULSE_TIME *
 										((TIMING_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->bit0.low) < delayTolerance)
 										)
 								{
 									LED = LED_OFF;
 								}
-								else if((abs(capture_period_pos -
+								else if((abs(capture_period_pos_s -
 										((TIMING_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->PULSE_TIME *
 										((TIMING_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->bit1.high) < delayTolerance) &&
-									(abs(capture_period_neg -
+									(abs(capture_period_neg_s -
 										((TIMING_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->PULSE_TIME *
 										((TIMING_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->bit1.low) < delayTolerance)
 										)
