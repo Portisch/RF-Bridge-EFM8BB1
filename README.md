@@ -137,6 +137,8 @@ Stop the 0xA6 sniffing and restart the PT226x sniffing.
 
 ## Transmiting by command 0xA8
 There is a new command in the firmware to be able to send RF data.<br/>
+Predefined protocols in the RF_Protocols.h file can be used directly by<br/>
+using the protocol identifier.<br/>
 
 Hex: AA A8 06 02 D0 F9 32 11 33 55<br/>
 
@@ -147,7 +149,12 @@ Hex: AA A8 06 02 D0 F9 32 11 33 55<br/>
 0xD0-0x33: data<br/>
 0x55: uart sync end
 
-Universal transmit by command 0xA8<br/>
+### Universal transmit of a duty cycle based protocol by command 0xA8
+When 0x7F get used as protocol identifier the timing can be user defined<br/>
+and do not have to be defined in RF_Protocols.h.<br/>
+This methode can be used to find correct parameter to define the timing<br/>
+in RF_Protocols.h for future.
+
 Hex: AA A8 0D 7F 12 C0 05 DC 02 BC 46 01 2C 1E 08 1E 55<br/>
 
 0xAA: uart sync init<br/>
