@@ -160,6 +160,7 @@ void uart_put_RF_Data(uint8_t Command, uint8_t used_protocol)
 	uint8_t i = 0;
 	uint8_t b = 0;
 	uint8_t bits = 0;
+	SI_VARIABLE_SEGMENT_POINTER(pVar, uint8_t, SI_SEG_CODE) = PROTOCOL_DATA[used_protocol].protocol_data;
 
 	uart_putc(RF_CODE_START);
 	uart_putc(Command);
@@ -168,13 +169,13 @@ void uart_put_RF_Data(uint8_t Command, uint8_t used_protocol)
 	{
 		case DUTY_CYCLE:
 		{
-			bits = ((DUTY_CYLCE_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->BIT_COUNT;
+			bits = ((DUTY_CYLCE_PROTOCOL_DATA *)pVar)->BIT_COUNT;
 			break;
 		}
 
 		case TIMING:
 		{
-			bits = ((TIMING_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->BIT_COUNT;
+			bits = ((TIMING_PROTOCOL_DATA *)pVar)->BIT_COUNT;
 			break;
 		}
 	}

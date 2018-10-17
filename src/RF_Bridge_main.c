@@ -370,9 +370,10 @@ int main (void)
 							{
 								if (tr_repeats != 0)
 								{
-									if (((DUTY_CYLCE_PROTOCOL_DATA *)PROTOCOL_DATA[PCA0_GetProtocolIndex(PT2260_IDENTIFIER)].protocol_data)->REPEAT_DELAY > 0)
+									SI_VARIABLE_SEGMENT_POINTER(pVar, uint8_t, SI_SEG_CODE) = PROTOCOL_DATA[PCA0_GetProtocolIndex(PT2260_IDENTIFIER)].protocol_data;
+									if (((DUTY_CYLCE_PROTOCOL_DATA *)pVar)->REPEAT_DELAY > 0)
 									{
-										InitTimer3_ms(1, ((DUTY_CYLCE_PROTOCOL_DATA *)PROTOCOL_DATA[PCA0_GetProtocolIndex(PT2260_IDENTIFIER)].protocol_data)->REPEAT_DELAY);
+										InitTimer3_ms(1, ((DUTY_CYLCE_PROTOCOL_DATA *)pVar)->REPEAT_DELAY);
 										// wait until timer has finished
 										WaitTimer3Finished();
 									}
@@ -450,23 +451,36 @@ int main (void)
 				// do transmit of the data
 				switch(rf_state)
 				{
-					protocol_type_t RF_CODE_RFOUT_NEW_PROTOCOL_TYPE = DUTY_CYCLE;
+					static protocol_type_t RF_CODE_RFOUT_NEW_PROTOCOL_TYPE = DUTY_CYCLE;
 
 					// init and start RF transmit
 					case RF_IDLE:
-						protocol_index = PCA0_GetProtocolIndex(RF_DATA[0]);
+						switch (RF_DATA[0])
+						{
+							case UNDEFINED_DUTY_CYCLE:
+								RF_CODE_RFOUT_NEW_PROTOCOL_TYPE = DUTY_CYCLE;
+								protocol_index = 0xFF;
+								break;
+							case UNDEFINED_TIMING:
+								RF_CODE_RFOUT_NEW_PROTOCOL_TYPE = TIMING;
+								protocol_index = 0xFF;
+								break;
+							default:
+								protocol_index = PCA0_GetProtocolIndex(RF_DATA[0]);
+								if (protocol_index != 0xFF)
+									RF_CODE_RFOUT_NEW_PROTOCOL_TYPE = PROTOCOL_DATA[protocol_index].protocol_type;
+								break;
+						}
 
-						if (protocol_index != 0xFF)
-							RF_CODE_RFOUT_NEW_PROTOCOL_TYPE = PROTOCOL_DATA[protocol_index].protocol_type;
+						tr_repeats--;
+						PCA0_StopSniffing();
 
 						switch (RF_CODE_RFOUT_NEW_PROTOCOL_TYPE)
 						{
 							case DUTY_CYCLE:
 							{
-								tr_repeats--;
-								PCA0_StopSniffing();
 								// check if unknown protocol should be used
-								// byte 0:		0x7F Protocol identifier
+								// byte 0:		Protocol identifier
 								// byte 1..2:	SYNC_HIGH
 								// byte 3..4:	SYNC_LOW
 								// byte 5..6:	BIT_HIGH_TIME
@@ -475,7 +489,7 @@ int main (void)
 								// byte 10:		BIT_LOW_DUTY
 								// byte 11:		BIT_COUNT + SYNC_BIT_COUNT in front of RF data
 								// byte 12..N:	RF data to send
-								if (RF_DATA[0] == 0x7F)
+								if (RF_DATA[0] == UNDEFINED_DUTY_CYCLE)
 								{
 									PCA0_InitTransmit(*(uint16_t *)&RF_DATA[1], *(uint16_t *)&RF_DATA[3],
 											*(uint16_t *)&RF_DATA[5], RF_DATA[7], *(uint16_t *)&RF_DATA[8], RF_DATA[10], RF_DATA[11]);
@@ -488,14 +502,16 @@ int main (void)
 								{
 									if (protocol_index != 0xFF)
 									{
+										SI_VARIABLE_SEGMENT_POINTER(pVar, uint8_t, SI_SEG_CODE) = PROTOCOL_DATA[protocol_index].protocol_data;
+
 										PCA0_InitTransmit(
-												((DUTY_CYLCE_PROTOCOL_DATA *)PROTOCOL_DATA[protocol_index].protocol_data)->SYNC_HIGH,
-												((DUTY_CYLCE_PROTOCOL_DATA *)PROTOCOL_DATA[protocol_index].protocol_data)->SYNC_LOW,
-												((DUTY_CYLCE_PROTOCOL_DATA *)PROTOCOL_DATA[protocol_index].protocol_data)->BIT_HIGH_TIME,
-												((DUTY_CYLCE_PROTOCOL_DATA *)PROTOCOL_DATA[protocol_index].protocol_data)->BIT_HIGH_DUTY,
-												((DUTY_CYLCE_PROTOCOL_DATA *)PROTOCOL_DATA[protocol_index].protocol_data)->BIT_LOW_TIME,
-												((DUTY_CYLCE_PROTOCOL_DATA *)PROTOCOL_DATA[protocol_index].protocol_data)->BIT_LOW_DUTY,
-												((DUTY_CYLCE_PROTOCOL_DATA *)PROTOCOL_DATA[protocol_index].protocol_data)->BIT_COUNT
+												((DUTY_CYLCE_PROTOCOL_DATA *)pVar)->SYNC_HIGH,
+												((DUTY_CYLCE_PROTOCOL_DATA *)pVar)->SYNC_LOW,
+												((DUTY_CYLCE_PROTOCOL_DATA *)pVar)->BIT_HIGH_TIME,
+												((DUTY_CYLCE_PROTOCOL_DATA *)pVar)->BIT_HIGH_DUTY,
+												((DUTY_CYLCE_PROTOCOL_DATA *)pVar)->BIT_LOW_TIME,
+												((DUTY_CYLCE_PROTOCOL_DATA *)pVar)->BIT_LOW_DUTY,
+												((DUTY_CYLCE_PROTOCOL_DATA *)pVar)->BIT_COUNT
 												);
 
 										actual_byte = 1;
@@ -511,41 +527,119 @@ int main (void)
 									PCA0_StartTransmit();
 								break;
 							}
+
+							case TIMING:
+							{
+								// check if unknown protocol should be used
+								// byte 0:		Protocol identifier
+								// byte 1..2:	SYNC_HIGH
+								// byte 3..4:	SYNC_LOW
+								// byte 5..6:	PULSE_TIME
+								// byte 7:		BIT_0_HIGH FACTOR
+								// byte 8:		BIT_0_LOW FACTOR
+								// byte 9:		BIT_1_HIGH FACTOR
+								// byte 10:		BIT_1_LOW FACTOR
+								// byte 11:		BIT_COUNT
+								// byte 12..N:	RF data to send
+								if (RF_DATA[0] == UNDEFINED_TIMING)
+								{
+									actual_byte = 12;
+
+									SendTimingProtocol(*(uint16_t *)&RF_DATA[1], *(uint16_t *)&RF_DATA[3],
+											*(uint16_t *)&RF_DATA[5] * RF_DATA[7],
+											*(uint16_t *)&RF_DATA[5] * RF_DATA[8],
+											*(uint16_t *)&RF_DATA[5] * RF_DATA[9],
+											*(uint16_t *)&RF_DATA[5] * RF_DATA[10],
+											RF_DATA[11]);
+								}
+								// byte 0:		Protocol identifier 0x01..0x7E
+								// byte 1..N:	data to be transmitted
+								else
+								{
+									if (protocol_index != 0xFF)
+									{
+										SI_VARIABLE_SEGMENT_POINTER(pVar, uint8_t, SI_SEG_CODE) = PROTOCOL_DATA[protocol_index].protocol_data;
+
+										actual_byte = 1;
+
+										SendTimingProtocol(
+												((TIMING_PROTOCOL_DATA *)pVar)->SYNC_HIGH,
+												((TIMING_PROTOCOL_DATA *)pVar)->SYNC_LOW,
+												((TIMING_PROTOCOL_DATA *)pVar)->PULSE_TIME *
+													((TIMING_PROTOCOL_DATA *)pVar)->bit0.high,
+												((TIMING_PROTOCOL_DATA *)pVar)->PULSE_TIME *
+													((TIMING_PROTOCOL_DATA *)pVar)->bit0.low,
+												((TIMING_PROTOCOL_DATA *)pVar)->PULSE_TIME *
+													((TIMING_PROTOCOL_DATA *)pVar)->bit1.high,
+												((TIMING_PROTOCOL_DATA *)pVar)->PULSE_TIME *
+													((TIMING_PROTOCOL_DATA *)pVar)->bit1.low,
+												((TIMING_PROTOCOL_DATA *)pVar)->BIT_COUNT);
+									}
+									else
+									{
+										uart_command = NONE;
+									}
+								}
+								break;
+							}
 						}
 						break;
 
 					// wait until data got transfered
 					case RF_FINISHED:
-						if (protocol_index != 0xFF)
-							RF_CODE_RFOUT_NEW_PROTOCOL_TYPE = PROTOCOL_DATA[protocol_index].protocol_type;
-
-						switch (RF_CODE_RFOUT_NEW_PROTOCOL_TYPE)
+						if (tr_repeats == 0)
 						{
-							case DUTY_CYCLE:
+							// restart sniffing if it was active
+							PCA0_DoSniffing(last_sniffing_command);
+
+							// send acknowledge
+							uart_put_command(RF_CODE_ACK);
+
+							// enable UART again
+							ReadUARTData = true;
+
+							// reset type of protocol
+							RF_CODE_RFOUT_NEW_PROTOCOL_TYPE = DUTY_CYCLE;
+						}
+						else
+						{
+							switch (RF_CODE_RFOUT_NEW_PROTOCOL_TYPE)
 							{
-								if (tr_repeats != 0)
+								case DUTY_CYCLE:
 								{
-									if (((DUTY_CYLCE_PROTOCOL_DATA *)PROTOCOL_DATA[protocol_index].protocol_data)->REPEAT_DELAY > 0)
+									if (protocol_index != 0xFF)
 									{
-										InitTimer3_ms(1, ((DUTY_CYLCE_PROTOCOL_DATA *)PROTOCOL_DATA[protocol_index].protocol_data)->REPEAT_DELAY);
-										// wait until timer has finished
-										WaitTimer3Finished();
+										SI_VARIABLE_SEGMENT_POINTER(pVar, uint8_t, SI_SEG_CODE) = PROTOCOL_DATA[protocol_index].protocol_data;
+
+										if (((DUTY_CYLCE_PROTOCOL_DATA *)pVar)->REPEAT_DELAY > 0)
+										{
+											InitTimer3_ms(1, ((DUTY_CYLCE_PROTOCOL_DATA *)pVar)->REPEAT_DELAY);
+											// wait until timer has finished
+											WaitTimer3Finished();
+										}
 									}
 
 									rf_state = RF_IDLE;
+									break;
 								}
-								else
+
+								case TIMING:
 								{
-									// restart sniffing if it was active
-									PCA0_DoSniffing(last_sniffing_command);
+									if (protocol_index != 0xFF)
+									{
+										SI_VARIABLE_SEGMENT_POINTER(pVar, uint8_t, SI_SEG_CODE) = PROTOCOL_DATA[protocol_index].protocol_data;
 
-									// send acknowledge
-									uart_put_command(RF_CODE_ACK);
+										if (((TIMING_PROTOCOL_DATA *)pVar)->REPEAT_DELAY > 0)
+										{
+											InitTimer3_ms(1, ((TIMING_PROTOCOL_DATA *)pVar)->REPEAT_DELAY);
+											// wait until timer has finished
+											WaitTimer3Finished();
+										}
+									}
 
-									// enable UART again
-									ReadUARTData = true;
+									rf_state = RF_IDLE;
+									break;
 								}
-								break;
 							}
 						}
 						break;

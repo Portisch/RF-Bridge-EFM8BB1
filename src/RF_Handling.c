@@ -161,13 +161,16 @@ void PCA0_channel1EventCb()
 
 					// one matching sync got received
 					case RF_IN_SYNC:
+					{
+						SI_VARIABLE_SEGMENT_POINTER(pVar, uint8_t, SI_SEG_CODE) = PROTOCOL_DATA[used_protocol].protocol_data;
+
 						switch (PROTOCOL_DATA[used_protocol].protocol_type)
 						{
 							case DUTY_CYCLE:
 							{
 								// at first skip SYNC bits
-								if ((((DUTY_CYLCE_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->SYNC_BIT_COUNT > 0) &&
-									(actual_sync_bit < ((DUTY_CYLCE_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->SYNC_BIT_COUNT))
+								if ((((DUTY_CYLCE_PROTOCOL_DATA *)pVar)->SYNC_BIT_COUNT > 0) &&
+									(actual_sync_bit < ((DUTY_CYLCE_PROTOCOL_DATA *)pVar)->SYNC_BIT_COUNT))
 								{
 									actual_sync_bit++;
 									break;
@@ -182,9 +185,9 @@ void PCA0_channel1EventCb()
 
 								// check if high or low duty cycle fits
 								// ignore last bit because of wrong duty cycle
-								if (!CheckDutyCycle(current_duty_cycle, ((DUTY_CYLCE_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->BIT_HIGH_DUTY) &&
-										!CheckDutyCycle(current_duty_cycle, ((DUTY_CYLCE_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->BIT_LOW_DUTY) &&
-										actual_bit != ((DUTY_CYLCE_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->BIT_COUNT)
+								if (!CheckDutyCycle(current_duty_cycle, ((DUTY_CYLCE_PROTOCOL_DATA *)pVar)->BIT_HIGH_DUTY) &&
+										!CheckDutyCycle(current_duty_cycle, ((DUTY_CYLCE_PROTOCOL_DATA *)pVar)->BIT_LOW_DUTY) &&
+										actual_bit != ((DUTY_CYLCE_PROTOCOL_DATA *)pVar)->BIT_COUNT)
 								{
 									RF_DATA_STATUS = 0;
 									LED = LED_OFF;
@@ -192,10 +195,10 @@ void PCA0_channel1EventCb()
 									break;
 								}
 
-								if ((CheckDutyCycle(current_duty_cycle, ((DUTY_CYLCE_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->BIT_HIGH_DUTY) &&
-										(actual_bit < ((DUTY_CYLCE_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->BIT_COUNT)) ||
+								if ((CheckDutyCycle(current_duty_cycle, ((DUTY_CYLCE_PROTOCOL_DATA *)pVar)->BIT_HIGH_DUTY) &&
+										(actual_bit < ((DUTY_CYLCE_PROTOCOL_DATA *)pVar)->BIT_COUNT)) ||
 										// the duty cycle can not be used for the last bit because of the missing rising edge on the end
-										((capture_period_pos > low_pulse_time) && (actual_bit == ((DUTY_CYLCE_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->BIT_COUNT)))
+										((capture_period_pos > low_pulse_time) && (actual_bit == ((DUTY_CYLCE_PROTOCOL_DATA *)pVar)->BIT_COUNT)))
 								{
 									// backup last bit high time
 									BIT_HIGH = capture_period_pos;
@@ -220,7 +223,7 @@ void PCA0_channel1EventCb()
 								}
 
 								// check if all bits for this protocol got received
-								if (actual_bit == ((DUTY_CYLCE_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->BIT_COUNT)
+								if (actual_bit == ((DUTY_CYLCE_PROTOCOL_DATA *)pVar)->BIT_COUNT)
 								{
 									// check if timeout timer for crc is finished
 									if (IsTimer2Finished())
@@ -245,8 +248,8 @@ void PCA0_channel1EventCb()
 
 							case TIMING:
 							{
-								uint16_t delayTolerance = ((TIMING_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->PULSE_TIME *
-										((TIMING_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->TOLERANCE / 100;
+								uint16_t delayTolerance = ((TIMING_PROTOCOL_DATA *)pVar)->PULSE_TIME *
+										((TIMING_PROTOCOL_DATA *)pVar)->TOLERANCE / 100;
 
 								// check the rest of the bits
 								actual_bit_of_byte--;
@@ -258,21 +261,21 @@ void PCA0_channel1EventCb()
 
 								// check if bit is a logic 0 or 1
 								if((abs(capture_period_pos_s -
-										((TIMING_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->PULSE_TIME *
-										((TIMING_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->bit0.high) < delayTolerance) &&
+										((TIMING_PROTOCOL_DATA *)pVar)->PULSE_TIME *
+										((TIMING_PROTOCOL_DATA *)pVar)->bit0.high) < delayTolerance) &&
 									(abs(capture_period_neg_s -
-										((TIMING_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->PULSE_TIME *
-										((TIMING_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->bit0.low) < delayTolerance)
+										((TIMING_PROTOCOL_DATA *)pVar)->PULSE_TIME *
+										((TIMING_PROTOCOL_DATA *)pVar)->bit0.low) < delayTolerance)
 										)
 								{
 									LED = LED_OFF;
 								}
 								else if((abs(capture_period_pos_s -
-										((TIMING_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->PULSE_TIME *
-										((TIMING_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->bit1.high) < delayTolerance) &&
+										((TIMING_PROTOCOL_DATA *)pVar)->PULSE_TIME *
+										((TIMING_PROTOCOL_DATA *)pVar)->bit1.high) < delayTolerance) &&
 									(abs(capture_period_neg_s -
-										((TIMING_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->PULSE_TIME *
-										((TIMING_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->bit1.low) < delayTolerance)
+										((TIMING_PROTOCOL_DATA *)pVar)->PULSE_TIME *
+										((TIMING_PROTOCOL_DATA *)pVar)->bit1.low) < delayTolerance)
 										)
 								{
 									LED = LED_ON;
@@ -294,7 +297,7 @@ void PCA0_channel1EventCb()
 								}
 
 								// check if all bits for this protocol got received
-								if (actual_bit == ((TIMING_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->BIT_COUNT)
+								if (actual_bit == ((TIMING_PROTOCOL_DATA *)pVar)->BIT_COUNT)
 								{
 									// check if timeout timer for crc is finished
 									if (IsTimer2Finished())
@@ -318,6 +321,7 @@ void PCA0_channel1EventCb()
 							}
 						}
 						break;
+					}
 				}
 				break;
 
@@ -439,13 +443,15 @@ uint8_t RFInSync(uint8_t identifier, uint16_t period_pos, uint16_t period_neg)
 				}
 				else
 				{
+					SI_VARIABLE_SEGMENT_POINTER(pVar, uint8_t, SI_SEG_CODE) = PROTOCOL_DATA[used_protocol].protocol_data;
+
 					switch (PROTOCOL_DATA[used_protocol].protocol_type)
 					{
 						case DUTY_CYCLE:
 						{
 							if (CheckSyncTiming(period_pos, period_neg,
-									((DUTY_CYLCE_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->SYNC_HIGH,
-									((DUTY_CYLCE_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->SYNC_LOW))
+									((DUTY_CYLCE_PROTOCOL_DATA *)pVar)->SYNC_HIGH,
+									((DUTY_CYLCE_PROTOCOL_DATA *)pVar)->SYNC_LOW))
 							{
 								ret = used_protocol;
 							}
@@ -455,8 +461,8 @@ uint8_t RFInSync(uint8_t identifier, uint16_t period_pos, uint16_t period_neg)
 						case TIMING:
 						{
 							if (CheckSyncTiming(period_pos, period_neg,
-									((TIMING_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->SYNC_HIGH,
-									((TIMING_PROTOCOL_DATA *)PROTOCOL_DATA[used_protocol].protocol_data)->SYNC_LOW))
+									((TIMING_PROTOCOL_DATA *)pVar)->SYNC_HIGH,
+									((TIMING_PROTOCOL_DATA *)pVar)->SYNC_LOW))
 							{
 								ret = used_protocol;
 							}
@@ -505,8 +511,6 @@ bool CheckDutyCycle(uint8_t current_duty_cycle, uint8_t desired_duty_cycle)
 void SendRF_SYNC(void)
 {
 	LED = LED_ON;
-	// enable P0.0 for I/O control
-	XBR1 &= ~XBR1_PCA0ME__CEX0_CEX1;
 	// switch to high
 	T_DATA = 1;
 	// do high time
@@ -523,8 +527,6 @@ void SendRF_SYNC(void)
 	InitTimer3_us(10, SYNC_LOW);
 	// wait until timer has finished
 	WaitTimer3Finished();
-	// disable P0.0 for I/O control, enter PCA mode
-	XBR1 |= XBR1_PCA0ME__CEX0_CEX1;
 }
 
 uint8_t PCA0_GetProtocolIndex(uint8_t identifier)
@@ -620,7 +622,11 @@ void PCA0_StartTransmit(void)
 	SetPCA0DutyCylce();
 
 	// make RF sync pulse
+	// enable P0.0 for I/O control
+	XBR1 &= ~XBR1_PCA0ME__CEX0_CEX1;
 	SendRF_SYNC();
+	// disable P0.0 for I/O control, enter PCA mode
+	XBR1 |= XBR1_PCA0ME__CEX0_CEX1;
 
 	PCA0_run();
 }
@@ -712,6 +718,20 @@ void PCA0_StopSniffing(void)
 	rf_state = RF_IDLE;
 }
 
+void SendSingleBit(uint16_t high_time, uint16_t low_time)
+{
+	// switch to high
+	T_DATA = 1;
+	InitTimer3_us(10, high_time);
+	// wait until timer has finished
+	WaitTimer3Finished();
+
+	// switch to low
+	T_DATA = 0;
+	InitTimer3_us(10, low_time);
+	// wait until timer has finished
+	WaitTimer3Finished();
+}
 //-----------------------------------------------------------------------------
 // Send generic signal based on n time bucket pairs (high/low timing)
 //-----------------------------------------------------------------------------
@@ -751,6 +771,58 @@ void SendRFBuckets(const uint16_t buckets[], const uint8_t rfdata[], uint8_t n, 
 	// disable P0.0 for I/O control, enter PCA mode
 	XBR1 |= XBR1_PCA0ME__CEX0_CEX1;
 	LED = LED_OFF;
+}
+
+void SendTimingProtocol(uint16_t sync_high, uint16_t sync_low,
+		uint16_t bit_0_high, uint16_t bit_0_low, uint16_t bit_1_high, uint16_t bit_1_low,
+		uint8_t bitcount)
+{
+	uint8_t i;
+	uint8_t actual_bit_of_byte = 0x80;
+
+	// disable interrupts for RF receiving and transmitting
+	PCA0CPM1 &= ~PCA0CPM1_ECCF__ENABLED;
+	PCA0CPM0 &= ~PCA0CPM0_ECCF__ENABLED;
+	// clear Cycle Overflow Flag
+	PCA0PWM &= ~PCA0PWM_COVF__OVERFLOW;
+	PCA0PWM &= ~PCA0PWM_ECOV__COVF_MASK_ENABLED;
+
+	// enable P0.0 for I/O control
+	XBR1 &= ~XBR1_PCA0ME__CEX0_CEX1;
+
+	SYNC_HIGH = sync_high;
+	SYNC_LOW = sync_low;
+
+	// do send sync
+	SendRF_SYNC();
+
+	for (i = 0; i < bitcount; i++)
+	{
+		if (RF_DATA[actual_byte] & actual_bit_of_byte)
+		{
+			// send a bit 1
+			SendSingleBit(bit_1_high, bit_1_low);
+		}
+		else
+		{
+			// send a bit 0
+			SendSingleBit(bit_0_high, bit_0_low);
+		}
+
+		actual_bit_of_byte >>= 1;
+
+		if (actual_bit_of_byte == 0)
+		{
+			actual_byte++;
+			actual_bit_of_byte = 0x80;
+		}
+	}
+
+	// disable P0.0 for I/O control, enter PCA mode
+	XBR1 |= XBR1_PCA0ME__CEX0_CEX1;
+	LED = LED_OFF;
+
+	rf_state = RF_FINISHED;
 }
 
 

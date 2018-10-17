@@ -92,6 +92,8 @@ typedef struct
 #define RF_TRANSMIT_REPEATS		8
 
 #define UNKNOWN_IDENTIFIER				0x00
+#define UNDEFINED_DUTY_CYCLE			0x7F
+#define UNDEFINED_TIMING				0x80
 
 /*
  * PT2260, EV1527,... original RF bridge protocol
@@ -205,7 +207,6 @@ SI_SEGMENT_VARIABLE(ALDI_RCWS, static TIMING_PROTOCOL_DATA, SI_SEG_CODE) =
 		70,
 		0			// REPEAT_DELAY
 	};
-
 
 /*
  * Protocol array
