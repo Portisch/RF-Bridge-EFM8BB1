@@ -373,18 +373,18 @@ uint8_t Compute_CRC8_Simple_OneByte(uint8_t byteVal)
     return crc;
 }
 
-bool CheckSyncTiming(uint16_t period_pos, uint16_t period_neg, uint16_t SYNC_HIGH, uint16_t SYNC_LOW)
+bool CheckSyncTiming(uint16_t period_pos, uint16_t period_neg, uint16_t sync_high_time, uint16_t sync_low_time)
 {
 	bool ret = false;
 
 	// check if SYNC high and SYNC low should be compared
-	if (SYNC_HIGH > 0)
+	if (sync_high_time > 0)
 	{
 		if (
-			(period_pos > (SYNC_HIGH - SYNC_TOLERANCE)) &&
-			(period_pos < (SYNC_HIGH + SYNC_TOLERANCE)) &&
-			(period_neg > (SYNC_LOW - SYNC_TOLERANCE)) &&
-			(period_neg < (SYNC_LOW + SYNC_TOLERANCE))
+			(period_pos > (sync_high_time - SYNC_TOLERANCE)) &&
+			(period_pos < (sync_high_time + SYNC_TOLERANCE)) &&
+			(period_neg > (sync_low_time - SYNC_TOLERANCE)) &&
+			(period_neg < (sync_low_time + SYNC_TOLERANCE))
 		)
 		{
 			ret = true;
@@ -392,8 +392,8 @@ bool CheckSyncTiming(uint16_t period_pos, uint16_t period_neg, uint16_t SYNC_HIG
 	}
 	// only SYNC low should be checked
 	else
-	if ((period_neg > (SYNC_LOW - SYNC_TOLERANCE)) &&
-		(period_neg < (SYNC_LOW + SYNC_TOLERANCE))
+	if ((period_neg > (sync_low_time - SYNC_TOLERANCE)) &&
+		(period_neg < (sync_low_time + SYNC_TOLERANCE))
 	)
 	{
 		ret = true;
