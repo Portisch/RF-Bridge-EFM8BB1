@@ -149,7 +149,7 @@ Hex: AA A8 06 02 D0 F9 32 11 33 55<br/>
 0xD0-0x33: data<br/>
 0x55: uart sync end
 
-### Universal transmit of a duty cycle based protocol by command 0xA8
+#### Universal transmit of a duty cycle based protocol by command 0xA8
 When 0x7F get used as protocol identifier the timing can be user defined<br/>
 and do not have to be defined in RF_Protocols.h.<br/>
 This methode can be used to find correct parameter to define the timing<br/>
@@ -169,6 +169,30 @@ Hex: AA A8 0D 7F 12 C0 05 DC 02 BC 46 01 2C 1E 08 1E 55<br/>
 0x1E: BIT_LOW_DUTY<br/>
 0x08: BIT_COUNT + SYNC_BIT_COUNT in front of RF data<br/>
 0x1E: RF data to send<br/>
+0x55: uart sync end<br/>
+
+#### Universal transmit of a time based protocol by command 0xA8
+When 0x80 get used as protocol identifier the timing can be user defined<br/>
+and do not have to be defined in RF_Protocols.h.<br/>
+This methode can be used to find correct parameter to define the timing<br/>
+in RF_Protocols.h for future.
+
+Hex: AA A8 0E 80 01 90 1B 58 00 C8 01 02 02 01 0C 1F B0 55<br/>
+
+0xAA: uart sync init<br/>
+0xA8: transmit RF data<br/>
+0x0E: data len<br/>
+0x80: protocol identifier 0x80<br/>
+0x01-0x90: SYNC_HIGH<br/>
+0x1B-0x58: SYNC_LOW<br/>
+0x00-0xC8: PULSE_TIME<br/>
+0x01: BIT_0_HIGH FACTOR<br/>
+0x02: BIT_0_LOW FACTOR<br/>
+0x02: BIT_1_HIGH FACTOR<br/>
+0x01: BIT_1_LOW FACTOR<br/>
+0x0C: BIT_COUNT<br/>
+0x1F-0xB0: RF data to send<br/>
+0x55: uart sync end<br/>
 
 ## Learning by command 0xA9
 Hex: AA A9 55<br/>
