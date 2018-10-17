@@ -177,6 +177,8 @@ and do not have to be defined in RF_Protocols.h.<br/>
 This methode can be used to find correct parameter to define the timing<br/>
 in RF_Protocols.h for future.
 
+<img src="https://raw.github.com/Portisch/RF-Bridge-EFM8BB1/master/doc/pulse_timing.png" width="400" ></br>
+
 Hex: AA A8 0E 80 01 90 1B 58 00 C8 01 02 02 01 0C 1F B0 55<br/>
 
 0xAA: uart sync init<br/>
