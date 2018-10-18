@@ -370,10 +370,10 @@ int main (void)
 							{
 								if (tr_repeats != 0)
 								{
-									SI_VARIABLE_SEGMENT_POINTER(pVar, uint8_t, SI_SEG_CODE) = PROTOCOL_DATA[PCA0_GetProtocolIndex(PT2260_IDENTIFIER)].protocol_data;
-									if (((DUTY_CYLCE_PROTOCOL_DATA *)pVar)->REPEAT_DELAY > 0)
+									SI_VARIABLE_SEGMENT_POINTER(pVar, DUTY_CYLCE_PROTOCOL_DATA, SI_SEG_CODE) = (DUTY_CYLCE_PROTOCOL_DATA *)PROTOCOL_DATA[PCA0_GetProtocolIndex(PT2260_IDENTIFIER)].protocol_data;
+									if (pVar->REPEAT_DELAY > 0)
 									{
-										InitTimer3_ms(1, ((DUTY_CYLCE_PROTOCOL_DATA *)pVar)->REPEAT_DELAY);
+										InitTimer3_ms(1, pVar->REPEAT_DELAY);
 										// wait until timer has finished
 										WaitTimer3Finished();
 									}
@@ -502,16 +502,16 @@ int main (void)
 								{
 									if (protocol_index != 0xFF)
 									{
-										SI_VARIABLE_SEGMENT_POINTER(pVar, uint8_t, SI_SEG_CODE) = PROTOCOL_DATA[protocol_index].protocol_data;
+										SI_VARIABLE_SEGMENT_POINTER(pVar, DUTY_CYLCE_PROTOCOL_DATA, SI_SEG_CODE) = (DUTY_CYLCE_PROTOCOL_DATA *)PROTOCOL_DATA[protocol_index].protocol_data;
 
 										PCA0_InitTransmit(
-												((DUTY_CYLCE_PROTOCOL_DATA *)pVar)->SYNC_HIGH,
-												((DUTY_CYLCE_PROTOCOL_DATA *)pVar)->SYNC_LOW,
-												((DUTY_CYLCE_PROTOCOL_DATA *)pVar)->BIT_HIGH_TIME,
-												((DUTY_CYLCE_PROTOCOL_DATA *)pVar)->BIT_HIGH_DUTY,
-												((DUTY_CYLCE_PROTOCOL_DATA *)pVar)->BIT_LOW_TIME,
-												((DUTY_CYLCE_PROTOCOL_DATA *)pVar)->BIT_LOW_DUTY,
-												((DUTY_CYLCE_PROTOCOL_DATA *)pVar)->BIT_COUNT
+												pVar->SYNC_HIGH,
+												pVar->SYNC_LOW,
+												pVar->BIT_HIGH_TIME,
+												pVar->BIT_HIGH_DUTY,
+												pVar->BIT_LOW_TIME,
+												pVar->BIT_LOW_DUTY,
+												pVar->BIT_COUNT
 												);
 
 										actual_byte = 1;
@@ -558,22 +558,18 @@ int main (void)
 								{
 									if (protocol_index != 0xFF)
 									{
-										SI_VARIABLE_SEGMENT_POINTER(pVar, uint8_t, SI_SEG_CODE) = PROTOCOL_DATA[protocol_index].protocol_data;
+										SI_VARIABLE_SEGMENT_POINTER(pVar, TIMING_PROTOCOL_DATA, SI_SEG_CODE) = (TIMING_PROTOCOL_DATA *)PROTOCOL_DATA[protocol_index].protocol_data;
 
 										actual_byte = 1;
 
 										SendTimingProtocol(
-												((TIMING_PROTOCOL_DATA *)pVar)->SYNC_HIGH,
-												((TIMING_PROTOCOL_DATA *)pVar)->SYNC_LOW,
-												((TIMING_PROTOCOL_DATA *)pVar)->PULSE_TIME *
-													((TIMING_PROTOCOL_DATA *)pVar)->bit0.high,
-												((TIMING_PROTOCOL_DATA *)pVar)->PULSE_TIME *
-													((TIMING_PROTOCOL_DATA *)pVar)->bit0.low,
-												((TIMING_PROTOCOL_DATA *)pVar)->PULSE_TIME *
-													((TIMING_PROTOCOL_DATA *)pVar)->bit1.high,
-												((TIMING_PROTOCOL_DATA *)pVar)->PULSE_TIME *
-													((TIMING_PROTOCOL_DATA *)pVar)->bit1.low,
-												((TIMING_PROTOCOL_DATA *)pVar)->BIT_COUNT);
+												pVar->SYNC_HIGH,
+												pVar->SYNC_LOW,
+												pVar->PULSE_TIME * pVar->bit0.high,
+												pVar->PULSE_TIME * pVar->bit0.low,
+												pVar->PULSE_TIME * pVar->bit1.high,
+												pVar->PULSE_TIME * pVar->bit1.low,
+												pVar->BIT_COUNT);
 									}
 									else
 									{
@@ -609,11 +605,11 @@ int main (void)
 								{
 									if (protocol_index != 0xFF)
 									{
-										SI_VARIABLE_SEGMENT_POINTER(pVar, uint8_t, SI_SEG_CODE) = PROTOCOL_DATA[protocol_index].protocol_data;
+										SI_VARIABLE_SEGMENT_POINTER(pVar, DUTY_CYLCE_PROTOCOL_DATA, SI_SEG_CODE) = (DUTY_CYLCE_PROTOCOL_DATA *)PROTOCOL_DATA[protocol_index].protocol_data;
 
-										if (((DUTY_CYLCE_PROTOCOL_DATA *)pVar)->REPEAT_DELAY > 0)
+										if (pVar->REPEAT_DELAY > 0)
 										{
-											InitTimer3_ms(1, ((DUTY_CYLCE_PROTOCOL_DATA *)pVar)->REPEAT_DELAY);
+											InitTimer3_ms(1, pVar->REPEAT_DELAY);
 											// wait until timer has finished
 											WaitTimer3Finished();
 										}
@@ -627,11 +623,11 @@ int main (void)
 								{
 									if (protocol_index != 0xFF)
 									{
-										SI_VARIABLE_SEGMENT_POINTER(pVar, uint8_t, SI_SEG_CODE) = PROTOCOL_DATA[protocol_index].protocol_data;
+										SI_VARIABLE_SEGMENT_POINTER(pVar, TIMING_PROTOCOL_DATA, SI_SEG_CODE) = (TIMING_PROTOCOL_DATA *)PROTOCOL_DATA[protocol_index].protocol_data;
 
-										if (((TIMING_PROTOCOL_DATA *)pVar)->REPEAT_DELAY > 0)
+										if (pVar->REPEAT_DELAY > 0)
 										{
-											InitTimer3_ms(1, ((TIMING_PROTOCOL_DATA *)pVar)->REPEAT_DELAY);
+											InitTimer3_ms(1, pVar->REPEAT_DELAY);
 											// wait until timer has finished
 											WaitTimer3Finished();
 										}
