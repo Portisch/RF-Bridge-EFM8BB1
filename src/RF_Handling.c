@@ -847,6 +847,7 @@ bool findBucket(uint16_t duration, uint8_t *index)
 	{
 		// calculate delta by the current bucket and check if the new duration fits into
 		uint16_t delta = duration / 4 + duration / 8;
+		delta = delta > buckets[i] ? buckets[i] : delta;
 
 		if (((buckets[i] - delta) < duration) && (duration < (buckets[i] + delta)))
 		{
@@ -946,7 +947,7 @@ void Bucket_Received(uint16_t duration)
 					bucket_count++;
 
 					// check if maximum of array got reached
-					if (bucket_count > sizeof(buckets))
+					if (bucket_count > (sizeof(buckets)/sizeof(buckets[0])))
 					{
 						bucket_count = 0;
 						// restart sync

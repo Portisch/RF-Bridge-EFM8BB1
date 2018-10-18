@@ -53,7 +53,7 @@ typedef struct
 	uint8_t BIT_LOW_DUTY;
 	// bit count for this protocol
 	uint8_t BIT_COUNT;
-	// delay in microseconds between the repeats
+	// delay in milliseconds between the repeats
 	uint8_t REPEAT_DELAY;
 } DUTY_CYLCE_PROTOCOL_DATA;
 
