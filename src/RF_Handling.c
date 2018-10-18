@@ -833,7 +833,8 @@ bool probablyFooter(uint16_t duration)
 
 bool matchesFooter(uint16_t duration)
 {
-  uint16_t footer_delta = bucket_sync / 4;
+  uint16_t footer_delta = bucket_sync / 100 * SYNC_TOLERANCE;
+  footer_delta = footer_delta > SYNC_TOLERANCE_MAX ? SYNC_TOLERANCE_MAX : footer_delta;
   return (((bucket_sync - footer_delta) < duration) && (duration < (bucket_sync + footer_delta)));
 }
 
@@ -841,9 +842,12 @@ bool findBucket(uint16_t duration, uint8_t *index)
 {
 	bool ret = false;
 	uint8_t i;
+
 	for (i = 0; i < bucket_count; i++)
 	{
+		// calculate delta by the current bucket and check if the new duration fits into
 		uint16_t delta = duration / 4 + duration / 8;
+
 		if (((buckets[i] - delta) < duration) && (duration < (buckets[i] + delta)))
 		{
 			if (index != NULL)
@@ -851,6 +855,47 @@ bool findBucket(uint16_t duration, uint8_t *index)
 
 			ret = true;
 			break;
+		}
+	}
+
+	return ret;
+}
+
+bool definedBucket(uint16_t duration, uint8_t *index)
+{
+	bool ret = false;
+	uint8_t i;
+	uint16_t delta;
+
+	for (i = 0; i < bucket_count; i++)
+	{
+		// calculate delta by the current bucket and check if the new duration fits into
+		delta = buckets[i] / 4 + buckets[i] / 8 + buckets[i] / 16;
+
+		if (((buckets[i] - delta) < duration) && (duration < (buckets[i] + delta)))
+		{
+			if (index != NULL)
+				*index = i;
+
+			ret = true;
+			break;
+		}
+	}
+
+	if (ret == false)
+	{
+		// check it the other way if a existing bucket will match in the new duration
+		delta = duration / 4 + duration / 8 + duration / 16;
+		for (i = 0; i < bucket_count; i++)
+		{
+			if (((duration - delta) < buckets[i]) && (buckets[i] < (duration + delta)))
+			{
+				if (index != NULL)
+					*index = i;
+
+				ret = true;
+				break;
+			}
 		}
 	}
 
@@ -900,7 +945,7 @@ void Bucket_Received(uint16_t duration)
 			else if (duration >= MIN_PULSE_LENGTH)
 			{
 				// check if bucket was already received
-				if (findBucket(duration, &bucket_index))
+				if (definedBucket(duration, &bucket_index))
 				{
 					// make new average of this bucket
 					buckets[bucket_index] = (buckets[bucket_index] + duration) / 2;
