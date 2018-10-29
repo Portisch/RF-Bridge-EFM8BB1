@@ -892,6 +892,55 @@ bool definedBucket(uint16_t duration, uint8_t *index)
 	return ret;
 }
 
+void CheckUsedBuckets(void)
+{
+	uint8_t i, x, a;
+
+	// mark first all used buckets
+	for (i = 0; i < actual_byte; i++)
+	{
+		if ((buckets[RF_DATA[i] >> 4] & 0x7FFF) > 0)
+			buckets[RF_DATA[i] >> 4] |= 0x8000;
+
+		if ((buckets[RF_DATA[i] & 0x0F] & 0x7FFF) > 0)
+			buckets[RF_DATA[i] & 0x0F] |= 0x8000;
+	}
+
+	// move buckets forward
+	i = 0;
+	while (i < bucket_count)
+	{
+		if ((buckets[i] & 0x8000) == 0)
+		{
+			x = i;
+			while (x < bucket_count)
+			{
+				buckets[x] = buckets[x + 1];
+
+				// replace all x+1 with x in RF data
+				for (a= 0; a < (actual_byte + 1); a++)
+				{
+					if ((RF_DATA[a] >> 4) == (x + 1))
+						RF_DATA[a] = (x << 4) | (RF_DATA[a] & 0x0F);
+
+					if ((RF_DATA[a] & 0x0F) == (x + 1))
+						RF_DATA[a] = (RF_DATA[a] & 0xF0) | x;
+				}
+				x++;
+			}
+
+			bucket_count--;
+		}
+		else
+		{
+			// clear used mark
+			buckets[i] &= 0x7FFF;
+		}
+
+		i++;
+	}
+}
+
 void Bucket_Received(uint16_t duration)
 {
 	uint8_t bucket_index;
@@ -907,7 +956,12 @@ void Bucket_Received(uint16_t duration)
 
 			if (probablyFooter(duration))
 			{
+				// clean buckets
+				for (bucket_index = 0; bucket_index < (sizeof(buckets)/sizeof(buckets[0])); bucket_index++)
+					buckets[bucket_index] = 0;
+
 				bucket_count = 0;
+				bucket_index = 0;
 				bucket_sync = duration;
 				rf_state = RF_IN_SYNC;
 				LED = LED_ON;
@@ -1018,6 +1072,9 @@ void Bucket_Received(uint16_t duration)
 					{
 						RF_DATA[actual_byte] = (bucket_count << 4) | 0x0F;
 					}
+
+					// remove unused buckets
+					CheckUsedBuckets();
 
 					RF_DATA_STATUS |= RF_DATA_RECEIVED_MASK;
 				}
