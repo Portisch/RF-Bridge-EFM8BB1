@@ -865,6 +865,7 @@ bool findBucket(uint16_t duration, uint8_t *index)
 bool definedBucket(uint16_t duration, uint8_t *index)
 {
 	bool ret = false;
+	uint16_t delta;
 	uint8_t i;
 
 	//search new duration first in existing array
@@ -875,9 +876,9 @@ bool definedBucket(uint16_t duration, uint8_t *index)
 	else
 	{
 		// check it the other way if a existing bucket will match in the new duration
-		uint16_t delta = duration / 4 + duration / 8 + duration / 16;
 		for (i = 0; i < bucket_count; i++)
 		{
+			delta = buckets[i] / 4 + buckets[i] / 8 + buckets[i] / 16;
 			if (((duration - delta) < buckets[i]) && (buckets[i] < (duration + delta)))
 			{
 				if (index != NULL)
