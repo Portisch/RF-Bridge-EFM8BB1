@@ -894,7 +894,7 @@ bool definedBucket(uint16_t duration, uint8_t *index)
 
 void CheckUsedBuckets(void)
 {
-	uint8_t i, x, a;
+	uint8_t i, x, a, removed_buckets = 0;
 
 	// mark first all used buckets
 	for (i = 0; i < actual_byte; i++)
@@ -929,7 +929,7 @@ void CheckUsedBuckets(void)
 				x++;
 			}
 
-			bucket_count--;
+			removed_buckets++;
 		}
 		else
 		{
@@ -939,6 +939,8 @@ void CheckUsedBuckets(void)
 
 		i++;
 	}
+
+	bucket_count -= removed_buckets;
 }
 
 void Bucket_Received(uint16_t duration)
@@ -992,7 +994,7 @@ void Bucket_Received(uint16_t duration)
 				if (definedBucket(duration, &bucket_index))
 				{
 					// make new average of this bucket
-					buckets[bucket_index] = (buckets[bucket_index] + duration) / 2;
+					//buckets[bucket_index] = (buckets[bucket_index] + duration) / 2;
 				}
 				else
 				{
