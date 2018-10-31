@@ -24,7 +24,9 @@ SI_SEGMENT_VARIABLE(UART_Buffer_Read_Position, static volatile uint8_t,  SI_SEG_
 SI_SEGMENT_VARIABLE(UART_Buffer_Write_Position, static volatile uint8_t,  SI_SEG_XDATA)=0;
 SI_SEGMENT_VARIABLE(UART_Buffer_Write_Len, static volatile uint8_t,  SI_SEG_XDATA)=0;
 SI_SEGMENT_VARIABLE(lastRxError, static volatile uint8_t,  SI_SEG_XDATA)=0;
-SI_SEGMENT_VARIABLE(TX_Finished, bool,  SI_SEG_DATA)=false;
+SI_SEGMENT_VARIABLE(TX_Finished, bool, SI_SEG_DATA) = false;
+SI_SEGMENT_VARIABLE(uart_state, uart_state_t, SI_SEG_XDATA) = IDLE;
+SI_SEGMENT_VARIABLE(uart_command, uart_command_t, SI_SEG_XDATA) = NONE;
 
 //-----------------------------------------------------------------------------
 // UART ISR Callbacks
@@ -75,22 +77,9 @@ SI_INTERRUPT(UART0_ISR, UART0_IRQn)
 	}
 }
 
-void uart_buffer_reset(void)
-{
-	UART_RX_Buffer_Position = 0;
-	UART_Buffer_Read_Position = 0;
-	UART_TX_Buffer_Position = 0;
-	UART_Buffer_Write_Position = 0;
-}
-
 void uart_wait_until_TX_finished(void)
 {
 	while(!TX_Finished);
-}
-
-uint8_t uart_getlen(void)
-{
-	return UART_RX_Buffer_Position - UART_Buffer_Read_Position;
 }
 
 /*************************************************************************
@@ -141,16 +130,6 @@ void uart_put_command(uint8_t command)
 {
 	uart_putc(RF_CODE_START);
 	uart_putc(command);
-	uart_putc(RF_CODE_STOP);
-	UART0_initTxPolling();
-}
-
-void uart_put_uint16_t(uint8_t command, uint16_t value)
-{
-	uart_putc(RF_CODE_START);
-	uart_putc(command);
-	uart_putc((value >> 8) & 0xFF);
-	uart_putc(value & 0xFF);
 	uart_putc(RF_CODE_STOP);
 	UART0_initTxPolling();
 }
@@ -231,7 +210,7 @@ void uart_put_RF_buckets(uint8_t Command)
 	UART0_initTxPolling();
 	uart_wait_until_TX_finished();
 
-	// send up to 16 buckets
+	// send up to 15 buckets
 	while (i < bucket_count)
 	{
 		uart_putc((buckets[i] >> 8) & 0xFF);
@@ -239,7 +218,7 @@ void uart_put_RF_buckets(uint8_t Command)
 		i++;
 	}
 
-	// add sync bucket
+	// send sync bucket
 	uart_putc((bucket_sync >> 8) & 0xFF);
 	uart_putc(bucket_sync & 0xFF);
 

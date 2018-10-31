@@ -21,9 +21,6 @@
 // $[Generated Includes]
 // [Generated Includes]$
 
-SI_SEGMENT_VARIABLE(uart_state, uart_state_t, SI_SEG_XDATA) = IDLE;
-SI_SEGMENT_VARIABLE(uart_command, uart_command_t, SI_SEG_XDATA) = NONE;
-
 //-----------------------------------------------------------------------------
 // SiLabs_Startup() Routine
 // ----------------------------------------------------------------------------
@@ -181,6 +178,7 @@ int main (void)
 							break;
 						case RF_CODE_RFOUT_NEW:
 							tr_repeats = RF_TRANSMIT_REPEATS;
+							/* no break */
 						case RF_CODE_RFOUT_BUCKET:
 							uart_state = RECEIVE_LEN;
 							break;
@@ -581,28 +579,41 @@ int main (void)
 				if (uart_state != IDLE)
 					break;
 
-				if (rf_state == RF_IDLE) PCA0_StopSniffing();
-				else if (rf_state != RF_FINISHED) break;
-
-				// byte 0:				number of buckets: k
-				// byte 1:				number of repeats: r
-				// byte 2*(1..k):		bucket time high
-				// byte 2*(1..k)+1:		bucket time low
-				// byte 2*k+2..N:		RF buckets to send
-				if ((k == 0) || (len < 4))
+				// do transmit of the data
+				switch(rf_state)
 				{
-					uart_command = NONE;
-					break;
-				}
-				else
-				{
-					SendRFBuckets((uint16_t *)(RF_DATA+2), RF_DATA+k+2, len-k-2, RF_DATA[1]);
-					uart_put_command(RF_CODE_ACK);			// send acknowledgment
-				}
+					// init and start RF transmit
+					case RF_IDLE:
+						PCA0_StopSniffing();
 
-				PCA0_DoSniffing(last_sniffing_command);
-				ReadUARTData = true;					// re-enable UART
+						// byte 0:				number of buckets: k
+						// byte 1:				number of repeats: r
+						// byte 2*(1..k):		bucket time high
+						// byte 2*(1..k)+1:		bucket time low
+						// byte 2*k+2..N:		RF buckets to send
+						if ((k == 0) || (len < 4))
+						{
+							uart_command = NONE;
+							break;
+						}
+						else
+						{
+							SendRFBuckets((uint16_t *)(RF_DATA+2), RF_DATA+k+2, len-k-2, RF_DATA[1]);
+						}
+						break;
 
+					// wait until data got transfered
+					case RF_FINISHED:
+						// restart sniffing if it was active
+						PCA0_DoSniffing(last_sniffing_command);
+
+						// send acknowledge
+						uart_put_command(RF_CODE_ACK);
+
+						// enable UART again
+						ReadUARTData = true;
+						break;
+				}
 				break;
 			}
 

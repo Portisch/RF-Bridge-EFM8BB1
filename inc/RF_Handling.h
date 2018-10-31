@@ -8,10 +8,6 @@
 #ifndef INC_RF_HANDLING_H_
 #define INC_RF_HANDLING_H_
 
-extern uint8_t Compute_CRC8_Simple_OneByte(uint8_t byteVal);
-extern uint8_t RFInSync(uint8_t identifier, uint8_t inverse, uint16_t period_pos, uint16_t period_neg);
-extern uint8_t PCA0_GetProtocolIndex(uint8_t identifier);
-extern void SetTimer0Overflow(uint8_t T0_Overflow);
 extern uint8_t PCA0_DoSniffing(uint8_t active_command);
 extern void PCA0_StopSniffing(void);
 extern void SendRFBuckets(uint16_t *buckets, uint8_t *rfdata, uint8_t n, uint8_t repeats);
@@ -30,7 +26,6 @@ typedef enum
 	RF_IDLE,
 	RF_IN_SYNC,
 	RF_DECODE_BUCKET,
-	RF_TRANSMITTING,
 	RF_FINISHED
 } rf_state_t;
 

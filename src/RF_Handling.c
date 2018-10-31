@@ -50,6 +50,153 @@ void PCA0_overflowCb() { }
 
 void PCA0_intermediateOverflowCb() { }
 
+uint8_t Compute_CRC8_Simple_OneByte(uint8_t byteVal)
+{
+    const uint8_t generator = 0x1D;
+    uint8_t i;
+    uint8_t crc = byteVal; /* init crc directly with input byte instead of 0, avoid useless 8 bitshifts until input byte is in crc register */
+
+    for (i = 0; i < 8; i++)
+    {
+        if ((crc & 0x80) != 0)
+        { /* most significant bit set, shift crc register and perform XOR operation, taking not-saved 9th set bit into account */
+            crc = (uint8_t)((crc << 1) ^ generator);
+        }
+        else
+        { /* most significant bit not set, go to next bit */
+            crc <<= 1;
+        }
+    }
+
+    return crc;
+}
+
+uint8_t CheckRFSync_pos(uint16_t period_pos, uint16_t sync_high, uint16_t sync_high_delta)
+{
+	uint8_t ret = false;
+	if ((period_pos > (sync_high - sync_high_delta)) &&
+		(period_pos < (sync_high + sync_high_delta)))
+	{
+		ret = true;
+	}
+	return ret;
+}
+
+uint8_t CheckRFSync_neg(uint16_t period_neg, uint16_t sync_low, uint16_t sync_low_delta)
+{
+	uint8_t ret = false;
+	if ((period_neg > (sync_low - sync_low_delta)) &&
+		(period_neg < (sync_low + sync_low_delta)))
+	{
+		ret = true;
+	}
+	return ret;
+}
+
+uint8_t CheckRFSync(uint8_t protocol_index, uint8_t inverse, uint16_t period_pos, uint16_t period_neg)
+{
+	uint8_t ret = false;
+	uint16_t pulse_time;
+	uint16_t sync_high_delta;
+	uint16_t sync_low_delta;
+
+	// ignore protocols what aren't matching with positive/negative edge
+	if (PROTOCOL_DATA[protocol_index].INVERSE != inverse)
+		return ret;
+
+	// check if sync high and low is defined
+	if ((PROTOCOL_DATA[protocol_index].SYNC.HIGH > 0) && (PROTOCOL_DATA[protocol_index].SYNC.LOW > 0))
+	{
+		// use calculated pulse time for PT2260 devices to decode the data
+		if (protocol_index == PT2260_INDEX)
+		{
+			pulse_time = PROTOCOL_DATA[protocol_index].SYNC.HIGH > PROTOCOL_DATA[protocol_index].SYNC.LOW ?
+					period_pos / PROTOCOL_DATA[protocol_index].SYNC.HIGH : period_neg / PROTOCOL_DATA[protocol_index].SYNC.LOW;
+		}
+		else
+		{
+			pulse_time = PROTOCOL_DATA[protocol_index].PULSE_TIME;
+		}
+
+		sync_high_delta = (period_pos / 100 * SYNC_TOLERANCE) > SYNC_TOLERANCE_MAX ? SYNC_TOLERANCE_MAX : (period_pos / 100 * SYNC_TOLERANCE);
+		sync_low_delta = (period_neg / 100 * SYNC_TOLERANCE) > SYNC_TOLERANCE_MAX ? SYNC_TOLERANCE_MAX : (period_neg / 100 * SYNC_TOLERANCE);
+
+		if (CheckRFSync_pos(period_pos, pulse_time * PROTOCOL_DATA[protocol_index].SYNC.HIGH, sync_high_delta) &&
+			CheckRFSync_neg(period_neg, pulse_time * PROTOCOL_DATA[protocol_index].SYNC.LOW, sync_low_delta))
+		{
+			BIT_LOW = pulse_time * PROTOCOL_DATA[protocol_index].BIT0.HIGH;
+			BIT_HIGH = pulse_time * PROTOCOL_DATA[protocol_index].BIT1.HIGH;
+			ret = true;
+		}
+	}
+	else if (PROTOCOL_DATA[protocol_index].SYNC.LOW > 0)
+	{
+		pulse_time = PROTOCOL_DATA[protocol_index].PULSE_TIME;
+
+		sync_low_delta = (period_neg / 100 * SYNC_TOLERANCE) > SYNC_TOLERANCE_MAX ? SYNC_TOLERANCE_MAX : (period_neg / 100 * SYNC_TOLERANCE);
+
+		if (CheckRFSync_neg(period_neg, pulse_time * PROTOCOL_DATA[protocol_index].SYNC.LOW, sync_low_delta))
+		{
+			BIT_LOW = pulse_time * PROTOCOL_DATA[protocol_index].BIT0.HIGH;
+			BIT_HIGH = pulse_time * PROTOCOL_DATA[protocol_index].BIT1.HIGH;
+			ret = true;
+		}
+	}
+	else if (PROTOCOL_DATA[protocol_index].SYNC.HIGH > 0)
+	{
+		pulse_time = PROTOCOL_DATA[protocol_index].PULSE_TIME;
+
+		sync_high_delta = (period_pos / 100 * SYNC_TOLERANCE) > SYNC_TOLERANCE_MAX ? SYNC_TOLERANCE_MAX : (period_pos / 100 * SYNC_TOLERANCE);
+
+		if (CheckRFSync_neg(period_pos, pulse_time * PROTOCOL_DATA[protocol_index].SYNC.HIGH, sync_high_delta))
+		{
+			BIT_LOW = pulse_time * PROTOCOL_DATA[protocol_index].BIT0.HIGH;
+			BIT_HIGH = pulse_time * PROTOCOL_DATA[protocol_index].BIT1.HIGH;
+			ret = true;
+		}
+	}
+
+	return ret;
+}
+
+//-----------------------------------------------------------------------------
+// Check for a RF sync
+//-----------------------------------------------------------------------------
+uint8_t RFInSync(uint8_t protocol_index, uint8_t inverse, uint16_t period_pos, uint16_t period_neg)
+{
+	uint8_t ret = 0x80;
+	uint8_t index;
+
+	switch(protocol_index)
+	{
+		// protocol is undefined, do loop through all protocols
+		case UNDEFINED_INDEX:
+
+			// check all protocols
+			for (index = 0x00 ; index < PROTOCOLCOUNT; index++)
+			{
+				if(CheckRFSync(index, inverse, period_pos, period_neg))
+				{
+					ret = index;
+					break;
+				}
+			}
+			break;
+
+		// check other protocols
+		default:
+
+			if (CheckRFSync(protocol_index, inverse, period_pos, period_neg))
+			{
+				ret = protocol_index;
+			}
+
+			break;
+	}
+
+	return ret;
+}
+
 void HandleRFData(uint8_t inverse, uint16_t capture_period_pos, uint16_t capture_period_neg)
 {
 	SI_SEGMENT_VARIABLE(capture_period_pos_s, int32_t, SI_SEG_XDATA);
@@ -273,153 +420,6 @@ void PCA0_channel1EventCb() { }
 
 void PCA0_channel2EventCb() { }
 
-uint8_t Compute_CRC8_Simple_OneByte(uint8_t byteVal)
-{
-    const uint8_t generator = 0x1D;
-    uint8_t i;
-    uint8_t crc = byteVal; /* init crc directly with input byte instead of 0, avoid useless 8 bitshifts until input byte is in crc register */
-
-    for (i = 0; i < 8; i++)
-    {
-        if ((crc & 0x80) != 0)
-        { /* most significant bit set, shift crc register and perform XOR operation, taking not-saved 9th set bit into account */
-            crc = (uint8_t)((crc << 1) ^ generator);
-        }
-        else
-        { /* most significant bit not set, go to next bit */
-            crc <<= 1;
-        }
-    }
-
-    return crc;
-}
-
-uint8_t CheckRFSync_pos(uint16_t period_pos, uint16_t sync_high, uint16_t sync_high_delta)
-{
-	uint8_t ret = false;
-	if ((period_pos > (sync_high - sync_high_delta)) &&
-		(period_pos < (sync_high + sync_high_delta)))
-	{
-		ret = true;
-	}
-	return ret;
-}
-
-uint8_t CheckRFSync_neg(uint16_t period_neg, uint16_t sync_low, uint16_t sync_low_delta)
-{
-	uint8_t ret = false;
-	if ((period_neg > (sync_low - sync_low_delta)) &&
-		(period_neg < (sync_low + sync_low_delta)))
-	{
-		ret = true;
-	}
-	return ret;
-}
-
-uint8_t CheckRFSync(uint8_t protocol_index, uint8_t inverse, uint16_t period_pos, uint16_t period_neg)
-{
-	uint8_t ret = false;
-	uint16_t pulse_time;
-	uint16_t sync_high_delta;
-	uint16_t sync_low_delta;
-
-	// ignore protocols what aren't matching with positive/negative edge
-	if (PROTOCOL_DATA[protocol_index].INVERSE != inverse)
-		return ret;
-
-	// check if sync high and low is defined
-	if ((PROTOCOL_DATA[protocol_index].SYNC.HIGH > 0) && (PROTOCOL_DATA[protocol_index].SYNC.LOW > 0))
-	{
-		// use calculated pulse time for PT2260 devices to decode the data
-		if (protocol_index == PT2260_INDEX)
-		{
-			pulse_time = PROTOCOL_DATA[protocol_index].SYNC.HIGH > PROTOCOL_DATA[protocol_index].SYNC.LOW ?
-					period_pos / PROTOCOL_DATA[protocol_index].SYNC.HIGH : period_neg / PROTOCOL_DATA[protocol_index].SYNC.LOW;
-		}
-		else
-		{
-			pulse_time = PROTOCOL_DATA[protocol_index].PULSE_TIME;
-		}
-
-		sync_high_delta = (period_pos / 100 * SYNC_TOLERANCE) > SYNC_TOLERANCE_MAX ? SYNC_TOLERANCE_MAX : (period_pos / 100 * SYNC_TOLERANCE);
-		sync_low_delta = (period_neg / 100 * SYNC_TOLERANCE) > SYNC_TOLERANCE_MAX ? SYNC_TOLERANCE_MAX : (period_neg / 100 * SYNC_TOLERANCE);
-
-		if (CheckRFSync_pos(period_pos, pulse_time * PROTOCOL_DATA[protocol_index].SYNC.HIGH, sync_high_delta) &&
-			CheckRFSync_neg(period_neg, pulse_time * PROTOCOL_DATA[protocol_index].SYNC.LOW, sync_low_delta))
-		{
-			BIT_LOW = pulse_time * PROTOCOL_DATA[protocol_index].BIT0.HIGH;
-			BIT_HIGH = pulse_time * PROTOCOL_DATA[protocol_index].BIT1.HIGH;
-			ret = true;
-		}
-	}
-	else if (PROTOCOL_DATA[protocol_index].SYNC.LOW > 0)
-	{
-		pulse_time = PROTOCOL_DATA[protocol_index].PULSE_TIME;
-
-		sync_low_delta = (period_neg / 100 * SYNC_TOLERANCE) > SYNC_TOLERANCE_MAX ? SYNC_TOLERANCE_MAX : (period_neg / 100 * SYNC_TOLERANCE);
-
-		if (CheckRFSync_neg(period_neg, pulse_time * PROTOCOL_DATA[protocol_index].SYNC.LOW, sync_low_delta))
-		{
-			BIT_LOW = pulse_time * PROTOCOL_DATA[protocol_index].BIT0.HIGH;
-			BIT_HIGH = pulse_time * PROTOCOL_DATA[protocol_index].BIT1.HIGH;
-			ret = true;
-		}
-	}
-	else if (PROTOCOL_DATA[protocol_index].SYNC.HIGH > 0)
-	{
-		pulse_time = PROTOCOL_DATA[protocol_index].PULSE_TIME;
-
-		sync_high_delta = (period_pos / 100 * SYNC_TOLERANCE) > SYNC_TOLERANCE_MAX ? SYNC_TOLERANCE_MAX : (period_pos / 100 * SYNC_TOLERANCE);
-
-		if (CheckRFSync_neg(period_pos, pulse_time * PROTOCOL_DATA[protocol_index].SYNC.HIGH, sync_high_delta))
-		{
-			BIT_LOW = pulse_time * PROTOCOL_DATA[protocol_index].BIT0.HIGH;
-			BIT_HIGH = pulse_time * PROTOCOL_DATA[protocol_index].BIT1.HIGH;
-			ret = true;
-		}
-	}
-
-	return ret;
-}
-
-//-----------------------------------------------------------------------------
-// Check for a RF sync
-//-----------------------------------------------------------------------------
-uint8_t RFInSync(uint8_t protocol_index, uint8_t inverse, uint16_t period_pos, uint16_t period_neg)
-{
-	uint8_t ret = 0x80;
-	uint8_t index;
-
-	switch(protocol_index)
-	{
-		// protocol is undefined, do loop through all protocols
-		case UNDEFINED_INDEX:
-
-			// check all protocols
-			for (index = 0x00 ; index < PROTOCOLCOUNT; index++)
-			{
-				if(CheckRFSync(index, inverse, period_pos, period_neg))
-				{
-					ret = index;
-					break;
-				}
-			}
-			break;
-
-		// check other protocols
-		default:
-
-			if (CheckRFSync(protocol_index, inverse, period_pos, period_neg))
-			{
-				ret = protocol_index;
-			}
-
-			break;
-	}
-
-	return ret;
-}
-
 void SetTimer0Overflow(uint8_t T0_Overflow)
 {
 	/***********************************************************************
@@ -508,6 +508,8 @@ void SendRFBuckets(const uint16_t buckets[], const uint8_t rfdata[], uint8_t n, 
 	while (repeats-- != 0);				// how many times do I need to repeat?
 
 	LED = LED_OFF;
+
+	rf_state = RF_FINISHED;
 }
 
 void SendTimingProtocol(uint16_t sync_high, uint16_t sync_low,
@@ -776,7 +778,7 @@ void Bucket_Received(uint16_t duration)
 					actual_bit_of_byte = 4;
 
 					// check if maximum of array got reached
-					if (actual_byte > sizeof(RF_DATA))
+					if (actual_byte > RF_DATA_BUFFERSIZE)
 					{
 						StopTimer2();
 						bucket_count = 0;
