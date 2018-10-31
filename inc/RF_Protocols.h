@@ -174,8 +174,8 @@ SI_SEGMENT_VARIABLE(PROTOCOL_DATA[PROTOCOLCOUNT], static const struct TIMING_PRO
 			{  0, 59 },	// SYNC HIGH_LOW
 			7,			// SYNC_BIT_COUNT
 			500,		// PULSE_TIME
-			{  1,   2 },// BIT0 HIGH_LOW
-			{  3,   2 },// BIT1 HIGH_LOW
+			{  3,   2 },// BIT0 HIGH_LOW
+			{  1,   2 },// BIT1 HIGH_LOW
 			64,			// BIT_COUNT
 			60,			// TOLERANCE
 			0,			// REPEAT_DELAY
