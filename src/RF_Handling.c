@@ -481,14 +481,14 @@ void SendSingleBit(uint16_t high_time, uint16_t low_time)
 {
 	// switch to high
 	LED = LED_ON;
-	T_DATA = 1;
+	T_DATA = TDATA_ON;
 	InitTimer3_us(10, high_time);
 	// wait until timer has finished
 	WaitTimer3Finished();
 
 	// switch to low
 	LED = LED_OFF;
-	T_DATA = 0;
+	T_DATA = TDATA_OFF;
 	InitTimer3_us(10, low_time);
 	// wait until timer has finished
 	WaitTimer3Finished();

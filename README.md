@@ -39,23 +39,23 @@ Hex: AA B1 04 0439 01C5 0BAE 1C3E 01 10 10 10 10 01 01 01 10 10 01 01 10 10 01 0
 0xAA: uart sync init<br/>
 0xB1: bucket sniffing<br/>
 0x04: bucket count including sync bucket<br/>
-0x0439: Bucket 1 length: 1081µs<br/>
-0x01C5: Bucket 2 length: 453µs<br/>
-0x0BAE: Bucket 3 length: 2990µs<br/>
-0x1C3E: Bucket 4 length: 7230µs<br/>
+0x0439: Bucket 0 length: 1081µs<br/>
+0x01C5: Bucket 1 length: 453µs<br/>
+0x0BAE: Bucket 2 length: 2990µs<br/>
+0x1C3E: Bucket 3 length: 7230µs<br/>
 0x01-0x23: RF data received (high/low nibbles denote buckets)<br/>
 0x55: uart sync end</br>
 </br>
 If the data is only including 01, 10 and 23 at the end than it should be possible to decode the signal by command 0xA6.</br>
 But for this the protocol have to be defined in the RF_Protocols.h file.
 
-01 means:</br>
+01 means bucket 0 and bucket 1:</br>
 <img src="https://raw.github.com/Portisch/RF-Bridge-EFM8BB1/master/doc/01_Bit_1.png" width="400" ></br>
 
-10 means:</br>
+10 means bucket 1 and bucket 0:</br>
 <img src="https://raw.github.com/Portisch/RF-Bridge-EFM8BB1/master/doc/10_Bit_0.png" width="400" ></br>
 
-23 means:</br>
+23 means the sync:</br>
 <img src="https://raw.github.com/Portisch/RF-Bridge-EFM8BB1/master/doc/23_Sync_Bit.png" width="400" ></br>
 
 The bitcount can be counted like this:</br>
@@ -116,7 +116,7 @@ With the command the standard PT226x sniffing gets disabled and the sniffing of 
 Hex: AA A6 55
 
 Example of a received decoded protocol:<br/>
-Hex: AA A6 04 03 32 FA 80 55<br/>
+Hex: AA A6 04 02 32 FA 80 55<br/>
 
 0xAA: uart sync init<br/>
 0xA6: sniffed RF data<br/>
@@ -138,7 +138,7 @@ Hex: AA A8 06 01 D0 F9 32 11 33 55<br/>
 0xAA: uart sync init<br/>
 0xA8: transmit RF data<br/>
 0x06: data len<br/>
-0x02: protocol index (ROHRMOTOR24)<br/>
+0x01: protocol index (ROHRMOTOR24)<br/>
 0xD0-0x33: data<br/>
 0x55: uart sync end
 
@@ -187,10 +187,10 @@ Hex: AA B0 20 04 1A 0120 01C0 0300 2710 0121212201220121212121212122012121220121
 0x20: data len: 32 bytes<br/>
 0x04: number of buckets: 4<br/>
 0x19: number of repetitions: (transmit 1+25 = 26 times)<br/>
-0x01-0x20: Bucket 1 length: 288µs<br/>
-0x01-0xC0: Bucket 2 length: 448µs<br/>
-0x03-0x00: Bucket 3 length: 768µs<br/>
-0x27-0x10: Bucket 4 length: 10ms (sync)<br/>
+0x01-0x20: Bucket 0 length: 288µs<br/>
+0x01-0xC0: Bucket 1 length: 448µs<br/>
+0x03-0x00: Bucket 2 length: 768µs<br/>
+0x27-0x10: Bucket 3 length: 10ms (sync)<br/>
 0x01-0x03: RF data to send (high/low nibbles denote buckets to use for RF high (on) and low (off))<br/>
 0x55: uart sync end
 
@@ -208,10 +208,10 @@ Hex: AA B1 04 0120 01C0 0300 2710 01212122012201212121212121220121212201212203 5
 0xAA: uart sync init<br/>
 0xB1: bucket sniffing<br/>
 0x04: bucket count including sync bucket<br/>
-0x01-0x20: Bucket 1 length: 288µs<br/>
-0x01-0xC0: Bucket 2 length: 448µs<br/>
-0x03-0x00: Bucket 3 length: 768µs<br/>
-0x27-0x10: Bucket 4 length: 10ms (sync)<br/>
+0x01-0x20: Bucket 0 length: 288µs<br/>
+0x01-0xC0: Bucket 1 length: 448µs<br/>
+0x03-0x00: Bucket 2 length: 768µs<br/>
+0x27-0x10: Bucket 3 length: 10ms (sync)<br/>
 0x01-0x03: RF data received (high/low nibbles denote buckets)<br/>
 0x55: uart sync end
 
