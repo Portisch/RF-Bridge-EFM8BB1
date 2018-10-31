@@ -4,7 +4,7 @@
     <property object="CLOCK_0" propertyId="ABPeripheral.included" value="true"/>
     <property object="CLOCK_0" propertyId="clock.clockselect.clocksourcedivider" value="SYSCLK / 1"/>
     <property object="CLOCK_0" propertyId="clock.clockselect.sysclk" value="24.500 MHz"/>
-    <property object="CROSSBAR0" propertyId="xbar0.pca0.cex" value="CEX0 and CEX1"/>
+    <property object="CROSSBAR0" propertyId="xbar0.pca0.cex" value="CEX0"/>
     <property object="CROSSBAR0" propertyId="xbar0.uart0.data" value="Enabled"/>
     <property object="DefaultMode" propertyId="mode.diagramLocation" value="100, 100"/>
     <property object="INTERRUPT_0" propertyId="ABPeripheral.included" value="true"/>
@@ -17,6 +17,7 @@
     <property object="P0.0" propertyId="ports.settings.iomode" value="Digital Push-Pull Output"/>
     <property object="P0.0" propertyId="ports.settings.label" value="T_DATA"/>
     <property object="P0.0" propertyId="ports.settings.outputmode" value="Push-pull"/>
+    <property object="P0.0" propertyId="ports.settings.skip" value="Skipped"/>
     <property object="P0.1" propertyId="ports.settings.skip" value="Skipped"/>
     <property object="P0.2" propertyId="ports.settings.skip" value="Skipped"/>
     <property object="P0.3" propertyId="ports.settings.skip" value="Skipped"/>
@@ -40,14 +41,10 @@
     <property object="PBCFG_0" propertyId="pbcfg.settings.enablecrossbar" value="Enabled"/>
     <property object="PCACH_0" propertyId="ABPeripheral.included" value="true"/>
     <property object="PCACH_0" propertyId="pcach.pcachannel.cex0outputpolarity" value="Inverted"/>
-    <property object="PCACH_0" propertyId="pcach.pcachannel.matchfunction" value="Enabled"/>
-    <property object="PCACH_0" propertyId="pcach.pcachannelcapturecomparemode.enablechannelcomparatorfunction" value="Enabled"/>
-    <property object="PCACH_0" propertyId="pcach.pcachannelcapturecomparemode.enablechannelpulsewidthmodulationmoden" value="Enabled"/>
-    <property object="PCACH_0" propertyId="pcach.pcacontrol.channelcapturecomparemode" value="Predefined 8~11-bit pulse modulator"/>
+    <property object="PCACH_0" propertyId="pcach.pcachannelcapturecomparemode.enablechannelcapturenegativefunction" value="Enabled"/>
+    <property object="PCACH_0" propertyId="pcach.pcachannelcapturecomparemode.enablechannelcapturepositivefunction" value="Enabled"/>
+    <property object="PCACH_0" propertyId="pcach.pcacontrol.channelcapturecomparemode" value="Capture on transition of CEX"/>
     <property object="PCACH_1" propertyId="ABPeripheral.included" value="true"/>
-    <property object="PCACH_1" propertyId="pcach.pcachannelcapturecomparemode.enablechannelcapturenegativefunction" value="Enabled"/>
-    <property object="PCACH_1" propertyId="pcach.pcachannelcapturecomparemode.enablechannelcapturepositivefunction" value="Enabled"/>
-    <property object="PCACH_1" propertyId="pcach.pcacontrol.channelcapturecomparemode" value="Capture on transition of CEX"/>
     <property object="PCACH_2" propertyId="ABPeripheral.included" value="true"/>
     <property object="PCA_0" propertyId="ABPeripheral.included" value="true"/>
     <property object="PCA_0" propertyId="pca.pcacountertimerconfiguration.enablepcacountertimeroverflowinterrupt" value="Enabled"/>

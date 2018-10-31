@@ -155,30 +155,16 @@ void uart_put_uint16_t(uint8_t command, uint16_t value)
 	UART0_initTxPolling();
 }
 
-void uart_put_RF_Data(uint8_t Command, uint8_t used_protocol)
+void uart_put_RF_Data(uint8_t Command, uint8_t protocol_index)
 {
 	uint8_t i = 0;
 	uint8_t b = 0;
 	uint8_t bits = 0;
-	SI_VARIABLE_SEGMENT_POINTER(pVar, uint8_t, SI_SEG_CODE) = PROTOCOL_DATA[used_protocol].protocol_data;
 
 	uart_putc(RF_CODE_START);
 	uart_putc(Command);
 
-	switch (PROTOCOL_DATA[used_protocol].protocol_type)
-	{
-		case DUTY_CYCLE:
-		{
-			bits = ((DUTY_CYLCE_PROTOCOL_DATA *)pVar)->BIT_COUNT;
-			break;
-		}
-
-		case TIMING:
-		{
-			bits = ((TIMING_PROTOCOL_DATA *)pVar)->BIT_COUNT;
-			break;
-		}
-	}
+	bits = PROTOCOL_DATA[protocol_index].BIT_COUNT;
 
 	while(i < bits)
 	{
@@ -188,8 +174,8 @@ void uart_put_RF_Data(uint8_t Command, uint8_t used_protocol)
 
 	uart_putc(b+1);
 
-	// set identifier for this protocol
-	uart_putc(PROTOCOL_DATA[used_protocol].IDENTIFIER);
+	// send index off this protocol
+	uart_putc(protocol_index);
 
 	// copy data to UART buffer
 	i = 0;

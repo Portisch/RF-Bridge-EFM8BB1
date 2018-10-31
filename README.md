@@ -51,19 +51,12 @@ But for this the protocol have to be defined in the RF_Protocols.h file.
 
 01 means:</br>
 <img src="https://raw.github.com/Portisch/RF-Bridge-EFM8BB1/master/doc/01_Bit_1.png" width="400" ></br>
-BIT_HIGH_TIME is 1081µs.</br>
-BIT_HIGH_DUTY = 100% / (1081µs + 453µS) * 1081µs =~ 70%. </br>
 
 10 means:</br>
 <img src="https://raw.github.com/Portisch/RF-Bridge-EFM8BB1/master/doc/10_Bit_0.png" width="400" ></br>
-BIT_LOW_TIME is 453µs.</br>
-BIT_LOW_DUTY = 100% / (1081µs + 453µS) * 453µs =~ 30%.</br>
 
 23 means:</br>
 <img src="https://raw.github.com/Portisch/RF-Bridge-EFM8BB1/master/doc/23_Sync_Bit.png" width="400" ></br>
-SYNC_HIGH is 2990µs.</br>
-SYNC_LOW is 7230µs.</br>
-SYNC_BIT_COUNT is default 0.</br>
 
 The bitcount can be counted like this:</br>
 
@@ -88,21 +81,21 @@ The xx is the firmware version (0x00-0xFF)
 0xAA: uart sync init<br/>
 0xA6: sniffing active<br/>
 0x06: data len<br/>
-0x02: protocol identifier<br/>
+0x01: protocol index<br/>
 0xD0-0x55: data<br/>
 0x55: uart sync end
 
 STOP:<br/>
 Binary: 10101010 10100110 00000110 00000001 11010000 11111001 00110010 00010001 01010101 01010101<br/>
-Hex: AA A6 06 02 D0 F9 32 11 55 55<br/>
+Hex: AA A6 06 01 D0 F9 32 11 55 55<br/>
 DOWN:<br/>
 Binary: 10101010 10100110 00000110 00000001 11010000 11111001 00110010 00010001 00110011 01010101<br/>
-Hex: AA A6 06 02 D0 F9 32 11 33 55<br/>
+Hex: AA A6 06 01 D0 F9 32 11 33 55<br/>
 
 ## RF decode from Seamaid_PAR_56_RGB remote (24 bit of data):
 Light ON:<br/>
-Binary: 10101010 10100110 00000100 00000011 00110010 11111010 10001111 01010101<br/>
-Hex: AA A6 04 03 32 FA 8F 55<br/>
+Binary: 10101010 10100110 00000010 00000011 00110010 11111010 10001111 01010101<br/>
+Hex: AA A6 04 02 32 FA 8F 55<br/>
 
 ## Transmiting by command 0xA5
 This is the original implemented RF transmit command<br/>
@@ -115,7 +108,7 @@ Hex: AA A5 24 E0 01 40 03 84 D0 03 58 55<br/>
 0xD0-0x58: 24bit Data<br/>
 
 The high time of the SYNC get calculated by the Tsyn (SYNC low time),<br/>
-duty cycle of the high bit is 75% and 25% of the low bit.<br/>
+the timing is defined by Tlow and Thigh.<br/>
 
 ## Sniffing by command 0xA6
 With the command the standard PT226x sniffing gets disabled and the sniffing of the defined protocols in RF_Protocols.h is starting.<br/>
@@ -128,70 +121,49 @@ Hex: AA A6 04 03 32 FA 80 55<br/>
 0xAA: uart sync init<br/>
 0xA6: sniffed RF data<br/>
 0x04: data len<br/>
-0x03: protocol identifier (Seamaid_PAR_56_RGB)<br/>
+0x02: protocol index (Seamaid_PAR_56_RGB)<br/>
 0x32-0x80: data<br/>
 0x55: uart sync end
 
 ## Stop sniffing by command 0xA7
-Stop the 0xA6 sniffing and restart the PT226x sniffing.
+Stop the 0xA6 sniffing and restart the default PT226x sniffing.
 
 ## Transmiting by command 0xA8
 There is a new command in the firmware to be able to send RF data.<br/>
 Predefined protocols in the RF_Protocols.h file can be used directly by<br/>
-using the protocol identifier.<br/>
+using the protocol index.<br/>
 
-Hex: AA A8 06 02 D0 F9 32 11 33 55<br/>
+Hex: AA A8 06 01 D0 F9 32 11 33 55<br/>
 
 0xAA: uart sync init<br/>
 0xA8: transmit RF data<br/>
 0x06: data len<br/>
-0x02: protocol identifier (ROHRMOTOR24)<br/>
+0x02: protocol index (ROHRMOTOR24)<br/>
 0xD0-0x33: data<br/>
 0x55: uart sync end
 
-#### Universal transmit of a duty cycle based protocol by command 0xA8
-When 0x7F get used as protocol identifier the timing can be user defined<br/>
-and do not have to be defined in RF_Protocols.h.<br/>
-This methode can be used to find correct parameter to define the timing<br/>
-in RF_Protocols.h for future.
-
-Hex: AA A8 0D 7F 12 C0 05 DC 02 BC 46 01 2C 1E 08 1E 55<br/>
-
-0xAA: uart sync init<br/>
-0xA8: transmit RF data<br/>
-0x0D: data len<br/>
-0x7F: protocol identifier 0x7F<br/>
-0x12-0xC0: SYNC_HIGH<br/>
-0x05-0xDC: SYNC_LOW<br/>
-0x02-0xBC: BIT_HIGH_TIME<br/>
-0x46: BIT_HIGH_DUTY<br/>
-0x01-0x2C: BIT_LOW_TIME<br/>
-0x1E: BIT_LOW_DUTY<br/>
-0x08: BIT_COUNT + SYNC_BIT_COUNT in front of RF data<br/>
-0x1E: RF data to send<br/>
-0x55: uart sync end<br/>
-
 #### Universal transmit of a time based protocol by command 0xA8
-When 0x80 get used as protocol identifier the timing can be user defined<br/>
+When 0x80 get used as protocol index the timing can be user defined<br/>
 and do not have to be defined in RF_Protocols.h.<br/>
-This methode can be used to find correct parameter to define the timing<br/>
+This method can be used to find correct parameter to define the timing<br/>
 in RF_Protocols.h for future.
 
 <img src="https://raw.github.com/Portisch/RF-Bridge-EFM8BB1/master/doc/pulse_timing.png" width="800" ></br>
 
-Hex: AA A8 0E 80 01 90 1B 58 00 C8 01 02 02 01 0C 1F B0 55<br/>
+Hex: AA A8 0F 80 00 0A 00 14 00 C8 01 02 02 01 00 0C 1F B0 55<br/>
 
 0xAA: uart sync init<br/>
 0xA8: transmit RF data<br/>
-0x0E: data len<br/>
-0x80: protocol identifier 0x80<br/>
-0x01-0x90: SYNC_HIGH<br/>
-0x1B-0x58: SYNC_LOW<br/>
+0x0F: data len<br/>
+0x80: protocol index 0x80<br/>
+0x00-0x0A: SYNC_HIGH FACTOR<br/>
+0x00-0x14: SYNC_LOW FACTOR<br/>
 0x00-0xC8: PULSE_TIME<br/>
 0x01: BIT_0_HIGH FACTOR<br/>
 0x02: BIT_0_LOW FACTOR<br/>
 0x02: BIT_1_HIGH FACTOR<br/>
 0x01: BIT_1_LOW FACTOR<br/>
+0x00: SYNC_BIT_COUNT<br/>
 0x0C: BIT_COUNT<br/>
 0x1F-0xB0: RF data to send<br/>
 0x55: uart sync end<br/>
@@ -260,7 +232,3 @@ For support/help take a look [here](https://github.com/Portisch/RF-Bridge-EFM8BB
 Hex: AA C0 xx xx 55<br/>
 
 Do beep xxxx miliseconds (uint16_t). Like AA C0 03 E8 55 will beep for ~1000ms.
-
-# Next Steps
-Add ESPurna support:<br/>
-A new protocol have to be implemented to support more RF signals -> have to be defined!

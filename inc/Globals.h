@@ -18,7 +18,7 @@
 #define TDATA_ON	1
 #define TDATA_OFF	0
 
-#define Sniffing	true
+#define Sniffing_On	1
 
 #define SYSCLK	24500000
 
