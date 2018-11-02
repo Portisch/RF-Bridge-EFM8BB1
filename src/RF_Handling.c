@@ -97,63 +97,44 @@ uint8_t CheckRFSync(uint8_t protocol_index, uint8_t inverse, uint16_t period_pos
 {
 	uint8_t ret = false;
 	uint16_t pulse_time;
-	uint16_t sync_high_delta;
-	uint16_t sync_low_delta;
+	uint16_t sync_delta;
 
 	// ignore protocols what aren't matching with positive/negative edge
 	if (PROTOCOL_DATA[protocol_index].INVERSE != inverse)
 		return ret;
 
-	// check if sync high and low is defined
-	if ((PROTOCOL_DATA[protocol_index].SYNC.HIGH > 0) && (PROTOCOL_DATA[protocol_index].SYNC.LOW > 0))
+	if (protocol_index == PT2260_INDEX)
 	{
 		// use calculated pulse time for PT2260 devices to decode the data
-		if (protocol_index == PT2260_INDEX)
-		{
-			pulse_time = PROTOCOL_DATA[protocol_index].SYNC.HIGH > PROTOCOL_DATA[protocol_index].SYNC.LOW ?
-					period_pos / PROTOCOL_DATA[protocol_index].SYNC.HIGH : period_neg / PROTOCOL_DATA[protocol_index].SYNC.LOW;
-		}
-		else
-		{
-			pulse_time = PROTOCOL_DATA[protocol_index].PULSE_TIME;
-		}
-
-		sync_high_delta = (period_pos / 100 * SYNC_TOLERANCE) > SYNC_TOLERANCE_MAX ? SYNC_TOLERANCE_MAX : (period_pos / 100 * SYNC_TOLERANCE);
-		sync_low_delta = (period_neg / 100 * SYNC_TOLERANCE) > SYNC_TOLERANCE_MAX ? SYNC_TOLERANCE_MAX : (period_neg / 100 * SYNC_TOLERANCE);
-
-		if (CheckRFSync_pos(period_pos, pulse_time * PROTOCOL_DATA[protocol_index].SYNC.HIGH, sync_high_delta) &&
-			CheckRFSync_neg(period_neg, pulse_time * PROTOCOL_DATA[protocol_index].SYNC.LOW, sync_low_delta))
-		{
-			BIT_LOW = pulse_time * PROTOCOL_DATA[protocol_index].BIT0.HIGH;
-			BIT_HIGH = pulse_time * PROTOCOL_DATA[protocol_index].BIT1.HIGH;
-			ret = true;
-		}
+		pulse_time = PROTOCOL_DATA[protocol_index].SYNC.HIGH > PROTOCOL_DATA[protocol_index].SYNC.LOW ?
+				period_pos / PROTOCOL_DATA[protocol_index].SYNC.HIGH : period_neg / PROTOCOL_DATA[protocol_index].SYNC.LOW;
 	}
-	else if (PROTOCOL_DATA[protocol_index].SYNC.LOW > 0)
+	else
 	{
+		// for all other use predefined protocol pulse time
 		pulse_time = PROTOCOL_DATA[protocol_index].PULSE_TIME;
-
-		sync_low_delta = (period_neg / 100 * SYNC_TOLERANCE) > SYNC_TOLERANCE_MAX ? SYNC_TOLERANCE_MAX : (period_neg / 100 * SYNC_TOLERANCE);
-
-		if (CheckRFSync_neg(period_neg, pulse_time * PROTOCOL_DATA[protocol_index].SYNC.LOW, sync_low_delta))
-		{
-			BIT_LOW = pulse_time * PROTOCOL_DATA[protocol_index].BIT0.HIGH;
-			BIT_HIGH = pulse_time * PROTOCOL_DATA[protocol_index].BIT1.HIGH;
-			ret = true;
-		}
 	}
-	else if (PROTOCOL_DATA[protocol_index].SYNC.HIGH > 0)
+
+	// check only longest sync pulse
+	if (PROTOCOL_DATA[protocol_index].SYNC.HIGH > PROTOCOL_DATA[protocol_index].SYNC.LOW)
 	{
-		pulse_time = PROTOCOL_DATA[protocol_index].PULSE_TIME;
+		sync_delta = (period_pos / 100 * SYNC_TOLERANCE) > SYNC_TOLERANCE_MAX ? SYNC_TOLERANCE_MAX : (period_pos / 100 * SYNC_TOLERANCE);
 
-		sync_high_delta = (period_pos / 100 * SYNC_TOLERANCE) > SYNC_TOLERANCE_MAX ? SYNC_TOLERANCE_MAX : (period_pos / 100 * SYNC_TOLERANCE);
-
-		if (CheckRFSync_neg(period_pos, pulse_time * PROTOCOL_DATA[protocol_index].SYNC.HIGH, sync_high_delta))
-		{
-			BIT_LOW = pulse_time * PROTOCOL_DATA[protocol_index].BIT0.HIGH;
-			BIT_HIGH = pulse_time * PROTOCOL_DATA[protocol_index].BIT1.HIGH;
+		if (CheckRFSync_pos(period_pos, pulse_time * PROTOCOL_DATA[protocol_index].SYNC.LOW, sync_delta))
 			ret = true;
-		}
+	}
+	else
+	{
+		sync_delta = (period_neg / 100 * SYNC_TOLERANCE) > SYNC_TOLERANCE_MAX ? SYNC_TOLERANCE_MAX : (period_neg / 100 * SYNC_TOLERANCE);
+
+		if (CheckRFSync_neg(period_neg, pulse_time * PROTOCOL_DATA[protocol_index].SYNC.LOW, sync_delta))
+			ret = true;
+	}
+
+	if (ret == true)
+	{
+		BIT_LOW = pulse_time * PROTOCOL_DATA[protocol_index].BIT0.HIGH;
+		BIT_HIGH = pulse_time * PROTOCOL_DATA[protocol_index].BIT1.HIGH;
 	}
 
 	return ret;
