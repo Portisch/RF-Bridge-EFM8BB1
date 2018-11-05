@@ -39,10 +39,10 @@ void SiLabs_Startup (void)
 // ----------------------------------------------------------------------------
 int main (void)
 {
-	bool ReadUARTData = true;
-	uint8_t last_desired_rf_protocol;
-	uint16_t l;
-	uint8_t tr_repeats;
+	SI_SEGMENT_VARIABLE(ReadUARTData, bool, SI_SEG_DATA) = true;
+	SI_SEGMENT_VARIABLE(last_desired_rf_protocol, uint8_t, SI_SEG_XDATA);
+	SI_SEGMENT_VARIABLE(tr_repeats, uint8_t, SI_SEG_XDATA);
+	SI_SEGMENT_VARIABLE(l, uint16_t, SI_SEG_XDATA);
 
 	// Call hardware initialization routine
 	enter_DefaultMode_from_RESET();
@@ -351,6 +351,7 @@ int main (void)
 								*(uint16_t *)&RF_DATA[2],	// bit 1 low time
 								0,							// sync bit count
 								24,							// bit count
+								false,						// inverse
 								6);							// actual position at the data array
 
 						break;
@@ -372,6 +373,9 @@ int main (void)
 						{
 							// restart sniffing if it was active
 							PCA0_DoSniffing(last_sniffing_command);
+
+							// disable RF transmit
+							T_DATA = TDATA_OFF;
 
 							// send acknowledge
 							uart_put_command(RF_CODE_ACK);
@@ -461,7 +465,8 @@ int main (void)
 						// byte 10:		BIT_1_LOW FACTOR
 						// byte 11:		SYNC_BIT_COUNT
 						// byte 12:		BIT_COUNT
-						// byte 13..N:	RF data to send
+						// byte 13:		INVERSE
+						// byte 14..N:	RF data to send
 						if (RF_DATA[0] == UNDEFINED_INDEX)
 						{
 							SendTimingProtocol(
@@ -473,7 +478,8 @@ int main (void)
 									*(uint16_t *)&RF_DATA[5] * RF_DATA[10],					// bit 1 low time
 									RF_DATA[11],											// sync bit count
 									RF_DATA[12],											// bit count
-									13);													// actual position at the data array
+									RF_DATA[13],											// inverse
+									14);													// actual position at the data array
 						}
 						// byte 0:		Protocol identifier 0x01..0x7E
 						// byte 1..N:	data to be transmitted
@@ -490,6 +496,7 @@ int main (void)
 										PROTOCOL_DATA[protocol_index].PULSE_TIME * PROTOCOL_DATA[protocol_index].BIT1.LOW,	// bit 1 low time
 										PROTOCOL_DATA[protocol_index].SYNC_BIT_COUNT,										// sync bit count
 										PROTOCOL_DATA[protocol_index].BIT_COUNT,											// bit count
+										PROTOCOL_DATA[protocol_index].INVERSE,												// inverse
 										1);																					// actual position at the data array
 							}
 							else
@@ -519,6 +526,9 @@ int main (void)
 						{
 							// restart sniffing if it was active
 							PCA0_DoSniffing(last_sniffing_command);
+
+							// disable RF transmit
+							T_DATA = TDATA_OFF;
 
 							// send acknowledge
 							uart_put_command(RF_CODE_ACK);
@@ -606,6 +616,9 @@ int main (void)
 					case RF_FINISHED:
 						// restart sniffing if it was active
 						PCA0_DoSniffing(last_sniffing_command);
+
+						// disable RF transmit
+						T_DATA = TDATA_OFF;
 
 						// send acknowledge
 						uart_put_command(RF_CODE_ACK);

@@ -458,18 +458,18 @@ void PCA0_StopSniffing(void)
 	rf_state = RF_IDLE;
 }
 
-void SendSingleBit(uint16_t high_time, uint16_t low_time)
+void SendSingleBit(uint8_t inverse, uint16_t high_time, uint16_t low_time)
 {
 	// switch to high
 	LED = LED_ON;
-	T_DATA = TDATA_ON;
+	T_DATA = TDATA_ON ^ inverse;
 	InitTimer3_us(10, high_time);
 	// wait until timer has finished
 	WaitTimer3Finished();
 
 	// switch to low
 	LED = LED_OFF;
-	T_DATA = TDATA_OFF;
+	T_DATA = TDATA_OFF ^ inverse;
 	InitTimer3_us(10, low_time);
 	// wait until timer has finished
 	WaitTimer3Finished();
@@ -484,7 +484,7 @@ void SendRFBuckets(const uint16_t buckets[], const uint8_t rfdata[], uint8_t n, 
 		uint8_t i;
 
 		for (i = 0; i < n; i++)			// transmit n bucket pairs
-			SendSingleBit(buckets[rfdata[i] >> 4], buckets[rfdata[i] & 0x0f]);
+			SendSingleBit(false, buckets[rfdata[i] >> 4], buckets[rfdata[i] & 0x0f]);
 	}
 	while (repeats-- != 0);				// how many times do I need to repeat?
 
@@ -495,14 +495,14 @@ void SendRFBuckets(const uint16_t buckets[], const uint8_t rfdata[], uint8_t n, 
 
 void SendTimingProtocol(uint16_t sync_high, uint16_t sync_low,
 		uint16_t bit_0_high, uint16_t bit_0_low, uint16_t bit_1_high, uint16_t bit_1_low,
-		uint8_t sync_bits, uint8_t bitcount, uint8_t position)
+		uint8_t sync_bits, uint8_t bitcount, uint8_t inverse, uint8_t position)
 {
 	uint8_t i;
 	uint8_t actual_position = position;
 	uint8_t actual_bit_of_byte = 0x80;
 
 	// do send sync
-	SendSingleBit(sync_high, sync_low);
+	SendSingleBit(inverse, sync_high, sync_low);
 
 	// send sync bits if used
 	if (sync_bits > 0)
@@ -510,7 +510,7 @@ void SendTimingProtocol(uint16_t sync_high, uint16_t sync_low,
 		for (i = 0; i < sync_bits; i++)
 		{
 			// send a bit 1
-			SendSingleBit(bit_1_high, bit_1_low);
+			SendSingleBit(inverse, bit_1_high, bit_1_low);
 		}
 	}
 
@@ -520,12 +520,12 @@ void SendTimingProtocol(uint16_t sync_high, uint16_t sync_low,
 		if (RF_DATA[actual_position] & actual_bit_of_byte)
 		{
 			// send a bit 1
-			SendSingleBit(bit_1_high, bit_1_low);
+			SendSingleBit(inverse, bit_1_high, bit_1_low);
 		}
 		else
 		{
 			// send a bit 0
-			SendSingleBit(bit_0_high, bit_0_low);
+			SendSingleBit(inverse, bit_0_high, bit_0_low);
 		}
 
 		actual_bit_of_byte >>= 1;
