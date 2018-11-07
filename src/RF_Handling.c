@@ -474,6 +474,17 @@ void SendSingleBit(uint8_t inverse, uint16_t high_time, uint16_t low_time)
 	// wait until timer has finished
 	WaitTimer3Finished();
 }
+
+void SendSingleBucket(uint8_t high_low, uint16_t bucket_time)
+{
+	// switch to high_low
+	LED = LED_ON;
+	T_DATA = high_low;
+	InitTimer3_us(10, bucket_time);
+	// wait until timer has finished
+	WaitTimer3Finished();
+}
+
 //-----------------------------------------------------------------------------
 // Send generic signal based on n time bucket pairs (high/low timing)
 //-----------------------------------------------------------------------------
@@ -481,10 +492,26 @@ void SendRFBuckets(const uint16_t buckets[], const uint8_t rfdata[], uint8_t n, 
 {
 	do
 	{
+		// start transmit of the buckets with a high bucket
+		uint8_t high_low = 1;
 		uint8_t i;
 
-		for (i = 0; i < n; i++)			// transmit n bucket pairs
-			SendSingleBit(false, buckets[rfdata[i] >> 4], buckets[rfdata[i] & 0x0f]);
+		// transmit n buckets
+		for (i = 0; i < n; i++)
+		{
+			// ignore 'F' bucket number
+			if (rfdata[i] >> 4 != 0x0F)
+			{
+				SendSingleBucket(high_low, buckets[(rfdata[i] >> 4) & 0x07]);
+				high_low = !high_low;
+			}
+
+			if ((rfdata[i] & 0x0F) != 0x0F)
+			{
+				SendSingleBucket(high_low, buckets[rfdata[i] & 0x07]);
+				high_low = !high_low;
+			}
+		}
 	}
 	while (repeats-- != 0);				// how many times do I need to repeat?
 
