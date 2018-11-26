@@ -95,19 +95,19 @@ uint8_t CheckRFSync_neg(uint16_t period_neg, uint16_t sync_low, uint16_t sync_lo
 
 uint8_t CheckRFSync(uint8_t protocol_index, uint8_t inverse, uint16_t period_pos, uint16_t period_neg)
 {
-	uint8_t ret = false;
+	uint8_t ret_pos = false;
+	uint8_t ret_neg = false;
 	uint16_t pulse_time;
 	uint16_t sync_delta;
 
 	// ignore protocols what aren't matching with positive/negative edge
 	if (PROTOCOL_DATA[protocol_index].INVERSE != inverse)
-		return ret;
+		return (ret_pos & ret_neg);
 
 	if (protocol_index == PT2260_INDEX)
 	{
 		// use calculated pulse time for PT2260 devices to decode the data
-		pulse_time = PROTOCOL_DATA[protocol_index].SYNC.HIGH > PROTOCOL_DATA[protocol_index].SYNC.LOW ?
-				period_pos / PROTOCOL_DATA[protocol_index].SYNC.HIGH : period_neg / PROTOCOL_DATA[protocol_index].SYNC.LOW;
+		pulse_time = period_neg / PROTOCOL_DATA[PT2260_INDEX].SYNC.LOW;
 	}
 	else
 	{
@@ -116,28 +116,31 @@ uint8_t CheckRFSync(uint8_t protocol_index, uint8_t inverse, uint16_t period_pos
 	}
 
 	// check only longest sync pulse
-	if (PROTOCOL_DATA[protocol_index].SYNC.HIGH > PROTOCOL_DATA[protocol_index].SYNC.LOW)
+	if (PROTOCOL_DATA[protocol_index].SYNC.HIGH > 0)
 	{
 		sync_delta = (period_pos / 100 * SYNC_TOLERANCE) > SYNC_TOLERANCE_MAX ? SYNC_TOLERANCE_MAX : (period_pos / 100 * SYNC_TOLERANCE);
+		sync_delta = sync_delta < SYNC_TOLERANCE_MIN ? SYNC_TOLERANCE_MIN : sync_delta;
 
-		if (CheckRFSync_pos(period_pos, pulse_time * PROTOCOL_DATA[protocol_index].SYNC.LOW, sync_delta))
-			ret = true;
+		if (CheckRFSync_pos(period_pos, pulse_time * PROTOCOL_DATA[protocol_index].SYNC.HIGH, sync_delta))
+			ret_pos = true;
 	}
-	else
+
+	if (PROTOCOL_DATA[protocol_index].SYNC.LOW > 0)
 	{
 		sync_delta = (period_neg / 100 * SYNC_TOLERANCE) > SYNC_TOLERANCE_MAX ? SYNC_TOLERANCE_MAX : (period_neg / 100 * SYNC_TOLERANCE);
+		sync_delta = sync_delta < SYNC_TOLERANCE_MIN ? SYNC_TOLERANCE_MIN : sync_delta;
 
 		if (CheckRFSync_neg(period_neg, pulse_time * PROTOCOL_DATA[protocol_index].SYNC.LOW, sync_delta))
-			ret = true;
+			ret_neg = true;
 	}
 
-	if (ret == true)
+	if ((ret_pos & ret_neg) == true)
 	{
 		BIT_LOW = pulse_time * PROTOCOL_DATA[protocol_index].BIT0.HIGH;
 		BIT_HIGH = pulse_time * PROTOCOL_DATA[protocol_index].BIT1.HIGH;
 	}
 
-	return ret;
+	return (ret_pos & ret_neg);
 }
 
 //-----------------------------------------------------------------------------

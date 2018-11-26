@@ -24,6 +24,7 @@
  */
 #define SYNC_TOLERANCE 			10
 #define SYNC_TOLERANCE_MAX		500
+#define SYNC_TOLERANCE_MIN		100
 
 /*
  * number of repeating by default
