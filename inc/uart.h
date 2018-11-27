@@ -14,7 +14,7 @@
 #define RF_CODE_START		0xAA
 #define RF_CODE_STOP		0x55
 
-#define UART_RX_BUFFER_SIZE	16 + 4
+#define UART_RX_BUFFER_SIZE	64
 #define UART_TX_BUFFER_SIZE	32
 
 /*

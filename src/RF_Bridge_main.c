@@ -583,8 +583,6 @@ int main (void)
 
 			case RF_CODE_RFOUT_BUCKET:
 			{
-				const uint8_t k = RF_DATA[0] * 2;
-
 				// only do the job if all data got received by UART
 				if (uart_state != IDLE)
 					break;
@@ -601,14 +599,16 @@ int main (void)
 						// byte 2*(1..k):		bucket time high
 						// byte 2*(1..k)+1:		bucket time low
 						// byte 2*k+2..N:		RF buckets to send
-						if ((k == 0) || (len < 4))
+						bucket_count = RF_DATA[0] * 2;
+
+						if ((bucket_count == 0) || (len < 4))
 						{
 							uart_command = NONE;
 							break;
 						}
 						else
 						{
-							SendRFBuckets((uint16_t *)(RF_DATA+2), RF_DATA+k+2, len-k-2, RF_DATA[1]);
+							SendRFBuckets((uint16_t *)(RF_DATA+2), RF_DATA+bucket_count+2, len-bucket_count-2, RF_DATA[1]);
 						}
 						break;
 

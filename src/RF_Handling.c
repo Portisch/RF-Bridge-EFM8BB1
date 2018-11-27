@@ -73,26 +73,14 @@ uint8_t Compute_CRC8_Simple_OneByte(uint8_t byteVal)
     return crc;
 }
 
-uint8_t CheckRFSync_pos(uint16_t period_pos, uint16_t sync_high, uint16_t sync_high_delta)
+uint16_t compute_delta(uint16_t duration)
 {
-	uint8_t ret = false;
-	if ((period_pos > (sync_high - sync_high_delta)) &&
-		(period_pos < (sync_high + sync_high_delta)))
-	{
-		ret = true;
-	}
-	return ret;
+	return ((float)duration / 100.0 * SYNC_TOLERANCE) > SYNC_TOLERANCE_MAX ? SYNC_TOLERANCE_MAX : ((float)duration / 100.0 * SYNC_TOLERANCE);
 }
 
-uint8_t CheckRFSync_neg(uint16_t period_neg, uint16_t sync_low, uint16_t sync_low_delta)
+uint8_t CheckRFSyncBucket(uint16_t period, uint16_t sync, uint16_t sync_delta)
 {
-	uint8_t ret = false;
-	if ((period_neg > (sync_low - sync_low_delta)) &&
-		(period_neg < (sync_low + sync_low_delta)))
-	{
-		ret = true;
-	}
-	return ret;
+	return (((sync - sync_delta) < period) && (period < (sync + sync_delta)));
 }
 
 uint8_t CheckRFSync(uint8_t protocol_index, uint8_t inverse, uint16_t period_pos, uint16_t period_neg)
@@ -120,19 +108,19 @@ uint8_t CheckRFSync(uint8_t protocol_index, uint8_t inverse, uint16_t period_pos
 	// check only longest sync pulse
 	if (PROTOCOL_DATA[protocol_index].SYNC.HIGH > 0)
 	{
-		sync_delta = (period_pos / 100 * SYNC_TOLERANCE) > SYNC_TOLERANCE_MAX ? SYNC_TOLERANCE_MAX : (period_pos / 100 * SYNC_TOLERANCE);
-		sync_delta = sync_delta < SYNC_TOLERANCE_MIN ? SYNC_TOLERANCE_MIN : sync_delta;
+		sync_delta = compute_delta(period_pos);
+		//sync_delta = sync_delta < SYNC_TOLERANCE_MIN ? SYNC_TOLERANCE_MIN : sync_delta;
 
-		if (CheckRFSync_pos(period_pos, pulse_time * PROTOCOL_DATA[protocol_index].SYNC.HIGH, sync_delta))
+		if (CheckRFSyncBucket(period_pos, pulse_time * PROTOCOL_DATA[protocol_index].SYNC.HIGH, sync_delta))
 			ret_pos = true;
 	}
 
 	if (PROTOCOL_DATA[protocol_index].SYNC.LOW > 0)
 	{
-		sync_delta = (period_neg / 100 * SYNC_TOLERANCE) > SYNC_TOLERANCE_MAX ? SYNC_TOLERANCE_MAX : (period_neg / 100 * SYNC_TOLERANCE);
-		sync_delta = sync_delta < SYNC_TOLERANCE_MIN ? SYNC_TOLERANCE_MIN : sync_delta;
+		sync_delta = compute_delta(period_neg);
+		//sync_delta = sync_delta < SYNC_TOLERANCE_MIN ? SYNC_TOLERANCE_MIN : sync_delta;
 
-		if (CheckRFSync_neg(period_neg, pulse_time * PROTOCOL_DATA[protocol_index].SYNC.LOW, sync_delta))
+		if (CheckRFSyncBucket(period_neg, pulse_time * PROTOCOL_DATA[protocol_index].SYNC.LOW, sync_delta))
 			ret_neg = true;
 	}
 
@@ -193,6 +181,8 @@ void HandleRFData(uint8_t inverse, uint16_t capture_period_pos, uint16_t capture
 	{
 		// check if we receive a sync
 		case RF_IDLE:
+			LED = LED_OFF;
+
 			// check first if last decoded RF signal was cleared
 			if (RF_DATA_STATUS != 0)
 				break;
@@ -334,30 +324,46 @@ void HandleRFData(uint8_t inverse, uint16_t capture_period_pos, uint16_t capture
 void PCA0_channel0EventCb()
 {
 	SI_SEGMENT_VARIABLE(current_capture_value, uint16_t, SI_SEG_XDATA);
-	static uint16_t previous_capture_value_pos, previous_capture_value_neg;
+	static uint16_t previous_capture_value;
 	static uint16_t capture_period_pos, capture_period_neg;
 
 	// Store most recent capture value
-	current_capture_value = PCA0CP0 * 10;
-
-	// ignore RF noise
-	if (current_capture_value < MIN_PULSE_LENGTH)
+	if (previous_capture_value > 0)
+	{
+		current_capture_value = (PCA0CP0 * 10) - previous_capture_value;
+		previous_capture_value = PCA0CP0 * 10;
+	}
+	else
+	{
+		previous_capture_value = PCA0CP0 * 10;
 		return;
+	}
+
+	// ignore RF noise and reset status
+	if (current_capture_value < MIN_PULSE_LENGTH)
+	{
+		protocol_index_in_sync = 0x80;
+		capture_period_pos = 0;
+		capture_period_neg = 0;
+		rf_state = IDLE;
+		return;
+	}
 
 	// positive edge
 	if (R_DATA)
 	{
-		// Update previous capture value with most recent info.
-		previous_capture_value_pos = current_capture_value;
-
-		// Calculate capture period from last two values.
-		capture_period_neg = current_capture_value - previous_capture_value_neg;
+		// capture period negative
+		capture_period_neg = current_capture_value;
 
 		// do sniffing by mode
 		switch (rf_sniffing_mode)
 		{
 			// do sniffing by timing mode
 			case MODE_TIMING:
+				// check if two buckets where received
+				if (capture_period_pos == 0 || capture_period_neg == 0)
+					return;
+
 				// check if a decode is already started
 				if (protocol_index_in_sync != 0x80)
 					if(PROTOCOL_DATA[protocol_index_in_sync].INVERSE == true)
@@ -375,17 +381,18 @@ void PCA0_channel0EventCb()
 	// negative edge
 	else
 	{
-		// Update previous capture value with most recent info.
-		previous_capture_value_neg = current_capture_value;
-
-		// Calculate capture period from last two values.
-		capture_period_pos = current_capture_value - previous_capture_value_pos;
+		// capture period positive
+		capture_period_pos = current_capture_value;
 
 		// do sniffing by mode
 		switch (rf_sniffing_mode)
 		{
 			// do sniffing by timing mode
 			case MODE_TIMING:
+				// check if two buckets where received
+				if (capture_period_pos == 0 || capture_period_neg == 0)
+					return;
+
 				// check if a decode is already started
 				if (protocol_index_in_sync != 0x80)
 					if(PROTOCOL_DATA[protocol_index_in_sync].INVERSE == false)
@@ -582,14 +589,11 @@ bool probablyFooter(uint16_t duration)
 
 bool matchesFooter(uint16_t duration)
 {
-  uint16_t footer_delta = bucket_sync / 100 * SYNC_TOLERANCE;
-  footer_delta = footer_delta > SYNC_TOLERANCE_MAX ? SYNC_TOLERANCE_MAX : footer_delta;
-  return (((bucket_sync - footer_delta) < duration) && (duration < (bucket_sync + footer_delta)));
+  return CheckRFSyncBucket(duration, bucket_sync, compute_delta(duration));
 }
 
 bool findBucket(uint16_t duration, uint8_t *index)
 {
-	bool ret = false;
 	uint8_t i;
 
 	for (i = 0; i < bucket_count; i++)
@@ -603,24 +607,22 @@ bool findBucket(uint16_t duration, uint8_t *index)
 			if (index != NULL)
 				*index = i;
 
-			ret = true;
-			break;
+			return true;
 		}
 	}
 
-	return ret;
+	return false;
 }
 
 bool definedBucket(uint16_t duration, uint8_t *index)
 {
-	bool ret = false;
 	uint16_t delta;
 	uint8_t i;
 
 	//search new duration first in existing array
 	if(findBucket(duration, index))
 	{
-		ret = true;
+		return true;
 	}
 	else
 	{
@@ -633,13 +635,12 @@ bool definedBucket(uint16_t duration, uint8_t *index)
 				if (index != NULL)
 					*index = i;
 
-				ret = true;
-				break;
+				return true;
 			}
 		}
 	}
 
-	return ret;
+	return false;
 }
 
 void CheckUsedBuckets(uint8_t data_len)
@@ -737,11 +738,6 @@ void Bucket_Received(uint16_t duration)
 				// this bucket looks like the sync bucket
 				bucket_sync = duration;
 				bucket_count_sync_1 = 0;
-			}
-			// stop on too short buckets
-			else if (duration < MIN_PULSE_LENGTH)
-			{
-				rf_state = RF_IDLE;
 			}
 			else
 			{
