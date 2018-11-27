@@ -25,6 +25,8 @@ typedef enum
 {
 	RF_IDLE,
 	RF_IN_SYNC,
+	RF_BUCKET_SYNC_1,
+	RF_BUCKET_SYNC_2,
 	RF_DECODE_BUCKET,
 	RF_FINISHED
 } rf_state_t;
@@ -62,7 +64,7 @@ extern SI_SEGMENT_VARIABLE(actual_sync_bit, uint8_t, SI_SEG_XDATA);
 extern SI_SEGMENT_VARIABLE(actual_byte, uint8_t, SI_SEG_XDATA);
 
 extern SI_SEGMENT_VARIABLE(bucket_sync, uint16_t, SI_SEG_XDATA);
-extern SI_SEGMENT_VARIABLE(buckets[15], uint16_t, SI_SEG_XDATA);
+extern SI_SEGMENT_VARIABLE(buckets[7], uint16_t, SI_SEG_XDATA);
 extern SI_SEGMENT_VARIABLE(bucket_count, uint8_t, SI_SEG_XDATA);
 
 #endif /* INC_RF_HANDLING_H_ */
