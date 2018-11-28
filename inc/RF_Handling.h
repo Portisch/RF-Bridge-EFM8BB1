@@ -8,12 +8,21 @@
 #ifndef INC_RF_HANDLING_H_
 #define INC_RF_HANDLING_H_
 
+extern bool buffer_out(uint16_t *bucket);
+extern void HandleRFBucket(uint16_t duration, bool high_low);
 extern uint8_t PCA0_DoSniffing(uint8_t active_command);
 extern void PCA0_StopSniffing(void);
-extern void SendRFBuckets(uint16_t *buckets, uint8_t *rfdata, uint8_t n, uint8_t repeats);
-extern void SendTimingProtocol(uint16_t sync_high, uint16_t sync_low,
-		uint16_t bit_0_high, uint16_t bit_0_low, uint16_t bit_1_high, uint16_t bit_1_low,
-		uint8_t sync_bits, uint8_t bitcount, uint8_t inverse, uint8_t position);
+extern void SendRFBuckets(uint16_t buckets[],
+		SI_VARIABLE_SEGMENT_POINTER(rfdata, uint8_t, SI_SEG_XDATA), uint8_t data_len);
+extern void SendBuckets(
+		uint16_t pulses[], uint8_t pulses_size,
+		uint8_t start[], uint8_t start_size,
+		uint8_t bit0[], uint8_t bit0_size,
+		uint8_t bit1[], uint8_t bit1_size,
+		uint8_t bit_count,
+		bool inverse,
+		SI_VARIABLE_SEGMENT_POINTER(rfdata, uint8_t, SI_SEG_XDATA));
+extern void SendBucketsByIndex(uint8_t index, SI_VARIABLE_SEGMENT_POINTER(rfdata, uint8_t, SI_SEG_XDATA));
 extern void Bucket_Received(uint16_t duration);
 
 // 112 byte == 896 bits, so a RF signal with maximum of 896 bits is possible
@@ -25,19 +34,16 @@ typedef enum
 {
 	RF_IDLE,
 	RF_IN_SYNC,
-	RF_BUCKET_SYNC_1,
-	RF_BUCKET_SYNC_2,
+	RF_BUCKET_REPEAT,
+	RF_BUCKET_IN_SYNC,
 	RF_DECODE_BUCKET,
 	RF_FINISHED
 } rf_state_t;
 
 typedef enum
 {
-	// do sniffing by timing
-	MODE_TIMING,
-	// do sniffing by bucket
-	// https://github.com/pimatic/RFControl
-	MODE_BUCKET
+	STANDARD,
+	ADVANCED
 } rf_sniffing_mode_t;
 
 #define RF_DATA_RECEIVED_MASK	0x80
@@ -48,9 +54,7 @@ extern SI_SEGMENT_VARIABLE(RF_DATA[RF_DATA_BUFFERSIZE], uint8_t, SI_SEG_XDATA);
 // Bit 6-0:	Protocol identifier
 extern SI_SEGMENT_VARIABLE(RF_DATA_STATUS, uint8_t, SI_SEG_XDATA);
 extern SI_SEGMENT_VARIABLE(rf_state, rf_state_t, SI_SEG_XDATA);
-extern SI_SEGMENT_VARIABLE(desired_rf_protocol, uint8_t, SI_SEG_XDATA);
-extern SI_SEGMENT_VARIABLE(rf_sniffing_mode, rf_sniffing_mode_t, SI_SEG_XDATA);
-extern SI_SEGMENT_VARIABLE(protocol_index_in_sync, uint8_t, SI_SEG_XDATA);
+extern SI_SEGMENT_VARIABLE(sniffing_mode, rf_sniffing_mode_t, SI_SEG_XDATA);
 
 extern SI_SEGMENT_VARIABLE(last_sniffing_command, uint8_t, SI_SEG_XDATA);
 
@@ -59,8 +63,6 @@ extern SI_SEGMENT_VARIABLE(BIT_HIGH, uint16_t, SI_SEG_XDATA);
 extern SI_SEGMENT_VARIABLE(BIT_LOW, uint16_t, SI_SEG_XDATA);
 
 extern SI_SEGMENT_VARIABLE(actual_bit_of_byte, uint8_t, SI_SEG_XDATA);
-extern SI_SEGMENT_VARIABLE(actual_bit, uint8_t, SI_SEG_XDATA);
-extern SI_SEGMENT_VARIABLE(actual_sync_bit, uint8_t, SI_SEG_XDATA);
 extern SI_SEGMENT_VARIABLE(actual_byte, uint8_t, SI_SEG_XDATA);
 
 extern SI_SEGMENT_VARIABLE(bucket_sync, uint16_t, SI_SEG_XDATA);

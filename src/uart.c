@@ -134,7 +134,7 @@ void uart_put_command(uint8_t command)
 	UART0_initTxPolling();
 }
 
-void uart_put_RF_Data(uint8_t Command, uint8_t protocol_index)
+void uart_put_RF_Data_Advanced(uint8_t Command, uint8_t protocol_index)
 {
 	uint8_t i = 0;
 	uint8_t b = 0;
@@ -143,7 +143,7 @@ void uart_put_RF_Data(uint8_t Command, uint8_t protocol_index)
 	uart_putc(RF_CODE_START);
 	uart_putc(Command);
 
-	bits = PROTOCOL_DATA[protocol_index].BIT_COUNT;
+	bits = PROTOCOL_DATA[protocol_index].bit_count;
 
 	while(i < bits)
 	{
@@ -168,7 +168,7 @@ void uart_put_RF_Data(uint8_t Command, uint8_t protocol_index)
 	UART0_initTxPolling();
 }
 
-void uart_put_RF_CODE_Data(uint8_t Command)
+void uart_put_RF_Data_Standard(uint8_t Command)
 {
 	uint8_t i = 0;
 	uint8_t b = 0;
@@ -206,11 +206,12 @@ void uart_put_RF_buckets(uint8_t Command)
 	uart_putc(Command);
 	// put bucket count + sync bucket
 	uart_putc(bucket_count + 1);
+
 	// start and wait for transmit
 	UART0_initTxPolling();
 	uart_wait_until_TX_finished();
 
-	// send up to 15 buckets
+	// send up to 7 buckets
 	while (i < bucket_count)
 	{
 		uart_putc((buckets[i] >> 8) & 0xFF);

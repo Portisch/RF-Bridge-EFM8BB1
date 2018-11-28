@@ -16,225 +16,225 @@
 /*
  * bucket sniffing constants
  */
-#define MIN_FOOTER_LENGTH	1300
+#define MIN_FOOTER_LENGTH	300
 #define MIN_PULSE_LENGTH	100
+
+#define PT226x_SYNC_MIN					4500
 
 /*
  * sync constants
  */
-#define SYNC_TOLERANCE 			10
-#define SYNC_TOLERANCE_MAX		500
-#define SYNC_TOLERANCE_MIN		100
+#define TOLERANCE_MAX		500
+#define TOLERANCE_MIN		100
 
 /*
  * number of repeating by default
  */
 #define RF_TRANSMIT_REPEATS		8
 
-/*
- * undefined protocol index
- */
-#define UNDEFINED_INDEX			0x80
-
-/*
- * Default Sonoff RF Bridge protocol
- */
-#define PT2260_INDEX			0x00
-
-/*
- * sniffing type
- */
-typedef enum
+typedef struct PROTOCOL_STATUS
 {
-	TIMING,
-	BUCKET
-} protocol_type_t;
+	uint16_t status;
+	uint8_t bit_count;
+} PROTOCOL_STATUS;
 
-/*
- * high low factor
- */
-typedef struct
+typedef struct PROTOCOL_DATA_UINT8_T
 {
-	uint8_t HIGH;
-	uint8_t LOW;
-} HIGH_LOW;
+	// pointer to array of uint8_t elements
+	SI_VARIABLE_SEGMENT_POINTER(dat, uint8_t, SI_SEG_CODE);
+	// size of the array
+	uint8_t size;
+} PROTOCOL_DATA_UINT8_T;
 
-/*
- * typedef for timing protocols
- */
-typedef struct TIMING_PROTOCOL_DATA
+typedef struct PROTOCOL_DATA_UINT16_T
 {
-	// high and low factor for the sync pulse
-	HIGH_LOW SYNC;
-	// sync bit count
-	uint8_t SYNC_BIT_COUNT;
-	// pulse time
-	uint16_t PULSE_TIME;
-	// high and low factor for bit 0
-	HIGH_LOW BIT0;
-	// high and low factor for bit 1
-	HIGH_LOW BIT1;
+	// pointer to array of uint16_t elements
+	SI_VARIABLE_SEGMENT_POINTER(dat, uint16_t, SI_SEG_CODE);
+	// size of the array
+	uint8_t size;
+} PROTOCOL_DATA_UINT16_T;
+
+typedef struct BUCKET_PROTOCOL_DATA
+{
+	// array and array size of buckets
+	PROTOCOL_DATA_UINT16_T pulses;
+	// array and array size of start buckets
+	PROTOCOL_DATA_UINT8_T start;
+	// array and array size of bit 0 buckets
+	PROTOCOL_DATA_UINT8_T bit0;
+	// array and array size of bit 1 buckets
+	PROTOCOL_DATA_UINT8_T bit1;
 	// bit count for this protocol
-	uint8_t BIT_COUNT;
-	// decode tolerance in % of the PULSE_TIME
-	uint8_t TOLERANCE;
-	// delay in microseconds between the repeats
-	uint8_t REPEAT_DELAY;
+	uint8_t bit_count;
 	// protocol with inverse pulses
-	uint8_t INVERSE;
-} TIMING_PROTOCOL_DATA;
+	uint8_t inverse;
+} BUCKET_PROTOCOL_DATA;
 
 /*
- * Protocol array
- * use a value of "0" for SYNC.high, SYNC.low or PULSE_TIME to deactivate some checking while decoding
+ * PT2260, EV1527,... original RF bridge protocol
+ * http://www.princeton.com.tw/Portals/0/Product/PT2260_4.pdf
  */
-#define PROTOCOLCOUNT	8
-#if PROTOCOLCOUNT > 0x7F
-#error Too much protocols are defined, stop!
-#endif
+#define PT226X
 
-SI_SEGMENT_VARIABLE(PROTOCOL_DATA[PROTOCOLCOUNT], static const struct TIMING_PROTOCOL_DATA, SI_SEG_CODE) =
+SI_SEGMENT_VARIABLE(PROTOCOL_PULSES(PT226X)[], static uint16_t, SI_SEG_CODE) = { 350, 1050, 10850 };
+SI_SEGMENT_VARIABLE(PROTOCOL_START(PT226X)[], static uint8_t, SI_SEG_CODE) = { 0, 2 };
+SI_SEGMENT_VARIABLE(PROTOCOL_BIT0(PT226X)[], static uint8_t, SI_SEG_CODE) = { 0, 1 };
+SI_SEGMENT_VARIABLE(PROTOCOL_BIT1(PT226X)[], static uint8_t, SI_SEG_CODE) = { 1, 0 };
+
+/*
+ * Rohrmotor24
+ * https://github.com/bjwelker/Raspi-Rollo/tree/master/Arduino/Rollo_Code_Receiver
+ */
+#define Rohrmotor24
+
+SI_SEGMENT_VARIABLE(PROTOCOL_PULSES(Rohrmotor24)[], static uint16_t, SI_SEG_CODE) = { 370, 740, 4800, 1500};
+SI_SEGMENT_VARIABLE(PROTOCOL_START(Rohrmotor24)[], static uint8_t, SI_SEG_CODE) = { 2, 3 };
+SI_SEGMENT_VARIABLE(PROTOCOL_BIT0(Rohrmotor24)[], static uint8_t, SI_SEG_CODE) = { 0, 1 };
+SI_SEGMENT_VARIABLE(PROTOCOL_BIT1(Rohrmotor24)[], static uint8_t, SI_SEG_CODE) = { 1, 0 };
+
+/*
+ * UNDERWATER PAR56 LED LAMP, 502266
+ * http://www.seamaid-lighting.com/de/produit/lampe-par56/
+ */
+#define PAR56
+
+SI_SEGMENT_VARIABLE(PROTOCOL_PULSES(PAR56)[], static uint16_t, SI_SEG_CODE) = { 380, 1100, 3000, 9000};
+SI_SEGMENT_VARIABLE(PROTOCOL_START(PAR56)[], static uint8_t, SI_SEG_CODE) = { 2, 3 };
+SI_SEGMENT_VARIABLE(PROTOCOL_BIT0(PAR56)[], static uint8_t, SI_SEG_CODE) = { 0, 1 };
+SI_SEGMENT_VARIABLE(PROTOCOL_BIT1(PAR56)[], static uint8_t, SI_SEG_CODE) = { 1, 0 };
+
+/*
+ * Alecto WS-1200 Series Wireless Weather Station
+ */
+#define WS_1200
+
+SI_SEGMENT_VARIABLE(PROTOCOL_PULSES(WS_1200)[], static uint16_t, SI_SEG_CODE) = { 500, 1000, 1500, 29500 };
+SI_SEGMENT_VARIABLE(PROTOCOL_START(WS_1200)[], static uint8_t, SI_SEG_CODE) = { 3 };
+SI_SEGMENT_VARIABLE(PROTOCOL_BIT0(WS_1200)[], static uint8_t, SI_SEG_CODE) = { 2, 1 };
+SI_SEGMENT_VARIABLE(PROTOCOL_BIT1(WS_1200)[], static uint8_t, SI_SEG_CODE) = { 0, 1 };
+
+/*
+ * ALDI Remote controlled wall sockets, 4x
+  */
+#define ALDI_4x
+
+SI_SEGMENT_VARIABLE(PROTOCOL_PULSES(ALDI_4x)[], static uint16_t, SI_SEG_CODE) = { 400, 1200, 3000, 7250};
+SI_SEGMENT_VARIABLE(PROTOCOL_START(ALDI_4x)[], static uint8_t, SI_SEG_CODE) = { 2, 3 };
+SI_SEGMENT_VARIABLE(PROTOCOL_BIT0(ALDI_4x)[], static uint8_t, SI_SEG_CODE) = { 0, 1 };
+SI_SEGMENT_VARIABLE(PROTOCOL_BIT1(ALDI_4x)[], static uint8_t, SI_SEG_CODE) = { 1, 0 };
+
+/*
+ * HT6P20X chips
+ * http://www.holtek.com.tw/documents/10179/11842/6p20v170.pdf
+ */
+#define HT6P20X
+
+SI_SEGMENT_VARIABLE(PROTOCOL_PULSES(HT6P20X)[], static uint16_t, SI_SEG_CODE) = { 450, 900, 10350};
+SI_SEGMENT_VARIABLE(PROTOCOL_START(HT6P20X)[], static uint8_t, SI_SEG_CODE) = { 2, 0 };
+SI_SEGMENT_VARIABLE(PROTOCOL_BIT0(HT6P20X)[], static uint8_t, SI_SEG_CODE) = { 0, 1 };
+SI_SEGMENT_VARIABLE(PROTOCOL_BIT1(HT6P20X)[], static uint8_t, SI_SEG_CODE) = { 1, 0 };
+
+/*
+ * HT12A/HT12E chips
+ * http://www.holtek.com/documents/10179/116711/2_12ev120.pdf
+ */
+#define HT12
+
+SI_SEGMENT_VARIABLE(PROTOCOL_PULSES(HT12)[], static uint16_t, SI_SEG_CODE) = { 210, 420, 7560};
+SI_SEGMENT_VARIABLE(PROTOCOL_START(HT12)[], static uint8_t, SI_SEG_CODE) = { 2, 0 };
+SI_SEGMENT_VARIABLE(PROTOCOL_BIT0(HT12)[], static uint8_t, SI_SEG_CODE) = { 0, 1 };
+SI_SEGMENT_VARIABLE(PROTOCOL_BIT1(HT12)[], static uint8_t, SI_SEG_CODE) = { 1, 0 };
+
+SI_SEGMENT_VARIABLE(PROTOCOL_DATA[], static struct BUCKET_PROTOCOL_DATA, SI_SEG_CODE) =
 {
 		/*
 		 * PT2260, EV1527,... original RF bridge protocol
-		 * http://www.princeton.com.tw/Portals/0/Product/PT2260_4.pdf
 		 */
 		{
-			//0,		// SYNC_HIGH
-			//0,		// SYNC_LOW
-			{  1, 31 },	// SYNC HIGH_LOW
-			0,			// SYNC_BIT_COUNT
-			350,		// PULSE_TIME
-			{  1,  3 },	// BIT0 HIGH_LOW
-			{  3,  1 },	// BIT1 HIGH_LOW
-			24,			// BIT_COUNT
-			60,			// TOLERANCE
-			0,			// REPEAT_DELAY
-			false		// INVERSE
+			{ &PROTOCOL_PULSES(PT226X), ARRAY_LENGTH(PROTOCOL_PULSES(PT226X)) },
+			{ &PROTOCOL_START(PT226X), ARRAY_LENGTH(PROTOCOL_START(PT226X)) },
+			{ &PROTOCOL_BIT0(PT226X), ARRAY_LENGTH(PROTOCOL_BIT0(PT226X)) },
+			{ &PROTOCOL_BIT1(PT226X), ARRAY_LENGTH(PROTOCOL_BIT1(PT226X)) },
+			24,
+			false
 		},
 
 		/*
 		 * Rohrmotor24
-		 * https://github.com/bjwelker/Raspi-Rollo/tree/master/Arduino/Rollo_Code_Receiver
 		 */
 		{
-			//4800,		// SYNC_HIGH
-			//1500,		// SYNC_LOW
-			{ 13,  4 },	// SYNC HIGH_LOW
-			0,			// SYNC_BIT_COUNT
-			370,		// PULSE_TIME
-			{  1,  2 },	// BIT0 HIGH_LOW
-			{  2,  1 },	// BIT1 HIGH_LOW
-			40,			// BIT_COUNT
-			60,			// TOLERANCE
-			8,			// REPEAT_DELAY
-			false		// INVERSE
+			{ &PROTOCOL_PULSES(Rohrmotor24), ARRAY_LENGTH(PROTOCOL_PULSES(Rohrmotor24)) },
+			{ &PROTOCOL_START(Rohrmotor24), ARRAY_LENGTH(PROTOCOL_START(Rohrmotor24)) },
+			{ &PROTOCOL_BIT0(Rohrmotor24), ARRAY_LENGTH(PROTOCOL_BIT0(Rohrmotor24)) },
+			{ &PROTOCOL_BIT1(Rohrmotor24), ARRAY_LENGTH(PROTOCOL_BIT1(Rohrmotor24)) },
+			40,
+			false
 		},
 
 		/*
 		 * UNDERWATER PAR56 LED LAMP, 502266
-		 * http://www.seamaid-lighting.com/de/produit/lampe-par56/
 		 */
 		{
-			//3000,		// SYNC_HIGH
-			//9000,		// SYNC_LOW
-			{  8, 23 },	// SYNC HIGH_LOW
-			0,			// SYNC_BIT_COUNT
-			390,		// PULSE_TIME
-			{  1,  3 },	// BIT0 HIGH_LOW
-			{  3,  1 },	// BIT1 HIGH_LOW
-			24,			// BIT_COUNT
-			60,			// TOLERANCE
-			0,			// REPEAT_DELAY
-			false		// INVERSE
-		},
-
-		/*
-		 * Wall plug Noru
-		  */
-		{
-			//9500,		// SYNC_HIGH
-			//3000,		// SYNC_LOW
-			{ 31, 10 },	// SYNC HIGH_LOW
-			0,			// SYNC_BIT_COUNT
-			300,		// PULSE_TIME
-			{  1,  3 },	// BIT0 HIGH_LOW
-			{  3,  1 },	// BIT1 HIGH_LOW
-			24,			// BIT_COUNT
-			60,			// TOLERANCE
-			0,			// REPEAT_DELAY
-			false		// INVERSE
+			{ &PROTOCOL_PULSES(PAR56), ARRAY_LENGTH(PROTOCOL_PULSES(PAR56)) },
+			{ &PROTOCOL_START(PAR56), ARRAY_LENGTH(PROTOCOL_START(PAR56)) },
+			{ &PROTOCOL_BIT0(PAR56), ARRAY_LENGTH(PROTOCOL_BIT0(PAR56)) },
+			{ &PROTOCOL_BIT1(PAR56), ARRAY_LENGTH(PROTOCOL_BIT1(PAR56)) },
+			24,
+			false
 		},
 
 		/*
 		 * Alecto WS-1200 Series Wireless Weather Station
-		  */
+		 */
 		{
-			//0,		// SYNC_HIGH
-			//29400		// SYNC_LOW
-			{  0, 59 },	// SYNC HIGH_LOW
-			7,			// SYNC_BIT_COUNT
-			500,		// PULSE_TIME
-			{  3,   2 },// BIT0 HIGH_LOW
-			{  1,   2 },// BIT1 HIGH_LOW
-			64,			// BIT_COUNT
-			60,			// TOLERANCE
-			0,			// REPEAT_DELAY
-			false		// INVERSE
+			{ &PROTOCOL_PULSES(WS_1200), ARRAY_LENGTH(PROTOCOL_PULSES(WS_1200)) },
+			{ &PROTOCOL_START(WS_1200), ARRAY_LENGTH(PROTOCOL_START(WS_1200)) },
+			{ &PROTOCOL_BIT0(WS_1200), ARRAY_LENGTH(PROTOCOL_BIT0(WS_1200)) },
+			{ &PROTOCOL_BIT1(WS_1200), ARRAY_LENGTH(PROTOCOL_BIT1(WS_1200)) },
+			71,
+			false
 		},
 
 		/*
 		 * ALDI Remote controlled wall sockets, 4x
-		  */
+		 */
 		{
-			//3000,		// SYNC_HIGH
-			//7250,		// SYNC_LOW
-			{  7, 18 },	// SYNC HIGH_LOW
-			0,			// SYNC_BIT_COUNT
-			400,		// PULSE_TIME
-			{  1,  3 },	// BIT0 HIGH_LOW
-			{  3,  1 },	// BIT1 HIGH_LOW
-			24,			// BIT_COUNT
-			60,			// TOLERANCE
-			0,			// REPEAT_DELAY
-			false		// INVERSE
+			{ &PROTOCOL_PULSES(ALDI_4x), ARRAY_LENGTH(PROTOCOL_PULSES(ALDI_4x)) },
+			{ &PROTOCOL_START(ALDI_4x), ARRAY_LENGTH(PROTOCOL_START(ALDI_4x)) },
+			{ &PROTOCOL_BIT0(ALDI_4x), ARRAY_LENGTH(PROTOCOL_BIT0(ALDI_4x)) },
+			{ &PROTOCOL_BIT1(ALDI_4x), ARRAY_LENGTH(PROTOCOL_BIT1(ALDI_4x)) },
+			24,
+			false
 		},
 
 		/*
 		 * HT6P20X chips
-		 * http://www.holtek.com.tw/documents/10179/11842/6p20v170.pdf
 		 */
 		{
-			//10350,	// SYNC_LOW
-			//450,		// SYNC_HIGH
-			{ 23,  1 },	// SYNC HIGH_LOW
-			0,			// SYNC_BIT_COUNT
-			450,		// PULSE_TIME
-			{  1,  2 },	// BIT0 HIGH_LOW
-			{  2,  1 },	// BIT1 HIGH_LOW
-			24,			// BIT_COUNT
-			60,			// TOLERANCE
-			0,			// REPEAT_DELAY
-			true		// INVERSE
+			{ &PROTOCOL_PULSES(HT6P20X), ARRAY_LENGTH(PROTOCOL_PULSES(HT6P20X)) },
+			{ &PROTOCOL_START(HT6P20X), ARRAY_LENGTH(PROTOCOL_START(HT6P20X)) },
+			{ &PROTOCOL_BIT0(HT6P20X), ARRAY_LENGTH(PROTOCOL_BIT0(HT6P20X)) },
+			{ &PROTOCOL_BIT1(HT6P20X), ARRAY_LENGTH(PROTOCOL_BIT1(HT6P20X)) },
+			24,
+			true
 		},
 
 		/*
 		 * HT12A/HT12E chips
-		 * http://www.holtek.com/documents/10179/116711/2_12ev120.pdf
 		 */
 		{
-			//7560,		// SYNC_LOW
-			//210,		// SYNC_HIGH
-			{ 36,  1 },	// SYNC HIGH_LOW
-			0,			// SYNC_BIT_COUNT
-			210,		// PULSE_TIME
-			{  1,  2 },	// BIT0 HIGH_LOW
-			{  2,  1 },	// BIT1 HIGH_LOW
-			12,			// BIT_COUNT
-			60,			// TOLERANCE
-			0,			// REPEAT_DELAY
-			true		// INVERSE
+			{ &PROTOCOL_PULSES(HT12), ARRAY_LENGTH(PROTOCOL_PULSES(HT12)) },
+			{ &PROTOCOL_START(HT12), ARRAY_LENGTH(PROTOCOL_START(HT12)) },
+			{ &PROTOCOL_BIT0(HT12), ARRAY_LENGTH(PROTOCOL_BIT0(HT12)) },
+			{ &PROTOCOL_BIT1(HT12), ARRAY_LENGTH(PROTOCOL_BIT1(HT12)) },
+			12,
+			true
 		}
 };
+
+#define PROTOCOLCOUNT (sizeof(PROTOCOL_DATA) / sizeof(PROTOCOL_DATA[0]))
+
+// status of each protocol
+SI_SEGMENT_VARIABLE(status[PROTOCOLCOUNT], static PROTOCOL_STATUS, SI_SEG_IDATA);
 
 #endif /* INC_RF_PROTOCOLS_H_ */
