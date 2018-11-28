@@ -69,8 +69,8 @@ extern SI_SEGMENT_VARIABLE(uart_command, uart_command_t, SI_SEG_XDATA);
 
 extern unsigned int uart_getc(void);
 extern void uart_put_command(uint8_t command);
-extern void uart_put_RF_Data(uint8_t Command, uint8_t used_protocol);
-extern void uart_put_RF_CODE_Data(uint8_t Command);
+extern void uart_put_RF_Data_Advanced(uint8_t Command, uint8_t protocol_index);
+extern void uart_put_RF_Data_Standard(uint8_t Command);
 extern void uart_put_RF_buckets(uint8_t Command);
 
 
