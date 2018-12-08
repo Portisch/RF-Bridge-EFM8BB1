@@ -147,6 +147,7 @@ SI_SEGMENT_VARIABLE(PROTOCOL_BIT1(HT12)[], static uint8_t, SI_SEG_CODE) = { 1, 0
 
 /*
  * Meteo SPxx -  Weather station (PHU Metrex)
+ * https://gist.github.com/klaper/ce3ba02501516d9a6d294367d2c300a6
  */
 
 #define SP45
