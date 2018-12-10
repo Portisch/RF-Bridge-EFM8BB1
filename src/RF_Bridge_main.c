@@ -537,7 +537,7 @@ int main (void)
 
 			// do bucket sniffing handling
 			if (buffer_out(&bucket))
-				Bucket_Received(bucket & 0x7FFF);
+				Bucket_Received(bucket & 0x7FFF, (bool)((bucket & 0x8000) >> 15));
 
 			// check if a RF signal got decoded
 			if ((RF_DATA_STATUS & RF_DATA_RECEIVED_MASK) != 0)

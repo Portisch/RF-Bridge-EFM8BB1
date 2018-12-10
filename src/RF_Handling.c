@@ -588,7 +588,7 @@ bool findBucket(uint16_t duration, uint8_t *index)
 	return false;
 }
 
-void Bucket_Received(uint16_t duration)
+void Bucket_Received(uint16_t duration, bool high_low)
 {
 	uint8_t bucket_index;
 
@@ -607,7 +607,7 @@ void Bucket_Received(uint16_t duration)
 
 			if (probablyFooter(duration))
 			{
-				bucket_sync = duration;
+				bucket_sync = duration | ((uint16_t)high_low << 15);
 				bucket_count_sync_1 = 0;
 				rf_state = RF_BUCKET_REPEAT;
 			}
@@ -634,10 +634,10 @@ void Bucket_Received(uint16_t duration)
 				}
 			}
 			// check if duration is longer than sync bucket restart
-			else if (duration > bucket_sync)
+			else if (duration > (bucket_sync & 0x7FFF))
 			{
 				// this bucket looks like the sync bucket
-				bucket_sync = duration;
+				bucket_sync = duration | ((uint16_t)high_low << 15);
 				bucket_count_sync_1 = 0;
 			}
 			else
@@ -675,12 +675,12 @@ void Bucket_Received(uint16_t duration)
 			// fill rf data with the current bucket number
 			if (actual_bit_of_byte == 4)
 			{
-				RF_DATA[actual_byte] = bucket_index << 4;
+				RF_DATA[actual_byte] = (bucket_index << 4) | ((uint8_t)high_low << 7);
 				actual_bit_of_byte = 0;
 			}
 			else
 			{
-				RF_DATA[actual_byte] |= (bucket_index & 0x0F);
+				RF_DATA[actual_byte] |= (bucket_index | ((uint8_t)high_low << 3));
 
 				crc = Compute_CRC8_Simple_OneByte(crc ^ RF_DATA[actual_byte]);
 
@@ -716,12 +716,15 @@ void Bucket_Received(uint16_t duration)
 					// add sync bucket number to data
 					if (actual_bit_of_byte == 0)
 					{
-						RF_DATA[actual_byte] |= (bucket_count & 0x0F);
+						RF_DATA[actual_byte] |= (bucket_count | ((bucket_sync & 0x8000) >> 12));
 					}
 					else
 					{
-						RF_DATA[actual_byte] = (bucket_count << 4) | 0x0F;
+						RF_DATA[actual_byte] = ((bucket_count << 4)  | ((bucket_sync & 0x8000) >> 8)) | 0x0F;
 					}
+
+					// clear high/low flag
+					bucket_sync &= 0x7FFF;
 
 					RF_DATA_STATUS |= RF_DATA_RECEIVED_MASK;
 				}
