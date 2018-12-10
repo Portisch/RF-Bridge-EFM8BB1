@@ -7,8 +7,21 @@
 # Author:      gerardovf
 #
 # Created:     05/09/2018
-# Editor:      Portisch
+# Editor:      Portisch, henfri
 #-------------------------------------------------------------------------------
+
+# Interactive Process to learn Codes:
+# -Run rfraw 177 in your SonOff console -Push all your remote (each Button 2-3 times)
+# -Save everything from the console that happened after rfraw 177 to a file, e.g. console.txt
+# a) Run bitbuckedconverter.py -f console.txt
+# b) Run bitbuckedconverter.py -f console.txt -e
+# In case of a) each line of console.txt will be converted into a B0 string and displayed
+# In case of b) each line of console.txt will be converted into a B0 string and send to the Bridge. Then:
+# -if the device reacted as expeced, you can enter a name of the button (e.g. "light")
+# -else enter nothing to try the next
+# -repeat this until all lines have been tried
+# -The tool will create a list of buttons -and their B0 codes- that have worked (i.e. for which you have specified a name)
+# -In the end you can test all of these codes
 
 from optparse import OptionParser
 import pycurl
@@ -17,6 +30,8 @@ from optparse import OptionParser
 #from io import StringIO
 from io import BytesIO
 from PIL import Image, ImageFont, ImageDraw
+from os.path import exists
+from time import sleep
 
 # Output:
 # Example: AA B0 23 04 14 0224 03FB 0BF4 1CAC 23011010011001010110101001100101011010100101100110 55
@@ -29,9 +44,8 @@ from PIL import Image, ImageFont, ImageDraw
 # data
 # 0x55: sync end
 
-def getInputStr():
-    #auxStr = '18:30:23 MQT: /sonoff/bridge/RESULT = {"RfRaw":{"Data":"AAB104022403FB0BF41CAC0110100110010101101010011001010110101001011001102355"}}'
-    auxStr = raw_input("Enter B1 line: ")
+
+def filterInputStr(auxStr):
     auxStr = auxStr.replace(' ', '')
     iPosEnd = auxStr.rfind('55')
     if (iPosEnd > -1):
@@ -45,11 +59,18 @@ def getInputStr():
         auxStr = ""
     return auxStr
 
+def getInputStr():
+    #auxStr = '18:30:23 MQT: /sonoff/bridge/RESULT = {"RfRaw":{"Data":"AA B1 04 0224 03FB 0BF4 1CAC 01101001100101011010100110010101101010010110011023 55"}}'
+    auxStr = raw_input("Enter B1 line: ")
+    auxStr = filterInputStr(auxStr)
+    return auxStr
+
 def sendCommand(szOutFinal, mydevice):
     #buffer = StringIO()
+    mydevice.replace("http://","").replace("/","")
     buffer = BytesIO()
     url = str("http://{}/ax?c2=191&c1=RfRaw%20".format(mydevice))
-    url += szOutFinal
+    url += szOutFinal.replace(" ","%20")
     print(url)
     print("Sending command to bridge")
     c = pycurl.Curl()
@@ -124,11 +145,13 @@ def DrawImage(buckets, data):
     filename = "oscilloscope.jpg"
 
     picture.save(filename)
-    try:
-        import webbrowser
-        webbrowser.open(filename)
-    except:
-        print("Saved oscilloscope screen to " + filename)
+    
+    if not (options.device):
+        try:
+            import webbrowser
+            webbrowser.open(filename)
+        except:
+            print("Saved oscilloscope screen to " + filename)
 
 def findSyncPattern(szData):    
     syncData = None
@@ -196,7 +219,8 @@ def decodeBuckets(buckets, data):
     else:
         bit1_mask = "10"
 
-    print("Bitcount: %d" % ((len(data)) / 2))
+    if (options.debug):
+        print("Bitcount: %d" % ((len(data)) / 2))
 
     code = ""
 
@@ -223,7 +247,7 @@ def main(szInpStr, repVal):
 
     # Start packing
     szOutAux = " %0.2X " % iNbrOfBuckets
-    szOutAux += "%0.2X " % repVal
+    szOutAux += "%0.2X " % int(repVal)
 
     for i in range(0, iNbrOfBuckets):
         szOutAux += szInpStr[6+i*4:10+i*4] + " "
@@ -250,17 +274,46 @@ def main(szInpStr, repVal):
         sendCommand(szOutAux, options.device)
 
     print("Resulting 0xB0 data: " + szOutAux)
+    return szOutAux
+
+def parse_file(fn):
+    commands={}
+    with open(fn) as f:
+        for line in f:
+            if '{"RfRaw":{"Data":"AA B1' in line:
+                print("###### Processing line {0} ######".format(line))
+                res=main(filterInputStr(line)
+                         , options.repeat)
+                if options.device:
+                    print("###### Command was sent. Enter name of command if your device reacted as expected or just [Enter] if not ######")
+                    print("###### Please no special caracters or spaces")
+                    strInput = input().replace(" ","")
+                    if len(strInput)>0:
+                        commands[strInput]=res
+            else: print("###### Skipping line '{0}' ######".format(line))
+    if options.device:
+        print("Successful commands were: {0}".format(commands))
+        print("Do you want to test these commands now? (y/n)")
+        if input().lower()=='y':
+            for key,value in commands.items():
+                print("Sending command {0}".format(key))
+                sendCommand(value, options.device)
+                sleep(4)
+
+
 
 usage = "usage: %prog [options]"
-parser = OptionParser(usage=usage, version="%prog 0.3")
+parser = OptionParser(usage=usage, version="%prog 0.4")
 parser.add_option("-e", "--dev", action="store", type="string",
-                  dest="device", help="device to send RfRaw B0 command")
+                  dest="device", help="device (ip or hostname) to send RfRaw B0 command")
 parser.add_option("-r", "--repeat", action="store",
-                  dest="repeat", default=20, help="number of times to repeat")
+                  dest="repeat", default=4, help="number of times to repeat")
 parser.add_option("-d", "--debug", action="store_true",
                   dest="debug", default=False, help="show debug info")
 parser.add_option("-v", "--verbose", action="store_true",
                   dest="verbose", default=False, help="show more detailed info")
+parser.add_option("-f", "--file", action="store", type="string",
+                  dest="file", default=False, help="go through a file and try each line interactively")
 (options, args) = parser.parse_args()
 
 # In program command line put two values (received Raw between '"' and desired repeats)
@@ -273,12 +326,17 @@ if __name__ == '__main__':
         print(parser.print_help())
         exit(1)
     '''
-    print(parser.print_help())
-
-    while(True):    
-        strInput = getInputStr()
-        if (len(strInput) > 0):
-            main(strInput, options.repeat)
+    if not options.file:
+        while(True):
+            strInput = getInputStr()
+            if (len(strInput) > 0):
+                main(strInput, options.repeat)
+            else:
+                break
+            print(parser.print_help())
+    else:
+        if exists(options.file):
+            parse_file(options.file)
         else:
-            break
-        print(parser.print_help())
+            print("File {0} does not exist. Exit".format(options.file))
+            print(parser.print_help())
