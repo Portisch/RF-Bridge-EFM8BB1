@@ -4,7 +4,7 @@
 # Name:        BitBucketConverter.py
 # Purpose:     Generate 'B0' message from received 'B1' data.
 #
-# Author:      gerardovf
+# Author:      gerardovf 
 #
 # Created:     05/09/2018
 # Editor:      Portisch
