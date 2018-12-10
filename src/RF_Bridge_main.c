@@ -294,10 +294,6 @@ int main (void)
 			case RF_CODE_LEARN:
 			case RF_CODE_LEARN_NEW:
 
-				// handle new received buckets
-				if (buffer_out(&bucket))
-					HandleRFBucket(bucket & 0x7FFF, (bool)((bucket & 0x8000) >> 15));
-
 				// check if a RF signal got decoded
 				if ((RF_DATA_STATUS & RF_DATA_RECEIVED_MASK) != 0)
 				{
@@ -351,15 +347,17 @@ int main (void)
 							break;
 					}
 				}
+				else
+				{
+					// handle new received buckets
+					if (buffer_out(&bucket))
+						HandleRFBucket(bucket & 0x7FFF, (bool)((bucket & 0x8000) >> 15));
+				}
 				break;
 
 			// do original sniffing
 			case RF_CODE_RFIN:
 			case RF_CODE_SNIFFING_ON:
-
-				// handle new received buckets
-				if (buffer_out(&bucket))
-					HandleRFBucket(bucket & 0x7FFF, (bool)((bucket & 0x8000) >> 15));
 
 				// check if a RF signal got decoded
 				if ((RF_DATA_STATUS & RF_DATA_RECEIVED_MASK) != 0)
@@ -380,6 +378,12 @@ int main (void)
 
 					// enable interrupt for RF receiving
 					PCA0CPM0 |= PCA0CPM0_ECCF__ENABLED;
+				}
+				else
+				{
+					// handle new received buckets
+					if (buffer_out(&bucket))
+						HandleRFBucket(bucket & 0x7FFF, (bool)((bucket & 0x8000) >> 15));
 				}
 				break;
 
@@ -535,10 +539,6 @@ int main (void)
 			}
 		case RF_CODE_SNIFFING_ON_BUCKET:
 
-			// do bucket sniffing handling
-			if (buffer_out(&bucket))
-				Bucket_Received(bucket & 0x7FFF);
-
 			// check if a RF signal got decoded
 			if ((RF_DATA_STATUS & RF_DATA_RECEIVED_MASK) != 0)
 			{
@@ -549,6 +549,12 @@ int main (void)
 
 				// enable interrupt for RF receiving
 				PCA0CPM0 |= PCA0CPM0_ECCF__ENABLED;
+			}
+			else
+			{
+				// do bucket sniffing handling
+				if (buffer_out(&bucket))
+					Bucket_Received(bucket & 0x7FFF, (bool)((bucket & 0x8000) >> 15));
 			}
 
 			break;

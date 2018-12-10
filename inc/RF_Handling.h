@@ -23,7 +23,7 @@ extern void SendBuckets(
 		bool inverse,
 		SI_VARIABLE_SEGMENT_POINTER(rfdata, uint8_t, SI_SEG_XDATA));
 extern void SendBucketsByIndex(uint8_t index, SI_VARIABLE_SEGMENT_POINTER(rfdata, uint8_t, SI_SEG_XDATA));
-extern void Bucket_Received(uint16_t duration);
+extern void Bucket_Received(uint16_t duration, bool high_low);
 
 // 112 byte == 896 bits, so a RF signal with maximum of 896 bits is possible
 // for bucket transmission, this depends on the number of buckets.

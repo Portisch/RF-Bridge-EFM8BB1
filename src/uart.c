@@ -214,13 +214,13 @@ void uart_put_RF_buckets(uint8_t Command)
 	// send up to 7 buckets
 	while (i < bucket_count)
 	{
-		uart_putc((buckets[i] >> 8) & 0xFF);
+		uart_putc((buckets[i] >> 8) & 0x7F);
 		uart_putc(buckets[i] & 0xFF);
 		i++;
 	}
 
 	// send sync bucket
-	uart_putc((bucket_sync >> 8) & 0xFF);
+	uart_putc((bucket_sync >> 8) & 0x7F);
 	uart_putc(bucket_sync & 0xFF);
 
 	// start and wait for transmit
@@ -228,7 +228,7 @@ void uart_put_RF_buckets(uint8_t Command)
 	uart_wait_until_TX_finished();
 
 	i = 0;
-	while(i < (actual_byte + 1))
+	while(i < actual_byte)
 	{
 		uart_putc(RF_DATA[i]);
 		i++;
