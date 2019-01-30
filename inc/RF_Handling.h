@@ -12,7 +12,8 @@ extern bool buffer_out(uint16_t *bucket);
 extern void HandleRFBucket(uint16_t duration, bool high_low);
 extern uint8_t PCA0_DoSniffing(uint8_t active_command);
 extern void PCA0_StopSniffing(void);
-extern void SendRFBuckets(uint16_t buckets[],
+extern void SendRFBuckets(
+		SI_VARIABLE_SEGMENT_POINTER(buckets, uint16_t, SI_SEG_XDATA),
 		SI_VARIABLE_SEGMENT_POINTER(rfdata, uint8_t, SI_SEG_XDATA), uint8_t data_len);
 extern void SendBuckets(
 		uint16_t pulses[], uint8_t pulses_size,

@@ -417,7 +417,7 @@ int main (void)
 								PROTOCOL_DATA[0].bit1.dat, PROTOCOL_DATA[0].bit1.size,
 								PROTOCOL_DATA[0].bit_count,
 								PROTOCOL_DATA[0].inverse,
-								&RF_DATA[6]
+								RF_DATA + 6
 								);
 						break;
 
@@ -476,7 +476,7 @@ int main (void)
 						// byte 0:		PROTOCOL_DATA index
 						// byte 1..:	Data
 
-						SendBucketsByIndex(RF_DATA[0], &RF_DATA[1]);
+						SendBucketsByIndex(RF_DATA[0], RF_DATA + 1);
 						break;
 
 					// wait until data got transfered
@@ -516,7 +516,7 @@ int main (void)
 						// byte 2*(1..k):		bucket time high
 						// byte 2*(1..k)+1:		bucket time low
 						// byte 2*k+2..N:		RF buckets to send
-						SendRFBuckets((uint16_t *)RF_DATA[2], &RF_DATA[2 + RF_DATA[0] * 2], len - 2 - RF_DATA[0] * 2);
+						SendRFBuckets((uint16_t *)(RF_DATA + 2), RF_DATA + (RF_DATA[0] << 1) + 2, len - 2 - (RF_DATA[0] << 1));
 						break;
 
 					// wait until data got transfered

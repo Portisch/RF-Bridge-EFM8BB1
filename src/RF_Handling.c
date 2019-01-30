@@ -460,26 +460,23 @@ bool SendSingleBucket(bool high_low, uint16_t bucket_time)
 //-----------------------------------------------------------------------------
 // Send generic signal based on n time bucket pairs (high/low timing)
 //-----------------------------------------------------------------------------
-void SendRFBuckets(uint16_t buckets[],
+void SendRFBuckets(
+		SI_VARIABLE_SEGMENT_POINTER(buckets, uint16_t, SI_SEG_XDATA),
 		SI_VARIABLE_SEGMENT_POINTER(rfdata, uint8_t, SI_SEG_XDATA), uint8_t data_len)
 {
 	// start transmit of the buckets with a high bucket
 	bool high_low = true;
+	bool high_low_mark = false;
 	uint8_t i;
+
+	// check first two buckets if high/low marking is included
+	high_low_mark = (rfdata[0] & 0x88) > 0;
 
 	// transmit data
 	for (i = 0; i < data_len; i++)
 	{
-		// ignore 'F' bucket number
-		if (rfdata[i] >> 4 != 0x0F)
-		{
-			high_low = SendSingleBucket(high_low, buckets[(rfdata[i] >> 4) & 0x07]);
-		}
-
-		if ((rfdata[i] & 0x0F) != 0x0F)
-		{
-			high_low = SendSingleBucket(high_low, buckets[rfdata[i] & 0x07]);
-		}
+			high_low = SendSingleBucket(high_low_mark ? (bool)(rfdata[i] >> 7) : high_low, buckets[(rfdata[i] >> 4) & 0x07]);
+			high_low = SendSingleBucket(high_low_mark ? (bool)((rfdata[i] >> 3) & 0x01) : high_low, buckets[rfdata[i] & 0x07]);
 	}
 
 	LED = LED_OFF;
@@ -577,14 +574,25 @@ bool findBucket(uint16_t duration, uint8_t *index)
 
 	for (i = 0; i < bucket_count; i++)
 	{
-		// calculate delta by the current bucket and check if the new duration fits into
-		delta = ((duration >> 2) + (duration >> 4));
+		// calculate delta by the current duration and check if the new duration fits into
+		delta = ((duration >> 2) + (duration >> 3));
 		delta = delta > buckets[i] ? buckets[i] : delta;
 
 		if (CheckRFBucket(duration, buckets[i], delta))
 		{
 			*index = i;
 			return true;
+		}
+		else
+		{
+			// calculate delta by the current bucket and check if the new duration fits into
+			delta = ((buckets[i] >> 2) + (buckets[i] >> 3));
+
+			if (CheckRFBucket(duration, buckets[i], delta))
+			{
+				*index = i;
+				return true;
+			}
 		}
 	}
 
@@ -650,7 +658,7 @@ void Bucket_Received(uint16_t duration, bool high_low)
 			}
 
 			// no more buckets are possible, reset
-			if (bucket_count_sync_1 == 0xFF)
+			if (bucket_count_sync_1 >= RF_DATA_BUFFERSIZE << 1)
 				rf_state = RF_IDLE;
 
 			break;
@@ -659,48 +667,50 @@ void Bucket_Received(uint16_t duration, bool high_low)
 		case RF_BUCKET_IN_SYNC:
 			bucket_count_sync_2++;
 
-			// check if bucket was already received
-			if (!findBucket(duration, &bucket_index))
+			// check if all buckets got received
+			if (bucket_count_sync_2 <= bucket_count_sync_1)
 			{
-				// new bucket received, add to array
-				buckets[bucket_count] = duration;
-				bucket_index = bucket_count;
-				bucket_count++;
-
-				// check if maximum of array got reached
-				if (bucket_count > ARRAY_LENGTH(buckets))
+				// check if bucket was already received
+				if (!findBucket(duration, &bucket_index))
 				{
-					bucket_count = 0;
-					// restart sync
-					rf_state = RF_IDLE;
+					// new bucket received, add to array
+					buckets[bucket_count] = duration;
+					bucket_index = bucket_count;
+					bucket_count++;
+
+					// check if maximum of array got reached
+					if (bucket_count > ARRAY_LENGTH(buckets))
+					{
+						// restart sync
+						rf_state = RF_IDLE;
+					}
+				}
+
+				// fill rf data with the current bucket number
+				if (actual_bit_of_byte == 4)
+				{
+					RF_DATA[actual_byte] = (bucket_index << 4) | ((uint8_t)high_low << 7);
+					actual_bit_of_byte = 0;
+				}
+				else
+				{
+					RF_DATA[actual_byte] |= (bucket_index | ((uint8_t)high_low << 3));
+
+					crc = Compute_CRC8_Simple_OneByte(crc ^ RF_DATA[actual_byte]);
+
+					actual_byte++;
+					actual_bit_of_byte = 4;
+
+					// check if maximum of array got reached
+					if (actual_byte > RF_DATA_BUFFERSIZE)
+					{
+						// restart sync
+						rf_state = RF_IDLE;
+					}
 				}
 			}
-
-			// fill rf data with the current bucket number
-			if (actual_bit_of_byte == 4)
-			{
-				RF_DATA[actual_byte] = (bucket_index << 4) | ((uint8_t)high_low << 7);
-				actual_bit_of_byte = 0;
-			}
-			else
-			{
-				RF_DATA[actual_byte] |= (bucket_index | ((uint8_t)high_low << 3));
-
-				crc = Compute_CRC8_Simple_OneByte(crc ^ RF_DATA[actual_byte]);
-
-				actual_byte++;
-				actual_bit_of_byte = 4;
-
-				// check if maximum of array got reached
-				if (actual_byte > RF_DATA_BUFFERSIZE)
-				{
-					// restart sync
-					rf_state = RF_IDLE;
-				}
-			}
-
-			// same amount of bucket where received, send by uart
-			if (bucket_count_sync_1 == bucket_count_sync_2)
+			// next bucket after data have to be a sync bucket
+			else if (matchesFooter(duration, high_low))
 			{
 				// check if timeout timer for crc is finished
 				if (IsTimer2Finished())
@@ -727,6 +737,12 @@ void Bucket_Received(uint16_t duration, bool high_low)
 				}
 
 				LED = LED_OFF;
+				rf_state = RF_IDLE;
+			}
+			// next bucket after receiving all data buckets was not a sync bucket, restart
+			else
+			{
+				// restart sync
 				rf_state = RF_IDLE;
 			}
 			break;

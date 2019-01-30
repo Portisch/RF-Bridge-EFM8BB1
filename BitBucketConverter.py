@@ -82,7 +82,7 @@ def sendCommand(szOutFinal, mydevice):
     #print(body)
 
 def DrawImage(buckets, data):
-    lines = []
+    lines = {'time': [], 'high': []}
     font = ImageFont.load_default()
     Bucket_High_Low_Marking = False
     repeats = 2
@@ -98,13 +98,13 @@ def DrawImage(buckets, data):
             break;
 
     for i in range(0, len(data)):
-        if (data[i:i+1] != 'F'):
-            lines.append(buckets[int(data[i:i+1], 16) & 0x07])
+        lines['time'].append(buckets[int(data[i:i+1], 16) & 0x07])
+        lines['high'].append(int(data[i:i+1], 16) >> 3)
 
     f = 0.03
 
     import math
-    picture = Image.new("L", (int(math.ceil(sum(lines * repeats) * f)) + 10, 150))
+    picture = Image.new("L", (int(math.ceil(sum(lines['time'] * repeats) * f)) + 10, 150))
     draw = ImageDraw.Draw(picture)
 
     draw.rectangle(((0, 0), (picture.width - 1, picture.height - 1)), fill="white", outline="black")
@@ -121,9 +121,12 @@ def DrawImage(buckets, data):
 
     for a in range(0, repeats):
         y = inverted
-        for i in range(len(lines)):
+        for i in range(len(lines['time'])):
             lastX = x
-            x += lines[i]
+            x += lines['time'][i]
+
+            if Bucket_High_Low_Marking:
+                y = not lines['high'][i]
 
             # horizontal line
             draw.line(((lastX * f, y * 50 + 25), (x * f, y * 50 + 25)), fill="black")
@@ -134,10 +137,10 @@ def DrawImage(buckets, data):
                 
             draw.line(((lastX * f, picture.height - 70), (lastX * f, picture.height - 30)), fill="grey")
 
-            img_txt = Image.new("L", font.getsize(str(lines[i])))
+            img_txt = Image.new("L", font.getsize(str(lines['time'][i])))
             draw_txt = ImageDraw.Draw(img_txt)
             draw_txt.rectangle(((0, 0), (img_txt.width, img_txt.height)), fill="white")
-            draw_txt.text((0,0), str(lines[i]),  font=font, fill="black")
+            draw_txt.text((0,0), str(lines['time'][i]),  font=font, fill="black")
             picture.paste(img_txt.rotate(90, expand=1), (int(math.ceil(lastX * f)) + 2, 10 + 50 + 25))         
             lastY = y
             y = not y
@@ -253,7 +256,8 @@ def main(szInpStr, repVal):
         szOutAux += szInpStr[6+i*4:10+i*4] + " "
         arrBuckets.append(int(szInpStr[6+i*4:10+i*4], 16))    
 
-    syncData = findSyncPattern(szInpStr[10+i*4:-2])
+    #syncData = findSyncPattern(szInpStr[10+i*4:-2])
+    syncData = None
 
     if (syncData != None):
         szOutAux += syncData
@@ -307,7 +311,7 @@ parser = OptionParser(usage=usage, version="%prog 0.4")
 parser.add_option("-e", "--dev", action="store", type="string",
                   dest="device", help="device (ip or hostname) to send RfRaw B0 command")
 parser.add_option("-r", "--repeat", action="store",
-                  dest="repeat", default=4, help="number of times to repeat")
+                  dest="repeat", default=8, help="number of times to repeat")
 parser.add_option("-d", "--debug", action="store_true",
                   dest="debug", default=False, help="show debug info")
 parser.add_option("-v", "--verbose", action="store_true",
