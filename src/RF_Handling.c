@@ -583,17 +583,6 @@ bool findBucket(uint16_t duration, uint8_t *index)
 			*index = i;
 			return true;
 		}
-		else
-		{
-			// calculate delta by the current bucket and check if the new duration fits into
-			delta = ((buckets[i] >> 2) + (buckets[i] >> 3));
-
-			if (CheckRFBucket(duration, buckets[i], delta))
-			{
-				*index = i;
-				return true;
-			}
-		}
 	}
 
 	return false;
