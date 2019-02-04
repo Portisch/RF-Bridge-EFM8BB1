@@ -237,6 +237,17 @@ SI_SEGMENT_VARIABLE(PROTOCOL_BIT1(KaKu)[], static uint8_t, SI_SEG_CODE) = {  HIG
 SI_SEGMENT_VARIABLE(PROTOCOL_END(KaKu)[], static uint8_t, SI_SEG_CODE) = {  HIGH(0), LOW(4) };
 #endif
 
+/*
+ * Brilliant Lighting Model #17698
+ */
+#if EFM8BB1_SUPPORT_Brilliant_Lighting_PROTOCOL == 1
+#define Brilliant_Lighting
+SI_SEGMENT_VARIABLE(PROTOCOL_BUCKETS(Brilliant_Lighting)[], static uint16_t, SI_SEG_CODE) = { 300, 650, 9850 };
+SI_SEGMENT_VARIABLE(PROTOCOL_START(Brilliant_Lighting)[], static uint8_t, SI_SEG_CODE) = { 2, 0 };
+SI_SEGMENT_VARIABLE(PROTOCOL_BIT0(Brilliant_Lighting)[], static uint8_t, SI_SEG_CODE) = { 0, 1 };
+SI_SEGMENT_VARIABLE(PROTOCOL_BIT1(Brilliant_Lighting)[], static uint8_t, SI_SEG_CODE) = { 1, 0 };
+#endif
+
 SI_SEGMENT_VARIABLE(PROTOCOL_DATA[], static struct BUCKET_PROTOCOL_DATA, SI_SEG_CODE) =
 {
 #if EFM8BB1_SUPPORT_PT226X_PROTOCOL == 1
@@ -419,6 +430,19 @@ SI_SEGMENT_VARIABLE(PROTOCOL_DATA[], static struct BUCKET_PROTOCOL_DATA, SI_SEG_
 			{ &PROTOCOL_BIT1(KaKu), ARRAY_LENGTH(PROTOCOL_BIT1(KaKu)) },
 			{ &PROTOCOL_END(KaKu), ARRAY_LENGTH(PROTOCOL_END(KaKu)) },
 			32
+		},
+#endif
+#if EFM8BB1_SUPPORT_Brilliant_Lighting_PROTOCOL == 1
+		/*
+		 * Brilliant Lighting Model #17698
+		 */
+		{
+			{ &PROTOCOL_BUCKETS(Brilliant_Lighting), ARRAY_LENGTH(PROTOCOL_BUCKETS(Brilliant_Lighting)) },
+			{ &PROTOCOL_START(Brilliant_Lighting), ARRAY_LENGTH(PROTOCOL_START(Brilliant_Lighting)) },
+			{ &PROTOCOL_BIT0(Brilliant_Lighting), ARRAY_LENGTH(PROTOCOL_BIT0(Brilliant_Lighting)) },
+			{ &PROTOCOL_BIT1(Brilliant_Lighting), ARRAY_LENGTH(PROTOCOL_BIT1(Brilliant_Lighting)) },
+			{ NULL, 0 },
+			21
 		},
 #endif
 };
