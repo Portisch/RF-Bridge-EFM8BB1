@@ -146,6 +146,41 @@ SI_SEGMENT_VARIABLE(PROTOCOL_BIT0(HT12)[], static uint8_t, SI_SEG_CODE) = { 0, 1
 SI_SEGMENT_VARIABLE(PROTOCOL_BIT1(HT12)[], static uint8_t, SI_SEG_CODE) = { 1, 0 };
 
 /*
+ * HT12A/HT12E chips - Generic Doorbell
+ * http://www.holtek.com/documents/10179/116711/2_12ev120.pdf
+ */
+#define HT12a
+
+SI_SEGMENT_VARIABLE(PROTOCOL_PULSES(HT12a)[], static uint16_t, SI_SEG_CODE) = { 200, 380, 6950};
+SI_SEGMENT_VARIABLE(PROTOCOL_START(HT12a)[], static uint8_t, SI_SEG_CODE) = { 2, 0 };
+SI_SEGMENT_VARIABLE(PROTOCOL_BIT0(HT12a)[], static uint8_t, SI_SEG_CODE) = { 0, 1 };
+SI_SEGMENT_VARIABLE(PROTOCOL_BIT1(HT12a)[], static uint8_t, SI_SEG_CODE) = { 1, 0 };
+
+/*
+ * HT12A/HT12E chips - Atag Extractor - Plus/Minus
+ * http://www.holtek.com/documents/10179/116711/2_12ev120.pdf
+ */
+
+#define HT12b
+
+SI_SEGMENT_VARIABLE(PROTOCOL_PULSES(HT12b)[], static uint16_t, SI_SEG_CODE) = { 350, 650, 13000};
+SI_SEGMENT_VARIABLE(PROTOCOL_START(HT12b)[], static uint8_t, SI_SEG_CODE) = { 2, 0 };
+SI_SEGMENT_VARIABLE(PROTOCOL_BIT0(HT12b)[], static uint8_t, SI_SEG_CODE) = { 0, 1 };
+SI_SEGMENT_VARIABLE(PROTOCOL_BIT1(HT12b)[], static uint8_t, SI_SEG_CODE) = { 1, 0 };
+
+/*
+ * HT12A/HT12E chips - Atag Extractor - Lights/Timer
+ * http://www.holtek.com/documents/10179/116711/2_12ev120.pdf
+ */
+
+#define HT12c
+
+SI_SEGMENT_VARIABLE(PROTOCOL_PULSES(HT12c)[], static uint16_t, SI_SEG_CODE) = { 350, 700, 15650};
+SI_SEGMENT_VARIABLE(PROTOCOL_START(HT12c)[], static uint8_t, SI_SEG_CODE) = { 2, 0 };
+SI_SEGMENT_VARIABLE(PROTOCOL_BIT0(HT12c)[], static uint8_t, SI_SEG_CODE) = { 0, 1 };
+SI_SEGMENT_VARIABLE(PROTOCOL_BIT1(HT12c)[], static uint8_t, SI_SEG_CODE) = { 1, 0 };
+
+/*
  * Meteo SPxx -  Weather station (PHU Metrex)
  * https://gist.github.com/klaper/ce3ba02501516d9a6d294367d2c300a6
  */
@@ -249,6 +284,42 @@ SI_SEGMENT_VARIABLE(PROTOCOL_DATA[], static struct BUCKET_PROTOCOL_DATA, SI_SEG_
 			{ &PROTOCOL_BIT0(HT12), ARRAY_LENGTH(PROTOCOL_BIT0(HT12)) },
 			{ &PROTOCOL_BIT1(HT12), ARRAY_LENGTH(PROTOCOL_BIT1(HT12)) },
 			12,
+			true
+		},
+
+		/*
+		 * HT12A/HT12E chips - A
+		 */
+		{
+			{ &PROTOCOL_PULSES(HT12a), ARRAY_LENGTH(PROTOCOL_PULSES(HT12a)) },
+			{ &PROTOCOL_START(HT12a), ARRAY_LENGTH(PROTOCOL_START(HT12a)) },
+			{ &PROTOCOL_BIT0(HT12a), ARRAY_LENGTH(PROTOCOL_BIT0(HT12a)) },
+			{ &PROTOCOL_BIT1(HT12a), ARRAY_LENGTH(PROTOCOL_BIT1(HT12a)) },
+			12,
+			true
+		},
+
+		/*
+		 * HT12A/HT12E chips - B
+		 */
+		{
+			{ &PROTOCOL_PULSES(HT12b), ARRAY_LENGTH(PROTOCOL_PULSES(HT12b)) },
+			{ &PROTOCOL_START(HT12b), ARRAY_LENGTH(PROTOCOL_START(HT12b)) },
+			{ &PROTOCOL_BIT0(HT12b), ARRAY_LENGTH(PROTOCOL_BIT0(HT12b)) },
+			{ &PROTOCOL_BIT1(HT12b), ARRAY_LENGTH(PROTOCOL_BIT1(HT12b)) },
+			12,
+			true
+		},
+
+		/*
+		 * HT12A/HT12E chips - C
+		 */
+		{
+			{ &PROTOCOL_PULSES(HT12c), ARRAY_LENGTH(PROTOCOL_PULSES(HT12c)) },
+			{ &PROTOCOL_START(HT12c), ARRAY_LENGTH(PROTOCOL_START(HT12c)) },
+			{ &PROTOCOL_BIT0(HT12c), ARRAY_LENGTH(PROTOCOL_BIT0(HT12c)) },
+			{ &PROTOCOL_BIT1(HT12c), ARRAY_LENGTH(PROTOCOL_BIT1(HT12c)) },
+			18,
 			true
 		},
 
