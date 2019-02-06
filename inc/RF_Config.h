@@ -21,3 +21,5 @@
 #define EFM8BB1_SUPPORT_SP45_PROTOCOL			0		// Meteo SPxx -  Weather station (PHU Metrex)
 #define EFM8BB1_SUPPORT_DC90_PROTOCOL			0		// Dooya DC90 remote
 #define EFM8BB1_SUPPORT_DG_HOSA_PROTOCOL		0		// Digoo DG-HOSA Smart 433MHz Wireless Household Carbon Monoxide Sensor
+#define EFM8BB1_SUPPORT_HT12a_PROTOCOL			0		// HT12A/HT12E chips - Generic Doorbell
+#define EFM8BB1_SUPPORT_HT12_Atag_PROTOCOL		0		// HT12A/HT12E chips - Atag Extractor - Plus/Minus/Lights/Timer
