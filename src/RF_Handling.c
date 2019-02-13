@@ -29,8 +29,11 @@ SI_SEGMENT_VARIABLE(SYNC_LOW, uint16_t, SI_SEG_XDATA) = 0x00;
 SI_SEGMENT_VARIABLE(BIT_HIGH, uint16_t, SI_SEG_XDATA) = 0x00;
 SI_SEGMENT_VARIABLE(BIT_LOW, uint16_t, SI_SEG_XDATA) = 0x00;
 
-SI_SEGMENT_VARIABLE(actual_bit_of_byte, uint8_t, SI_SEG_XDATA) = 0;
+SI_SEGMENT_VARIABLE(actual_byte_high_nibble, bool, SI_SEG_XDATA) = false;
 SI_SEGMENT_VARIABLE(actual_byte, uint8_t, SI_SEG_XDATA) = 0;
+
+// status of each protocol
+SI_SEGMENT_VARIABLE(status[PROTOCOLCOUNT], PROTOCOL_STATUS, SI_SEG_IDATA);
 
 SI_SEGMENT_VARIABLE(old_crc, uint8_t, SI_SEG_XDATA) = 0;
 SI_SEGMENT_VARIABLE(crc, uint8_t, SI_SEG_XDATA) = 0;
@@ -41,6 +44,8 @@ SI_SEGMENT_VARIABLE(buckets[7], uint16_t, SI_SEG_XDATA);	// -1 because of the bu
 SI_SEGMENT_VARIABLE(bucket_count, uint8_t, SI_SEG_XDATA) = 0;
 SI_SEGMENT_VARIABLE(bucket_count_sync_1, uint8_t, SI_SEG_XDATA);
 SI_SEGMENT_VARIABLE(bucket_count_sync_2, uint8_t, SI_SEG_XDATA);
+
+SI_SEGMENT_POINTER(pbuckets, uint16_t, SI_SEG_CODE) = buckets;
 
 #define GET_W_POSITION(x) (((x) >> 4) & 0x0F)
 #define INC_W_POSITION(x) ((x) = ((((x) >> 4) + 1) << 4) | ((x) & 0x0F))
@@ -103,9 +108,9 @@ bool CheckRFSyncBucket(uint16_t duration, uint16_t bucket)
 }
 
 bool DecodeBucket(uint8_t i, bool high_low_match, uint16_t duration,
-		uint16_t pulses[],
-		uint8_t bit0[], uint8_t bit0_size,
-		uint8_t bit1[], uint8_t bit1_size,
+		SI_VARIABLE_SEGMENT_POINTER(pulses, uint16_t, SI_SEG_CODE),
+		SI_VARIABLE_SEGMENT_POINTER(bit0, uint8_t, SI_SEG_CODE), uint8_t bit0_size,
+		SI_VARIABLE_SEGMENT_POINTER(bit1, uint8_t, SI_SEG_CODE), uint8_t bit1_size,
 		uint8_t bit_count)
 {
 	uint8_t last_bit = 0;
@@ -113,7 +118,7 @@ bool DecodeBucket(uint8_t i, bool high_low_match, uint16_t duration,
 	// do init before first bit received
 	if (BITS_GET(status[i]) == 0)
 	{
-		actual_bit_of_byte = 8;
+		ABP_RESET(status[i]);
 		memset(RF_DATA, 0, sizeof(RF_DATA));
 		crc = 0x00;
 	}
@@ -176,7 +181,7 @@ bool DecodeBucket(uint8_t i, bool high_low_match, uint16_t duration,
 		LED = LED_ON;
 		BIT0_CLEAR(status[i]);
 		BITS_INC(status[i]);
-		actual_bit_of_byte--;
+		ABP_DEC(status[i]);
 	}
 	// check if bit 1 is finished
 	else if (BIT1_GET(status[i]) == bit1_size - last_bit)
@@ -184,15 +189,15 @@ bool DecodeBucket(uint8_t i, bool high_low_match, uint16_t duration,
 		LED = LED_ON;
 		BIT1_CLEAR(status[i]);
 		BITS_INC(status[i]);
-		actual_bit_of_byte--;
-		RF_DATA[(BITS_GET(status[i]) - 1) / 8] |= (1 << actual_bit_of_byte);
+		ABP_DEC(status[i]);
+		RF_DATA[(BITS_GET(status[i]) - 1) >> 3] |= (1 << ABP_GET(status[i]));
 	}
 
 	// 8 bits are done, compute crc of data
-	if (actual_bit_of_byte == 0)
+	if (ABP_GET(status[i]) == 0)
 	{
-		crc = Compute_CRC8_Simple_OneByte(crc ^ RF_DATA[(BITS_GET(status[i]) - 1) / 8]);
-		actual_bit_of_byte = 8;
+		crc = Compute_CRC8_Simple_OneByte(crc ^ RF_DATA[(BITS_GET(status[i]) - 1) >> 3]);
+		ABP_RESET(status[i]);
 	}
 
 	// check if all bit got collected
@@ -220,9 +225,10 @@ bool DecodeBucket(uint8_t i, bool high_low_match, uint16_t duration,
 
 		LED = LED_OFF;
 		START_CLEAR(status[i]);
+		return true;
 	}
 
-	return true;
+	return false;
 }
 
 void HandleRFBucket(uint16_t duration, bool high_low)
@@ -263,9 +269,8 @@ void HandleRFBucket(uint16_t duration, bool high_low)
 			// if sync is finished check if bit0 or bit1 is starting
 			else if (START_GET(status[0]) == 2)
 			{
-				//DecodeBucket(0, high_low, duration, pVar);
 				DecodeBucket(0, PROTOCOL_DATA[0].inverse != high_low, duration,
-						buckets,
+						pbuckets,
 						PROTOCOL_DATA[0].bit0.dat, PROTOCOL_DATA[0].bit0.size,
 						PROTOCOL_DATA[0].bit1.dat, PROTOCOL_DATA[0].bit1.size,
 						PROTOCOL_DATA[0].bit_count
@@ -310,13 +315,13 @@ void HandleRFBucket(uint16_t duration, bool high_low)
 				{
 					//if (!DecodeBucket(i, high_low, duration, &PROTOCOL_DATA[i]))
 					//	continue;
-					if (!DecodeBucket(i, PROTOCOL_DATA[i].inverse != high_low, duration,
+					if (DecodeBucket(i, PROTOCOL_DATA[i].inverse != high_low, duration,
 							PROTOCOL_DATA[i].pulses.dat,
 							PROTOCOL_DATA[i].bit0.dat, PROTOCOL_DATA[i].bit0.size,
 							PROTOCOL_DATA[i].bit1.dat, PROTOCOL_DATA[i].bit1.size,
 							PROTOCOL_DATA[i].bit_count
 							))
-						continue;
+						return;
 				}
 			}
 			break;
@@ -337,7 +342,7 @@ void buffer_in(uint16_t bucket)
 		CLR_W_POSITION(buffer_buckets_positions);
 }
 
-bool buffer_out(uint16_t *bucket)
+bool buffer_out(SI_VARIABLE_SEGMENT_POINTER(bucket, uint16_t, SI_SEG_XDATA))
 {
 	uint8_t backup_PCA0CPM0 = PCA0CPM0;
 
@@ -623,7 +628,7 @@ void Bucket_Received(uint16_t duration, bool high_low)
 					LED = LED_ON;
 					bucket_count = 0;
 					actual_byte = 0;
-					actual_bit_of_byte = 0;
+					actual_byte_high_nibble = false;
 					bucket_count_sync_2 = 0;
 					crc = 0x00;
 					RF_DATA[0] = 0;
@@ -676,10 +681,9 @@ void Bucket_Received(uint16_t duration, bool high_low)
 				}
 
 				// fill rf data with the current bucket number
-				if (actual_bit_of_byte == 4)
+				if (actual_byte_high_nibble)
 				{
 					RF_DATA[actual_byte] = (bucket_index << 4) | ((uint8_t)high_low << 7);
-					actual_bit_of_byte = 0;
 				}
 				else
 				{
@@ -688,7 +692,6 @@ void Bucket_Received(uint16_t duration, bool high_low)
 					crc = Compute_CRC8_Simple_OneByte(crc ^ RF_DATA[actual_byte]);
 
 					actual_byte++;
-					actual_bit_of_byte = 4;
 
 					// check if maximum of array got reached
 					if (actual_byte > RF_DATA_BUFFERSIZE)
@@ -697,6 +700,8 @@ void Bucket_Received(uint16_t duration, bool high_low)
 						rf_state = RF_IDLE;
 					}
 				}
+
+				actual_byte_high_nibble = !actual_byte_high_nibble;
 			}
 			// next bucket after data have to be a sync bucket
 			else if (matchesFooter(duration, high_low))

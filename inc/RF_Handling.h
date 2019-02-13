@@ -8,7 +8,7 @@
 #ifndef INC_RF_HANDLING_H_
 #define INC_RF_HANDLING_H_
 
-extern bool buffer_out(uint16_t *bucket);
+extern bool buffer_out(SI_VARIABLE_SEGMENT_POINTER(bucket, uint16_t, SI_SEG_XDATA));
 extern void HandleRFBucket(uint16_t duration, bool high_low);
 extern uint8_t PCA0_DoSniffing(uint8_t active_command);
 extern void PCA0_StopSniffing(void);

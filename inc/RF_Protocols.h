@@ -36,6 +36,7 @@ typedef struct PROTOCOL_STATUS
 {
 	uint16_t status;
 	uint8_t bit_count;
+	uint8_t actual_bit_of_byte;
 } PROTOCOL_STATUS;
 
 typedef struct PROTOCOL_DATA_UINT8_T
@@ -349,8 +350,5 @@ SI_SEGMENT_VARIABLE(PROTOCOL_DATA[], static struct BUCKET_PROTOCOL_DATA, SI_SEG_
 };
 
 #define PROTOCOLCOUNT (sizeof(PROTOCOL_DATA) / sizeof(PROTOCOL_DATA[0]))
-
-// status of each protocol
-SI_SEGMENT_VARIABLE(status[PROTOCOLCOUNT], static PROTOCOL_STATUS, SI_SEG_IDATA);
 
 #endif /* INC_RF_PROTOCOLS_H_ */
