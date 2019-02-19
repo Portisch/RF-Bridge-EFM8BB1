@@ -29,7 +29,7 @@ SI_SEGMENT_VARIABLE(SYNC_LOW, uint16_t, SI_SEG_XDATA) = 0x00;
 SI_SEGMENT_VARIABLE(BIT_HIGH, uint16_t, SI_SEG_XDATA) = 0x00;
 SI_SEGMENT_VARIABLE(BIT_LOW, uint16_t, SI_SEG_XDATA) = 0x00;
 
-SI_SEGMENT_VARIABLE(actual_byte_high_nibble, bool, SI_SEG_XDATA) = false;
+SI_SEGMENT_VARIABLE(actual_byte_high_nibble, bool, SI_SEG_DATA) = false;
 SI_SEGMENT_VARIABLE(actual_byte, uint8_t, SI_SEG_XDATA) = 0;
 
 // status of each protocol
