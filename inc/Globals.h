@@ -38,6 +38,8 @@
 #define BIT1_INC(x) ((x).status = ((BIT1_GET(x) + 1) << 4) | ((x).status & 0xFF0F))
 #define BIT1_CLEAR(x) ((x).status &= 0xFF0F)
 
+#define BITS_CLEAR(x) ((x).status &= 0xF00F)
+
 #define END_GET(x) (uint8_t)((x).status & 0x0F)
 #define END_INC(x) ((x).status = END_GET(x) | ((x).status & 0xFFF0))
 #define END_CLEAR(x) ((x).status &= 0xFFF0)

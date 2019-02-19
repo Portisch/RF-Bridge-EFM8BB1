@@ -177,7 +177,7 @@ bool DecodeBucket(uint8_t i, bool high_low_match, uint16_t duration,
 	if (BIT0_GET(status[i]) == bit0_size - last_bit)
 	{
 		LED = LED_ON;
-		BIT0_CLEAR(status[i]);
+		BITS_CLEAR(status[i]);
 		BITS_INC(status[i]);
 		ABP_DEC(status[i]);
 	}
@@ -185,7 +185,7 @@ bool DecodeBucket(uint8_t i, bool high_low_match, uint16_t duration,
 	else if (BIT1_GET(status[i]) == bit1_size - last_bit)
 	{
 		LED = LED_ON;
-		BIT1_CLEAR(status[i]);
+		BITS_CLEAR(status[i]);
 		BITS_INC(status[i]);
 		ABP_DEC(status[i]);
 		RF_DATA[(BITS_GET(status[i]) - 1) >> 3] |= (1 << ABP_GET(status[i]));
