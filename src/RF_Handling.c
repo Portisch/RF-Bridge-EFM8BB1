@@ -29,7 +29,7 @@ SI_SEGMENT_VARIABLE(SYNC_LOW, uint16_t, SI_SEG_XDATA) = 0x00;
 SI_SEGMENT_VARIABLE(BIT_HIGH, uint16_t, SI_SEG_XDATA) = 0x00;
 SI_SEGMENT_VARIABLE(BIT_LOW, uint16_t, SI_SEG_XDATA) = 0x00;
 
-SI_SEGMENT_VARIABLE(actual_byte_high_nibble, bool, SI_SEG_XDATA) = false;
+SI_SEGMENT_VARIABLE(actual_byte_high_nibble, bool, SI_SEG_DATA) = false;
 SI_SEGMENT_VARIABLE(actual_byte, uint8_t, SI_SEG_XDATA) = 0;
 
 // status of each protocol
@@ -44,8 +44,6 @@ SI_SEGMENT_VARIABLE(buckets[7], uint16_t, SI_SEG_XDATA);	// -1 because of the bu
 SI_SEGMENT_VARIABLE(bucket_count, uint8_t, SI_SEG_XDATA) = 0;
 SI_SEGMENT_VARIABLE(bucket_count_sync_1, uint8_t, SI_SEG_XDATA);
 SI_SEGMENT_VARIABLE(bucket_count_sync_2, uint8_t, SI_SEG_XDATA);
-
-SI_SEGMENT_POINTER(pbuckets, uint16_t, SI_SEG_CODE) = buckets;
 
 #define GET_W_POSITION(x) (((x) >> 4) & 0x0F)
 #define INC_W_POSITION(x) ((x) = ((((x) >> 4) + 1) << 4) | ((x) & 0x0F))
@@ -108,7 +106,7 @@ bool CheckRFSyncBucket(uint16_t duration, uint16_t bucket)
 }
 
 bool DecodeBucket(uint8_t i, bool high_low_match, uint16_t duration,
-		SI_VARIABLE_SEGMENT_POINTER(pulses, uint16_t, SI_SEG_CODE),
+		uint16_t *pulses,
 		SI_VARIABLE_SEGMENT_POINTER(bit0, uint8_t, SI_SEG_CODE), uint8_t bit0_size,
 		SI_VARIABLE_SEGMENT_POINTER(bit1, uint8_t, SI_SEG_CODE), uint8_t bit1_size,
 		uint8_t bit_count)
@@ -270,7 +268,7 @@ void HandleRFBucket(uint16_t duration, bool high_low)
 			else if (START_GET(status[0]) == 2)
 			{
 				DecodeBucket(0, PROTOCOL_DATA[0].inverse != high_low, duration,
-						pbuckets,
+						buckets,
 						PROTOCOL_DATA[0].bit0.dat, PROTOCOL_DATA[0].bit0.size,
 						PROTOCOL_DATA[0].bit1.dat, PROTOCOL_DATA[0].bit1.size,
 						PROTOCOL_DATA[0].bit_count
