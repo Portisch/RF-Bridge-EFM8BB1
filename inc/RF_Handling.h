@@ -16,10 +16,10 @@ extern void SendRFBuckets(
 		SI_VARIABLE_SEGMENT_POINTER(buckets, uint16_t, SI_SEG_XDATA),
 		SI_VARIABLE_SEGMENT_POINTER(rfdata, uint8_t, SI_SEG_XDATA), uint8_t data_len);
 extern void SendBuckets(
-		uint16_t pulses[], uint8_t pulses_size,
-		uint8_t start[], uint8_t start_size,
-		uint8_t bit0[], uint8_t bit0_size,
-		uint8_t bit1[], uint8_t bit1_size,
+		uint16_t *pulses, uint8_t pulses_size,
+		SI_VARIABLE_SEGMENT_POINTER(start, uint8_t, SI_SEG_CODE), uint8_t start_size,
+		SI_VARIABLE_SEGMENT_POINTER(bit0, uint8_t, SI_SEG_CODE), uint8_t bit0_size,
+		SI_VARIABLE_SEGMENT_POINTER(bit1, uint8_t, SI_SEG_CODE), uint8_t bit1_size,
 		uint8_t bit_count,
 		bool inverse,
 		SI_VARIABLE_SEGMENT_POINTER(rfdata, uint8_t, SI_SEG_XDATA));
