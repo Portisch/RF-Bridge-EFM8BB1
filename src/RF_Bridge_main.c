@@ -415,6 +415,7 @@ int main (void)
 								PROTOCOL_DATA[0].start.dat, PROTOCOL_DATA[0].start.size,
 								PROTOCOL_DATA[0].bit0.dat, PROTOCOL_DATA[0].bit0.size,
 								PROTOCOL_DATA[0].bit1.dat, PROTOCOL_DATA[0].bit1.size,
+								PROTOCOL_DATA[0].end.dat, PROTOCOL_DATA[0].end.size,
 								PROTOCOL_DATA[0].bit_count,
 								RF_DATA + 6
 								);

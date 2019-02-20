@@ -55,6 +55,7 @@
 #define PROTOCOL_START(X) X ## _start
 #define PROTOCOL_BIT0(X) X ## _bit0
 #define PROTOCOL_BIT1(X) X ## _bit1
+#define PROTOCOL_END(X) X ## _end
 
 #define HIGH(x) ((x) | 0x08)
 #define LOW(x) ((x) & 0x07)
