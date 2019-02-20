@@ -27,3 +27,4 @@
 #define EFM8BB1_SUPPORT_DG_HOSA_PROTOCOL		1		// Digoo DG-HOSA Smart 433MHz Wireless Household Carbon Monoxide Sensor
 #define EFM8BB1_SUPPORT_HT12a_PROTOCOL			1		// HT12A/HT12E chips - Generic Doorbell
 #define EFM8BB1_SUPPORT_HT12_Atag_PROTOCOL		1		// HT12A/HT12E chips - Atag Extractor - Plus/Minus/Lights/Timer
+#define EFM8BB1_SUPPORT_Kaku_PROTOCOL			1		// KaKu wall sockets
