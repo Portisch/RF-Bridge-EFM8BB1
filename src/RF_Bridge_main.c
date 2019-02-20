@@ -411,12 +411,11 @@ int main (void)
 						buckets[2] = *(uint16_t *)&RF_DATA[0];
 
 						SendBuckets(
-								buckets, PROTOCOL_DATA[0].buckets.size,
+								buckets,
 								PROTOCOL_DATA[0].start.dat, PROTOCOL_DATA[0].start.size,
 								PROTOCOL_DATA[0].bit0.dat, PROTOCOL_DATA[0].bit0.size,
 								PROTOCOL_DATA[0].bit1.dat, PROTOCOL_DATA[0].bit1.size,
 								PROTOCOL_DATA[0].bit_count,
-								PROTOCOL_DATA[0].inverse,
 								RF_DATA + 6
 								);
 						break;

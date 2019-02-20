@@ -56,6 +56,11 @@
 #define PROTOCOL_BIT0(X) X ## _bit0
 #define PROTOCOL_BIT1(X) X ## _bit1
 
+#define HIGH(x) ((x) | 0x08)
+#define LOW(x) ((x) & 0x07)
+#define BUCKET_NR(x) ((x) & 0x07)
+#define BUCKET_STATE(x) (bool)(((x) & 0x08) >> 3)
+
 // USER PROTOTYPES
 SI_SBIT(LED, SFR_P1, 0);		// LED
 SI_SBIT(T_DATA, SFR_P0, 0);		// T_DATA

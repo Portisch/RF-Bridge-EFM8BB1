@@ -105,7 +105,7 @@ bool CheckRFSyncBucket(uint16_t duration, uint16_t bucket)
 	return CheckRFBucket(duration, bucket, delta);
 }
 
-bool DecodeBucket(uint8_t i, bool high_low_match, uint16_t duration,
+bool DecodeBucket(uint8_t i, bool high_low, uint16_t duration,
 		uint16_t *pulses,
 		SI_VARIABLE_SEGMENT_POINTER(bit0, uint8_t, SI_SEG_CODE), uint8_t bit0_size,
 		SI_VARIABLE_SEGMENT_POINTER(bit1, uint8_t, SI_SEG_CODE), uint8_t bit1_size,
@@ -124,10 +124,10 @@ bool DecodeBucket(uint8_t i, bool high_low_match, uint16_t duration,
 	// start decoding of the bits in sync of the buckets
 
 	// bit 0
-	if (CheckRFSyncBucket(duration, pulses[bit0[BIT0_GET(status[i])]]))
+	if (CheckRFSyncBucket(duration, pulses[BUCKET_NR(bit0[BIT0_GET(status[i])])]))
 	{
-		// start the bit decode only if inverse does match
-		if (((BIT0_GET(status[i]) == 0) && high_low_match) || (BIT0_GET(status[i]) > 0))
+		// decode only if high/low does match
+		if (BUCKET_STATE(bit0[BIT0_GET(status[i])]) == high_low)
 		{
 			if (BIT0_GET(status[i]) == 0)
 				BIT_LOW = duration;
@@ -142,10 +142,10 @@ bool DecodeBucket(uint8_t i, bool high_low_match, uint16_t duration,
 	}
 
 	// bit 1
-	if (CheckRFSyncBucket(duration, pulses[bit1[BIT1_GET(status[i])]]))
+	if (CheckRFSyncBucket(duration, pulses[BUCKET_NR(bit1[BIT1_GET(status[i])])]))
 	{
-		// start the bit decode only if inverse does match
-		if (((BIT1_GET(status[i]) == 0) && high_low_match) || (BIT1_GET(status[i]) > 0))
+		// decode only if high/low does match
+		if (BUCKET_STATE(bit1[BIT1_GET(status[i])]) == high_low)
 		{
 			if (BIT1_GET(status[i]) == 0)
 				BIT_HIGH = duration;
@@ -267,7 +267,7 @@ void HandleRFBucket(uint16_t duration, bool high_low)
 			// if sync is finished check if bit0 or bit1 is starting
 			else if (START_GET(status[0]) == 2)
 			{
-				DecodeBucket(0, PROTOCOL_DATA[0].inverse != high_low, duration,
+				DecodeBucket(0, high_low, duration,
 						buckets,
 						PROTOCOL_DATA[0].bit0.dat, PROTOCOL_DATA[0].bit0.size,
 						PROTOCOL_DATA[0].bit1.dat, PROTOCOL_DATA[0].bit1.size,
@@ -280,25 +280,15 @@ void HandleRFBucket(uint16_t duration, bool high_low)
 			// check each protocol for each bucket
 			for (i = 0; i < PROTOCOLCOUNT; i++)
 			{
-				// check if protocol was not started
-				if (START_GET(status[i]) == 0)
+				// protocol started, check if sync is finished
+				if (START_GET(status[i]) < PROTOCOL_DATA[i].start.size)
 				{
-					// skip sync check if protocol inverse does not match, but only if a real sync "bit" (high/low) is used
-					if (PROTOCOL_DATA[i].start.size > 1 && PROTOCOL_DATA[i].inverse == high_low)
+					// check if sync bucket high/low is matching
+					if (BUCKET_STATE(PROTOCOL_DATA[i].start.dat[START_GET(status[i])]) != high_low)
 						continue;
 
-					if (CheckRFSyncBucket(duration, PROTOCOL_DATA[i].buckets.dat[PROTOCOL_DATA[i].start.dat[0]]))
+					if (CheckRFSyncBucket(duration, PROTOCOL_DATA[i].buckets.dat[BUCKET_NR(PROTOCOL_DATA[i].start.dat[START_GET(status[i])])]))
 					{
-						START_INC(status[i]);
-						continue;
-					}
-				}
-				// protocol started, check if sync is finished
-				else if (START_GET(status[i]) < PROTOCOL_DATA[i].start.size)
-				{
-					if (CheckRFSyncBucket(duration, PROTOCOL_DATA[i].buckets.dat[PROTOCOL_DATA[i].start.dat[START_GET(status[i])]]))
-					{
-						SYNC_LOW = duration;
 						START_INC(status[i]);
 						continue;
 					}
@@ -311,9 +301,7 @@ void HandleRFBucket(uint16_t duration, bool high_low)
 				// if sync is finished check if bit0 or bit1 is starting
 				else if (START_GET(status[i]) == PROTOCOL_DATA[i].start.size)
 				{
-					//if (!DecodeBucket(i, high_low, duration, &PROTOCOL_DATA[i]))
-					//	continue;
-					if (DecodeBucket(i, PROTOCOL_DATA[i].inverse != high_low, duration,
+					if (DecodeBucket(i, high_low, duration,
 							PROTOCOL_DATA[i].buckets.dat,
 							PROTOCOL_DATA[i].bit0.dat, PROTOCOL_DATA[i].bit0.size,
 							PROTOCOL_DATA[i].bit1.dat, PROTOCOL_DATA[i].bit1.size,
@@ -488,25 +476,20 @@ void SendRFBuckets(
 }
 
 void SendBuckets(
-		uint16_t *pulses, uint8_t pulses_size,
+		uint16_t *pulses,
 		SI_VARIABLE_SEGMENT_POINTER(start, uint8_t, SI_SEG_CODE), uint8_t start_size,
 		SI_VARIABLE_SEGMENT_POINTER(bit0, uint8_t, SI_SEG_CODE), uint8_t bit0_size,
 		SI_VARIABLE_SEGMENT_POINTER(bit1, uint8_t, SI_SEG_CODE), uint8_t bit1_size,
 		uint8_t bit_count,
-		bool inverse,
 		SI_VARIABLE_SEGMENT_POINTER(rfdata, uint8_t, SI_SEG_XDATA))
 {
-	bool high_low = inverse ? false : true;
 	uint8_t i, a;
 	uint8_t actual_byte = 0;
 	uint8_t actual_bit = 0x80;
 
 	// transmit sync bucket(s)
 	for (i = 0; i < start_size; i++)
-		if (start[i] < pulses_size)
-			high_low = SendSingleBucket(high_low, pulses[start[i]]);
-		else
-			high_low = !high_low;
+		SendSingleBucket(BUCKET_STATE(start[i]), pulses[BUCKET_NR(start[i])]);
 
 	// transmit bit bucket(s)
 	for (i = 0; i < bit_count; i++)
@@ -515,19 +498,13 @@ void SendBuckets(
 		if ((rfdata[actual_byte] & actual_bit) == 0)
 		{
 			for (a = 0; a < bit0_size; a++)
-				if (bit0[a] < pulses_size)
-					high_low = SendSingleBucket(high_low, pulses[bit0[a]]);
-				else
-					high_low = !high_low;
+				SendSingleBucket(BUCKET_STATE(bit0[a]), pulses[BUCKET_NR(bit0[a])]);
 		}
 		// send bit 1
 		else
 		{
 			for (a = 0; a < bit1_size; a++)
-				if (bit1[a] < pulses_size)
-					high_low = SendSingleBucket(high_low, pulses[bit1[a]]);
-				else
-					high_low = !high_low;
+				SendSingleBucket(BUCKET_STATE(bit1[a]), pulses[BUCKET_NR(bit1[a])]);
 		}
 
 		actual_bit >>= 1;
@@ -547,12 +524,11 @@ void SendBuckets(
 void SendBucketsByIndex(uint8_t index, SI_VARIABLE_SEGMENT_POINTER(rfdata, uint8_t, SI_SEG_XDATA))
 {
 	SendBuckets(
-			PROTOCOL_DATA[index].buckets.dat, PROTOCOL_DATA[index].buckets.size,
+			PROTOCOL_DATA[index].buckets.dat,
 			PROTOCOL_DATA[index].start.dat, PROTOCOL_DATA[index].start.size,
 			PROTOCOL_DATA[index].bit0.dat, PROTOCOL_DATA[index].bit0.size,
 			PROTOCOL_DATA[index].bit1.dat, PROTOCOL_DATA[index].bit1.size,
 			PROTOCOL_DATA[index].bit_count,
-			PROTOCOL_DATA[index].inverse,
 			rfdata
 			);
 }
