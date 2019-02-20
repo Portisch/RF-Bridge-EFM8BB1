@@ -8,6 +8,7 @@
 #ifndef INC_UART_H_
 #define INC_UART_H_
 
+#include "RF_Config.h"
 //-----------------------------------------------------------------------------
 // Global Constants
 //-----------------------------------------------------------------------------
@@ -54,8 +55,10 @@ typedef enum
 	RF_CODE_LEARN_NEW = 0xA9,
 	RF_CODE_LEARN_KO_NEW = 0xAA,
 	RF_CODE_LEARN_OK_NEW = 0xAB,
+#if INCLUDE_BUCKET_SNIFFING == 1
 	RF_CODE_RFOUT_BUCKET = 0xB0,
 	RF_CODE_SNIFFING_ON_BUCKET = 0xB1,
+#endif
 	RF_DO_BEEP = 0xC0,
 	RF_ALTERNATIVE_FIRMWARE = 0xFF
 } uart_command_t;
@@ -71,7 +74,8 @@ extern unsigned int uart_getc(void);
 extern void uart_put_command(uint8_t command);
 extern void uart_put_RF_Data_Advanced(uint8_t Command, uint8_t protocol_index);
 extern void uart_put_RF_Data_Standard(uint8_t Command);
+#if INCLUDE_BUCKET_SNIFFING == 1
 extern void uart_put_RF_buckets(uint8_t Command);
-
+#endif
 
 #endif /* INC_UART_H_ */

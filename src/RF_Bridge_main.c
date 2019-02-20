@@ -189,6 +189,10 @@ int main (void)
 							break;
 						case RF_CODE_RFOUT_NEW:
 							tr_repeats = RF_TRANSMIT_REPEATS;
+#if INCLUDE_BUCKET_SNIFFING == 0
+							uart_state = RECEIVE_LEN;
+							break;
+#else
 							/* no break */
 						case RF_CODE_RFOUT_BUCKET:
 							uart_state = RECEIVE_LEN;
@@ -196,6 +200,7 @@ int main (void)
 						case RF_CODE_SNIFFING_ON_BUCKET:
 							last_sniffing_command = PCA0_DoSniffing(RF_CODE_SNIFFING_ON_BUCKET);
 							break;
+#endif
 						case RF_CODE_LEARN_NEW:
 							InitTimer3_ms(1, 50);
 							BUZZER = BUZZER_ON;
@@ -269,16 +274,20 @@ int main (void)
 							case RF_CODE_SNIFFING_ON:
 							case RF_CODE_SNIFFING_OFF:
 							case RF_CODE_RFIN:
+#if INCLUDE_BUCKET_SNIFFING == 1
 							case RF_CODE_SNIFFING_ON_BUCKET:
+#endif
 								// send acknowledge
 								uart_put_command(RF_CODE_ACK);
 							case RF_CODE_ACK:
 								// enable UART again
 								ReadUARTData = true;
 								break;
+#if INCLUDE_BUCKET_SNIFFING == 1
 							case RF_CODE_RFOUT_BUCKET:
 								tr_repeats = RF_DATA[1] + 1;
 								break;
+#endif
 						}
 					}
 					break;
@@ -497,6 +506,7 @@ int main (void)
 				}
 				break;
 
+#if INCLUDE_BUCKET_SNIFFING == 1
 			case RF_CODE_RFOUT_BUCKET:
 			{
 				// only do the job if all data got received by UART
@@ -558,6 +568,7 @@ int main (void)
 			}
 
 			break;
+#endif
 		} //switch(uart_command)
 	} //while (1)
 }

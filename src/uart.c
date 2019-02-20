@@ -198,6 +198,7 @@ void uart_put_RF_Data_Standard(uint8_t Command)
 	UART0_initTxPolling();
 }
 
+#if INCLUDE_BUCKET_SNIFFING == 1
 void uart_put_RF_buckets(uint8_t Command)
 {
 	uint8_t i = 0;
@@ -246,3 +247,4 @@ void uart_put_RF_buckets(uint8_t Command)
 
 	UART0_initTxPolling();
 }
+#endif

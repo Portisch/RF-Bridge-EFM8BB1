@@ -39,11 +39,14 @@ SI_SEGMENT_VARIABLE(old_crc, uint8_t, SI_SEG_XDATA) = 0;
 SI_SEGMENT_VARIABLE(crc, uint8_t, SI_SEG_XDATA) = 0;
 
 // up to 8 timing buckets for RF_CODE_SNIFFING_ON_BUCKET
-SI_SEGMENT_VARIABLE(bucket_sync, uint16_t, SI_SEG_XDATA);
 SI_SEGMENT_VARIABLE(buckets[7], uint16_t, SI_SEG_XDATA);	// -1 because of the bucket_sync
+
+#if INCLUDE_BUCKET_SNIFFING == 1
+SI_SEGMENT_VARIABLE(bucket_sync, uint16_t, SI_SEG_XDATA);
 SI_SEGMENT_VARIABLE(bucket_count, uint8_t, SI_SEG_XDATA) = 0;
 SI_SEGMENT_VARIABLE(bucket_count_sync_1, uint8_t, SI_SEG_XDATA);
 SI_SEGMENT_VARIABLE(bucket_count_sync_2, uint8_t, SI_SEG_XDATA);
+#endif
 
 #define GET_W_POSITION(x) (((x) >> 4) & 0x0F)
 #define INC_W_POSITION(x) ((x) = ((((x) >> 4) + 1) << 4) | ((x) & 0x0F))
@@ -451,6 +454,7 @@ bool SendSingleBucket(bool high_low, uint16_t bucket_time)
 //-----------------------------------------------------------------------------
 // Send generic signal based on n time bucket pairs (high/low timing)
 //-----------------------------------------------------------------------------
+#if INCLUDE_BUCKET_SNIFFING == 1
 void SendRFBuckets(
 		SI_VARIABLE_SEGMENT_POINTER(buckets, uint16_t, SI_SEG_XDATA),
 		SI_VARIABLE_SEGMENT_POINTER(rfdata, uint8_t, SI_SEG_XDATA), uint8_t data_len)
@@ -474,6 +478,7 @@ void SendRFBuckets(
 
 	rf_state = RF_FINISHED;
 }
+#endif
 
 void SendBuckets(
 		uint16_t *pulses,
@@ -539,6 +544,7 @@ void SendBucketsByIndex(uint8_t index, SI_VARIABLE_SEGMENT_POINTER(rfdata, uint8
 			);
 }
 
+#if INCLUDE_BUCKET_SNIFFING == 1
 bool probablyFooter(uint16_t duration)
 {
 	return duration >= MIN_FOOTER_LENGTH;
@@ -722,3 +728,4 @@ void Bucket_Received(uint16_t duration, bool high_low)
 			break;
 	}
 }
+#endif
