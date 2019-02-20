@@ -51,7 +51,7 @@
 #define ABP_DEC(x) ((x).actual_bit_of_byte -= 1)
 #define ABP_RESET(x) ((x).actual_bit_of_byte = 8)
 
-#define PROTOCOL_PULSES(X) X ## _pulses
+#define PROTOCOL_BUCKETS(X) X ## _buckets
 #define PROTOCOL_START(X) X ## _start
 #define PROTOCOL_BIT0(X) X ## _bit0
 #define PROTOCOL_BIT1(X) X ## _bit1

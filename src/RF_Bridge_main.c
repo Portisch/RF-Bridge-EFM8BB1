@@ -411,7 +411,7 @@ int main (void)
 						buckets[2] = *(uint16_t *)&RF_DATA[0];
 
 						SendBuckets(
-								buckets, PROTOCOL_DATA[0].pulses.size,
+								buckets, PROTOCOL_DATA[0].buckets.size,
 								PROTOCOL_DATA[0].start.dat, PROTOCOL_DATA[0].start.size,
 								PROTOCOL_DATA[0].bit0.dat, PROTOCOL_DATA[0].bit0.size,
 								PROTOCOL_DATA[0].bit1.dat, PROTOCOL_DATA[0].bit1.size,

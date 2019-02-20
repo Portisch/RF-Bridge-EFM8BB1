@@ -234,7 +234,7 @@ void HandleRFBucket(uint16_t duration, bool high_low)
 	uint8_t i = 0;
 
 	// if noise got received stop all running decodings
-	if (duration < MIN_PULSE_LENGTH)
+	if (duration < MIN_BUCKET_LENGTH)
 	{
 		for (i = 0; i < PROTOCOLCOUNT; i++)
 			START_CLEAR(status[i]);
@@ -287,7 +287,7 @@ void HandleRFBucket(uint16_t duration, bool high_low)
 					if (PROTOCOL_DATA[i].start.size > 1 && PROTOCOL_DATA[i].inverse == high_low)
 						continue;
 
-					if (CheckRFSyncBucket(duration, PROTOCOL_DATA[i].pulses.dat[PROTOCOL_DATA[i].start.dat[0]]))
+					if (CheckRFSyncBucket(duration, PROTOCOL_DATA[i].buckets.dat[PROTOCOL_DATA[i].start.dat[0]]))
 					{
 						START_INC(status[i]);
 						continue;
@@ -296,7 +296,7 @@ void HandleRFBucket(uint16_t duration, bool high_low)
 				// protocol started, check if sync is finished
 				else if (START_GET(status[i]) < PROTOCOL_DATA[i].start.size)
 				{
-					if (CheckRFSyncBucket(duration, PROTOCOL_DATA[i].pulses.dat[PROTOCOL_DATA[i].start.dat[START_GET(status[i])]]))
+					if (CheckRFSyncBucket(duration, PROTOCOL_DATA[i].buckets.dat[PROTOCOL_DATA[i].start.dat[START_GET(status[i])]]))
 					{
 						SYNC_LOW = duration;
 						START_INC(status[i]);
@@ -314,7 +314,7 @@ void HandleRFBucket(uint16_t duration, bool high_low)
 					//if (!DecodeBucket(i, high_low, duration, &PROTOCOL_DATA[i]))
 					//	continue;
 					if (DecodeBucket(i, PROTOCOL_DATA[i].inverse != high_low, duration,
-							PROTOCOL_DATA[i].pulses.dat,
+							PROTOCOL_DATA[i].buckets.dat,
 							PROTOCOL_DATA[i].bit0.dat, PROTOCOL_DATA[i].bit0.size,
 							PROTOCOL_DATA[i].bit1.dat, PROTOCOL_DATA[i].bit1.size,
 							PROTOCOL_DATA[i].bit_count
@@ -547,7 +547,7 @@ void SendBuckets(
 void SendBucketsByIndex(uint8_t index, SI_VARIABLE_SEGMENT_POINTER(rfdata, uint8_t, SI_SEG_XDATA))
 {
 	SendBuckets(
-			PROTOCOL_DATA[index].pulses.dat, PROTOCOL_DATA[index].pulses.size,
+			PROTOCOL_DATA[index].buckets.dat, PROTOCOL_DATA[index].buckets.size,
 			PROTOCOL_DATA[index].start.dat, PROTOCOL_DATA[index].start.size,
 			PROTOCOL_DATA[index].bit0.dat, PROTOCOL_DATA[index].bit0.size,
 			PROTOCOL_DATA[index].bit1.dat, PROTOCOL_DATA[index].bit1.size,
@@ -596,7 +596,7 @@ void Bucket_Received(uint16_t duration, bool high_low)
 	uint8_t bucket_index;
 
 	// if pulse is too short reset status
-	if (duration < MIN_PULSE_LENGTH)
+	if (duration < MIN_BUCKET_LENGTH)
 	{
 		rf_state = RF_IDLE;
 		return;
