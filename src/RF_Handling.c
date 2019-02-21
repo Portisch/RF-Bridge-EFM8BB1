@@ -92,12 +92,12 @@ uint8_t Compute_CRC8_Simple_OneByte(uint8_t byteVal)
 uint16_t compute_delta(uint16_t bucket)
 {
 	//return ((bucket >> 2) + (bucket >> 4));
-	return (bucket >> 2); // 25% delta of bucket for advanced decoding
+	return ((bucket >> 2) + 1); // 25% delta of bucket for advanced decoding
 }
 
 bool CheckRFBucket(uint16_t duration, uint16_t bucket, uint16_t delta)
 {
-	return (((bucket - delta) < duration) && (duration < (bucket + delta)));
+	return (((bucket - delta) <= duration) && (duration <= (bucket + delta)));
 }
 
 bool CheckRFSyncBucket(uint16_t duration, uint16_t bucket)
@@ -262,7 +262,7 @@ void HandleRFBucket(uint16_t duration, bool high_low)
 					START_INC(status[0]);
 					SYNC_LOW = duration;
 
-					buckets[0] = duration / 31;
+					buckets[0] = (duration / 31) + 1;
 					buckets[1] = buckets[0] * 3;
 					buckets[2] = duration;
 				}
@@ -356,7 +356,7 @@ bool buffer_out(SI_VARIABLE_SEGMENT_POINTER(bucket, uint16_t, SI_SEG_XDATA))
 
 void PCA0_channel0EventCb()
 {
-	uint16_t current_capture_value = PCA0CP0 * 10;
+	uint16_t current_capture_value = PCA0CP0;
 	uint8_t flags = PCA0MD;
 
 	// clear counter
@@ -365,8 +365,8 @@ void PCA0_channel0EventCb()
 	PCA0L = 0x00;
 	PCA0MD = flags;
 
-	// if bucket is no noise add it to buffer
-	if (/*current_capture_value > MIN_PULSE_LENGTH &&*/ current_capture_value < 0x8000)
+	// add bucket if a maximum of 0x7FFF * 10µs = 327670µs
+	if (current_capture_value < 0x8000)
 	{
 		buffer_in(current_capture_value | ((uint16_t)(!R_DATA) << 15));
 	}
@@ -566,7 +566,7 @@ bool findBucket(uint16_t duration, uint8_t *index)
 	for (i = 0; i < bucket_count; i++)
 	{
 		// calculate delta by the current duration and check if the new duration fits into
-		delta = ((duration >> 2) + (duration >> 3));
+		delta = (duration >> 2) + (duration >> 3) + 1;
 		delta = delta > buckets[i] ? buckets[i] : delta;
 
 		if (CheckRFBucket(duration, buckets[i], delta))

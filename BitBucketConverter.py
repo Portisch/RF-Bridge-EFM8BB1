@@ -254,7 +254,7 @@ def main(szInpStr, repVal):
 
     for i in range(0, iNbrOfBuckets):
         szOutAux += szInpStr[6+i*4:10+i*4] + " "
-        arrBuckets.append(int(szInpStr[6+i*4:10+i*4], 16))    
+        arrBuckets.append(int(szInpStr[6+i*4:10+i*4], 16) * 10)    
 
     #syncData = findSyncPattern(szInpStr[10+i*4:-2])
     syncData = None

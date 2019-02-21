@@ -58,9 +58,9 @@ void InitTimer3_us(uint16_t interval, uint16_t timeout)
 {
 	SetTimerReload((uint16_t)(0x10000 - ((uint32_t)SYSCLK / (1000000 / (uint32_t)interval))));
 
-	// remove 65µs because of startup delay
-	Timer_3_Timeout = timeout - 65;
-	Timer_3_Interval = interval;
+	// remove 60µs because of startup delay
+	Timer_3_Timeout = timeout - 6;
+	Timer_3_Interval = interval / 10;
 
 	// start timer
 	TMR3CN0 |= TMR3CN0_TR3__RUN;

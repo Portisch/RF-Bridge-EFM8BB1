@@ -177,14 +177,14 @@ void uart_put_RF_Data_Standard(uint8_t Command)
 	uart_putc(Command);
 
 	// sync low time
-	uart_putc((SYNC_LOW >> 8) & 0xFF);
-	uart_putc(SYNC_LOW & 0xFF);
+	uart_putc(((SYNC_LOW * 10) >> 8) & 0xFF);
+	uart_putc((SYNC_LOW * 10) & 0xFF);
 	// bit 0 high time
-	uart_putc((BIT_LOW >> 8) & 0xFF);
-	uart_putc(BIT_LOW & 0xFF);
+	uart_putc(((BIT_LOW * 10) >> 8) & 0xFF);
+	uart_putc((BIT_LOW * 10) & 0xFF);
 	// bit 1 high time
-	uart_putc((BIT_HIGH >> 8) & 0xFF);
-	uart_putc(BIT_HIGH & 0xFF);
+	uart_putc(((BIT_HIGH * 10) >> 8) & 0xFF);
+	uart_putc((BIT_HIGH * 10) & 0xFF);
 
 	// copy data to UART buffer
 	i = 0;
