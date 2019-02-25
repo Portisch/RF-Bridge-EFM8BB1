@@ -237,6 +237,18 @@ SI_SEGMENT_VARIABLE(PROTOCOL_BIT1(KaKu)[], static uint8_t, SI_SEG_CODE) = {  HIG
 SI_SEGMENT_VARIABLE(PROTOCOL_END(KaKu)[], static uint8_t, SI_SEG_CODE) = {  HIGH(0), LOW(4) };
 #endif
 
+/*
+ * Quigg GT-7000, Tevion GT-8000
+ * https://manual.pilight.org/protocols/433.92/switch/quigg_7000.html
+ */
+#if EFM8BB1_SUPPORT_Quigg_PROTOCOL == 1
+#define Quigg
+SI_SEGMENT_VARIABLE(PROTOCOL_BUCKETS(Quigg)[], static uint16_t, SI_SEG_CODE) = { 87, 124, 8015 };
+SI_SEGMENT_VARIABLE(PROTOCOL_START(Quigg)[], static uint8_t, SI_SEG_CODE) = {  LOW(2), HIGH(1) };
+SI_SEGMENT_VARIABLE(PROTOCOL_BIT0(Quigg)[], static uint8_t, SI_SEG_CODE) = {  LOW(0), HIGH(1) };
+SI_SEGMENT_VARIABLE(PROTOCOL_BIT1(Quigg)[], static uint8_t, SI_SEG_CODE) = {  LOW(1), HIGH(0) };
+#endif
+
 SI_SEGMENT_VARIABLE(PROTOCOL_DATA[], static struct BUCKET_PROTOCOL_DATA, SI_SEG_CODE) =
 {
 #if EFM8BB1_SUPPORT_PT226X_PROTOCOL == 1
@@ -419,6 +431,19 @@ SI_SEGMENT_VARIABLE(PROTOCOL_DATA[], static struct BUCKET_PROTOCOL_DATA, SI_SEG_
 			{ &PROTOCOL_BIT1(KaKu), ARRAY_LENGTH(PROTOCOL_BIT1(KaKu)) },
 			{ &PROTOCOL_END(KaKu), ARRAY_LENGTH(PROTOCOL_END(KaKu)) },
 			32
+		},
+#endif
+#if EFM8BB1_SUPPORT_Quigg_PROTOCOL == 1
+		/*
+		 * Quigg GT-7000, Tevion GT-8000
+		 */
+		{
+			{ &PROTOCOL_BUCKETS(Quigg), ARRAY_LENGTH(PROTOCOL_BUCKETS(Quigg)) },
+			{ &PROTOCOL_START(Quigg), ARRAY_LENGTH(PROTOCOL_START(Quigg)) },
+			{ &PROTOCOL_BIT0(Quigg), ARRAY_LENGTH(PROTOCOL_BIT0(Quigg)) },
+			{ &PROTOCOL_BIT1(Quigg), ARRAY_LENGTH(PROTOCOL_BIT1(Quigg)) },
+			{ NULL, 0 },
+			20
 		},
 #endif
 };
