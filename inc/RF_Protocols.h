@@ -260,6 +260,18 @@ SI_SEGMENT_VARIABLE(PROTOCOL_BIT0(OneByOne)[], static uint8_t, SI_SEG_CODE) = { 
 SI_SEGMENT_VARIABLE(PROTOCOL_BIT1(OneByOne)[], static uint8_t, SI_SEG_CODE) = { LOW(0), HIGH(1) };
 #endif
 
+/*
+ * Prologue Sensor #96
+ */
+#if EFM8BB1_SUPPORT_Prologue_PROTOCOL == 1
+#define Prologue
+SI_SEGMENT_VARIABLE(PROTOCOL_BUCKETS(Prologue)[], static uint16_t, SI_SEG_CODE) = { 660, 2000, 4000, 9000 };
+SI_SEGMENT_VARIABLE(PROTOCOL_START(Prologue)[], static uint8_t, SI_SEG_CODE) = { HIGH(0), LOW(3) };
+SI_SEGMENT_VARIABLE(PROTOCOL_BIT0(Prologue)[], static uint8_t, SI_SEG_CODE) = { HIGH(0), LOW(1) };
+SI_SEGMENT_VARIABLE(PROTOCOL_BIT1(Prologue)[], static uint8_t, SI_SEG_CODE) = { HIGH(0), LOW(2) };
+SI_SEGMENT_VARIABLE(PROTOCOL_END(Prologue)[], static uint8_t, SI_SEG_CODE) = { HIGH(0), LOW(1) };
+#endif
+
 SI_SEGMENT_VARIABLE(PROTOCOL_DATA[], static struct BUCKET_PROTOCOL_DATA, SI_SEG_CODE) =
 {
 #if EFM8BB1_SUPPORT_PT226X_PROTOCOL == 1
@@ -468,6 +480,19 @@ SI_SEGMENT_VARIABLE(PROTOCOL_DATA[], static struct BUCKET_PROTOCOL_DATA, SI_SEG_
 			{ &PROTOCOL_BIT1(OneByOne), ARRAY_LENGTH(PROTOCOL_BIT1(OneByOne)) },
 			{ NULL, 0 },
 			17
+		},
+#endif
+#if EFM8BB1_SUPPORT_Prologue_PROTOCOL == 1
+		/*
+		 * Prologue Sensor
+		 */
+		{
+			{ &PROTOCOL_BUCKETS(Prologue), ARRAY_LENGTH(PROTOCOL_BUCKETS(Prologue)) },
+			{ &PROTOCOL_START(Prologue), ARRAY_LENGTH(PROTOCOL_START(Prologue)) },
+			{ &PROTOCOL_BIT0(Prologue), ARRAY_LENGTH(PROTOCOL_BIT0(Prologue)) },
+			{ &PROTOCOL_BIT1(Prologue), ARRAY_LENGTH(PROTOCOL_BIT1(Prologue)) },
+			{ &PROTOCOL_END(Prologue), ARRAY_LENGTH(PROTOCOL_END(Prologue)) },
+			36
 		},
 #endif
 };

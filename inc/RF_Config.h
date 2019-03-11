@@ -30,3 +30,4 @@
 #define EFM8BB1_SUPPORT_Kaku_PROTOCOL			1		// KaKu wall sockets
 #define EFM8BB1_SUPPORT_DIO_PROTOCOL			1		// DIO Chacon RF 433Mhz, Issue #95
 #define EFM8BB1_SUPPORT_1BYONE_PROTOCOL			1		// 1ByOne Doorbell, PR #97
+#define EFM8BB1_SUPPORT_Prologue_PROTOCOL		1		// Prologue Sensor, Issue #96
