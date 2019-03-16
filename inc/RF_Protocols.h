@@ -272,6 +272,18 @@ SI_SEGMENT_VARIABLE(PROTOCOL_BIT1(Prologue)[], static uint8_t, SI_SEG_CODE) = { 
 SI_SEGMENT_VARIABLE(PROTOCOL_END(Prologue)[], static uint8_t, SI_SEG_CODE) = { HIGH(0), LOW(1) };
 #endif
 
+/*
+ * T-187-N (TX)-1 Generic Dog Training Collar Remote Control
+ */
+#if EFM8BB1_SUPPORT_DOG_COLLAR_PROTOCOL == 1
+#define DogCollar
+SI_SEGMENT_VARIABLE(PROTOCOL_BUCKETS(DogCollar)[], static uint16_t, SI_SEG_CODE) = { 1560, 720, 210 };
+SI_SEGMENT_VARIABLE(PROTOCOL_START(DogCollar)[], static uint8_t, SI_SEG_CODE) = { HIGH(0), LOW(1) };
+SI_SEGMENT_VARIABLE(PROTOCOL_BIT0(DogCollar)[], static uint8_t, SI_SEG_CODE) = { HIGH(2), LOW(1) };
+SI_SEGMENT_VARIABLE(PROTOCOL_BIT1(DogCollar)[], static uint8_t, SI_SEG_CODE) = { HIGH(1), LOW(2) };
+SI_SEGMENT_VARIABLE(PROTOCOL_END(DogCollar)[], static uint8_t, SI_SEG_CODE) = { HIGH(2), LOW(1) };
+#endif
+
 SI_SEGMENT_VARIABLE(PROTOCOL_DATA[], static struct BUCKET_PROTOCOL_DATA, SI_SEG_CODE) =
 {
 #if EFM8BB1_SUPPORT_PT226X_PROTOCOL == 1
@@ -493,6 +505,19 @@ SI_SEGMENT_VARIABLE(PROTOCOL_DATA[], static struct BUCKET_PROTOCOL_DATA, SI_SEG_
 			{ &PROTOCOL_BIT1(Prologue), ARRAY_LENGTH(PROTOCOL_BIT1(Prologue)) },
 			{ &PROTOCOL_END(Prologue), ARRAY_LENGTH(PROTOCOL_END(Prologue)) },
 			36
+		},
+#endif
+#if EFM8BB1_SUPPORT_DOG_COLLAR_PROTOCOL == 1
+		/*
+		 * T-187-N (TX)-1 Generic Dog Training Collar Remote Control
+		 */
+		{
+			{ &PROTOCOL_BUCKETS(DogCollar), ARRAY_LENGTH(PROTOCOL_BUCKETS(DogCollar)) },
+			{ &PROTOCOL_START(DogCollar), ARRAY_LENGTH(PROTOCOL_START(DogCollar)) },
+			{ &PROTOCOL_BIT0(DogCollar), ARRAY_LENGTH(PROTOCOL_BIT0(DogCollar)) },
+			{ &PROTOCOL_BIT1(DogCollar), ARRAY_LENGTH(PROTOCOL_BIT1(DogCollar)) },
+			{ &PROTOCOL_END(DogCollar), ARRAY_LENGTH(PROTOCOL_END(DogCollar)) },
+			40
 		},
 #endif
 };
