@@ -317,6 +317,17 @@ SI_SEGMENT_VARIABLE(PROTOCOL_BIT0(H13726)[], static uint8_t, SI_SEG_CODE) = { LO
 SI_SEGMENT_VARIABLE(PROTOCOL_BIT1(H13726)[], static uint8_t, SI_SEG_CODE) = { LOW(2), HIGH(0) };
 #endif
 
+/*
+ * Breezemore Fan
+ */
+#if EFM8BB1_SUPPORT_Breezemore_PROTOCOL == 1
+#define Breezemore
+SI_SEGMENT_VARIABLE(PROTOCOL_BUCKETS(Breezemore)[], static uint16_t, SI_SEG_CODE) = { 340, 680, 10000 };
+SI_SEGMENT_VARIABLE(PROTOCOL_START(Breezemore)[], static uint8_t, SI_SEG_CODE) = { LOW(2), HIGH(0) };
+SI_SEGMENT_VARIABLE(PROTOCOL_BIT0(Breezemore)[], static uint8_t, SI_SEG_CODE) = { LOW(0), HIGH(1) };
+SI_SEGMENT_VARIABLE(PROTOCOL_BIT1(Breezemore)[], static uint8_t, SI_SEG_CODE) = { LOW(1), HIGH(0) };
+#endif
+
 SI_SEGMENT_VARIABLE(PROTOCOL_DATA[], static struct BUCKET_PROTOCOL_DATA, SI_SEG_CODE) =
 {
 #if EFM8BB1_SUPPORT_PT226X_PROTOCOL == 1
@@ -590,6 +601,19 @@ SI_SEGMENT_VARIABLE(PROTOCOL_DATA[], static struct BUCKET_PROTOCOL_DATA, SI_SEG_
 			{ &PROTOCOL_BIT1(H13726), ARRAY_LENGTH(PROTOCOL_BIT1(H13726)) },
 			{ NULL, 0 },
 			36
+		},
+#endif
+#if EFM8BB1_SUPPORT_Breezemore_PROTOCOL == 1
+		/*
+		 * Breezemore Fan
+		 */
+		{
+			{ &PROTOCOL_BUCKETS(Breezemore), ARRAY_LENGTH(PROTOCOL_BUCKETS(Breezemore)) },
+			{ &PROTOCOL_START(Breezemore), ARRAY_LENGTH(PROTOCOL_START(Breezemore)) },
+			{ &PROTOCOL_BIT0(Breezemore), ARRAY_LENGTH(PROTOCOL_BIT0(Breezemore)) },
+			{ &PROTOCOL_BIT1(Breezemore), ARRAY_LENGTH(PROTOCOL_BIT1(Breezemore)) },
+			{ NULL, 0 },
+			26
 		},
 #endif
 };
