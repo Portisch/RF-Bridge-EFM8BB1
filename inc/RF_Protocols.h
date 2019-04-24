@@ -317,6 +317,17 @@ SI_SEGMENT_VARIABLE(PROTOCOL_BIT0(H13726)[], static uint8_t, SI_SEG_CODE) = { LO
 SI_SEGMENT_VARIABLE(PROTOCOL_BIT1(H13726)[], static uint8_t, SI_SEG_CODE) = { LOW(2), HIGH(0) };
 #endif
 
+/*
+ * Simple Doorbell, PR #115
+ */
+#if EFM8BB1_SUPPORT_DOORBELL_PROTOCOL == 1
+#define SimpleDoorbell
+SI_SEGMENT_VARIABLE(PROTOCOL_BUCKETS(SimpleDoorbell)[], static uint16_t, SI_SEG_CODE) = { 360, 1100, 5780 };
+SI_SEGMENT_VARIABLE(PROTOCOL_START(SimpleDoorbell)[], static uint8_t, SI_SEG_CODE) = { LOW(2), HIGH(1) };
+SI_SEGMENT_VARIABLE(PROTOCOL_BIT0(SimpleDoorbell)[], static uint8_t, SI_SEG_CODE) = { LOW(0), HIGH(1) };
+SI_SEGMENT_VARIABLE(PROTOCOL_BIT1(SimpleDoorbell)[], static uint8_t, SI_SEG_CODE) = { LOW(1), HIGH(0) };
+#endif
+
 SI_SEGMENT_VARIABLE(PROTOCOL_DATA[], static struct BUCKET_PROTOCOL_DATA, SI_SEG_CODE) =
 {
 #if EFM8BB1_SUPPORT_PT226X_PROTOCOL == 1
@@ -590,6 +601,19 @@ SI_SEGMENT_VARIABLE(PROTOCOL_DATA[], static struct BUCKET_PROTOCOL_DATA, SI_SEG_
 			{ &PROTOCOL_BIT1(H13726), ARRAY_LENGTH(PROTOCOL_BIT1(H13726)) },
 			{ NULL, 0 },
 			36
+		},
+#endif
+#if EFM8BB1_SUPPORT_DOORBELL_PROTOCOL == 1
+		/*
+		 * Simple Doorbell
+		 */
+		{
+			{ &PROTOCOL_BUCKETS(SimpleDoorbell), ARRAY_LENGTH(PROTOCOL_BUCKETS(SimpleDoorbell)) },
+			{ &PROTOCOL_START(SimpleDoorbell), ARRAY_LENGTH(PROTOCOL_START(SimpleDoorbell)) },
+			{ &PROTOCOL_BIT0(SimpleDoorbell), ARRAY_LENGTH(PROTOCOL_BIT0(SimpleDoorbell)) },
+			{ &PROTOCOL_BIT1(SimpleDoorbell), ARRAY_LENGTH(PROTOCOL_BIT1(SimpleDoorbell)) },
+			{ NULL, 0 },
+			17
 		},
 #endif
 };
