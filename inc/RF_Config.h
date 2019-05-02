@@ -35,4 +35,5 @@
 #define EFM8BB1_SUPPORT_BY302_PROTOCOL			0		// Byron BY302 Doorbell, Issue #102
 #define EFM8BB1_SUPPORT_DT_5514_PROTOCOL		0		// 5514 SILENT Dual Tech, Issue #104
 #define EFM8BB1_SUPPORT_H13726_PROTOCOL			0		// Auriol H13726 Weather Station, Issue #106
-#define EFM8BB1_SUPPORT_DOORBELL_PROTOCOL		1		// Simple Doorbell, PR #115
+#define EFM8BB1_SUPPORT_DOORBELL_PROTOCOL		1		// Simple Doorbell, Issue #115
+#define EFM8BB1_SUPPORT_SonOff_PIR_PROTOCOL		1		// SonOff PI PT2260 protocol, Issue #115
