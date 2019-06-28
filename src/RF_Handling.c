@@ -119,7 +119,7 @@ bool DecodeBucket(uint8_t i, bool high_low, uint16_t duration,
 	// do init before first bit received
 	if (BITS_GET(status[i]) == 0)
 	{
-		ABP_RESET(status[i]);
+		ABP_SET(status[i], bit_count % 8 ? bit_count % 8 : 8);
 		memset(RF_DATA, 0, sizeof(RF_DATA));
 		crc = 0x00;
 	}
