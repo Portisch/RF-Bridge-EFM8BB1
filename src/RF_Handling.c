@@ -91,8 +91,8 @@ uint8_t Compute_CRC8_Simple_OneByte(uint8_t byteVal)
 
 uint16_t compute_delta(uint16_t bucket)
 {
-	//return ((bucket >> 2) + (bucket >> 4));
-	return (bucket >> 2); // 25% delta of bucket for advanced decoding
+	return ((bucket >> 2) + (bucket >> 4));
+	//return (bucket >> 2); // 25% delta of bucket for advanced decoding
 }
 
 bool CheckRFBucket(uint16_t duration, uint16_t bucket, uint16_t delta)
