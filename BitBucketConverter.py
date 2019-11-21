@@ -286,7 +286,7 @@ def parse_file(fn):
     commands={}
     with open(fn) as f:
         for line in f:
-            if '{"RfRaw":{"Data":"AA B1' in line:
+            if '"RfRaw":{"Data":"AA B1' in line:
                 print("###### Processing line {0} ######".format(line))
                 res=main(filterInputStr(line)
                          , options.repeat)
