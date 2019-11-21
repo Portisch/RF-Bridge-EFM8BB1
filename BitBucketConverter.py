@@ -10,6 +10,8 @@
 # Editor:      Portisch, henfri
 #-------------------------------------------------------------------------------
 
+# Requires pillow and pycurl python packages from pip or your favourite package manager
+
 # Interactive Process to learn Codes:
 # -Run rfraw 177 in your SonOff console -Push all your remote (each Button 2-3 times)
 # -Save everything from the console that happened after rfraw 177 to a file, e.g. console.txt
@@ -32,6 +34,12 @@ from io import BytesIO
 from PIL import Image, ImageFont, ImageDraw
 from os.path import exists
 from time import sleep
+try:
+    # python 3
+    from urllib.parse import urlencode
+except ImportError:
+    # python 2
+    from urllib import urlencode
 
 # Output:
 # Example: AA B0 23 04 14 0224 03FB 0BF4 1CAC 23011010011001010110101001100101011010100101100110 55
@@ -69,8 +77,11 @@ def sendCommand(szOutFinal, mydevice):
     #buffer = StringIO()
     mydevice.replace("http://","").replace("/","")
     buffer = BytesIO()
-    url = str("http://{}/ax?c2=191&c1=RfRaw%20".format(mydevice))
-    url += szOutFinal.replace(" ","%20")
+    baseurl = str("http://{}/cm?".format(mydevice))
+    query = {
+        "cmnd": "BackLog RfRaw {}; RfRaw 0".format(szOutFinal)
+    }
+    url = baseurl + urlencode(query)
     print(url)
     print("Sending command to bridge")
     c = pycurl.Curl()
@@ -284,7 +295,7 @@ def parse_file(fn):
     commands={}
     with open(fn) as f:
         for line in f:
-            if '{"RfRaw":{"Data":"AA B1' in line:
+            if '"RfRaw":{"Data":"AA B1' in line:
                 print("###### Processing line {0} ######".format(line))
                 res=main(filterInputStr(line)
                          , options.repeat)
