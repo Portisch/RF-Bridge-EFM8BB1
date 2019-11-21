@@ -10,6 +10,8 @@
 # Editor:      Portisch, henfri
 #-------------------------------------------------------------------------------
 
+# Requires pillow and pycurl python packages from pip or your favourite package manager
+
 # Interactive Process to learn Codes:
 # -Run rfraw 177 in your SonOff console -Push all your remote (each Button 2-3 times)
 # -Save everything from the console that happened after rfraw 177 to a file, e.g. console.txt
