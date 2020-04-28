@@ -12,7 +12,7 @@
 
 # Interactive Process to learn Codes:
 # -Run rfraw 177 in your SonOff console -Push all your remote (each Button 2-3 times)
-# -Save everything from the console that happened after rfraw 177 to a file, e.g. console.txt
+# -Save the rfraw JSON objects ({"RfRaw":{"Data":"XXX"}}) from the console that happened after rfraw 177 to a file, e.g. console.txt
 # a) Run bitbuckedconverter.py -f console.txt
 # b) Run bitbuckedconverter.py -f console.txt -e
 # In case of a) each line of console.txt will be converted into a B0 string and displayed
