@@ -47,6 +47,7 @@
 #define BITS_GET(x) (uint8_t)((x).bit_count)
 #define BITS_INC(x) ((x).bit_count += 1)
 
+#define ABP_SET(x, y) ((x).actual_bit_of_byte = y)
 #define ABP_GET(x) (uint8_t)((x).actual_bit_of_byte)
 #define ABP_DEC(x) ((x).actual_bit_of_byte -= 1)
 #define ABP_RESET(x) ((x).actual_bit_of_byte = 8)

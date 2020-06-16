@@ -226,6 +226,17 @@ SI_SEGMENT_VARIABLE(PROTOCOL_BIT1(DG_HOSA)[], static uint8_t, SI_SEG_CODE) = { H
 #endif
 
 /*
+ * Digoo DG-R8S Outdoor Temperature/Humidity Sensor
+ */
+#if EFM8BB1_SUPPORT_DG_R8S_PROTOCOL == 1
+#define DG_R8S
+SI_SEGMENT_VARIABLE(PROTOCOL_BUCKETS(DG_R8S)[], static uint16_t, SI_SEG_CODE) = { 730, 4010, 1960, 8960 };
+SI_SEGMENT_VARIABLE(PROTOCOL_START(DG_R8S)[], static uint8_t, SI_SEG_CODE) = { LOW(3), HIGH(0) };
+SI_SEGMENT_VARIABLE(PROTOCOL_BIT0(DG_R8S)[], static uint8_t, SI_SEG_CODE) = { LOW(1), HIGH(0) };
+SI_SEGMENT_VARIABLE(PROTOCOL_BIT1(DG_R8S)[], static uint8_t, SI_SEG_CODE) = { LOW(2), HIGH(0) };
+#endif
+
+/*
  * KaKu wall sockets
  */
 #if EFM8BB1_SUPPORT_Kaku_PROTOCOL == 1
@@ -487,6 +498,19 @@ SI_SEGMENT_VARIABLE(PROTOCOL_DATA[], static struct BUCKET_PROTOCOL_DATA, SI_SEG_
 			{ NULL, 0 },
 			24
 		},
+#endif
+#if EFM8BB1_SUPPORT_DG_R8S_PROTOCOL == 1
+        /*
+         * Digoo DG-R8S Outdoor Temperature/Humidity Sensor
+         */
+        {
+            { &PROTOCOL_BUCKETS(DG_R8S), ARRAY_LENGTH(PROTOCOL_BUCKETS(DG_R8S)) },
+            { &PROTOCOL_START(DG_R8S), ARRAY_LENGTH(PROTOCOL_START(DG_R8S)) },
+            { &PROTOCOL_BIT0(DG_R8S), ARRAY_LENGTH(PROTOCOL_BIT0(DG_R8S)) },
+            { &PROTOCOL_BIT1(DG_R8S), ARRAY_LENGTH(PROTOCOL_BIT1(DG_R8S)) },
+            { NULL, 0 },
+            36
+        },
 #endif
 #if EFM8BB1_SUPPORT_Kaku_PROTOCOL == 1
 		/*
