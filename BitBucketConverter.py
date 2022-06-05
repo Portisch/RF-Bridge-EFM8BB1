@@ -61,7 +61,7 @@ def filterInputStr(auxStr):
 
 def getInputStr():
     #auxStr = '18:30:23 MQT: /sonoff/bridge/RESULT = {"RfRaw":{"Data":"AA B1 04 0224 03FB 0BF4 1CAC 01101001100101011010100110010101101010010110011023 55"}}'
-    auxStr = raw_input("Enter B1 line: ")
+    auxStr = input("Enter B1 line: ")
     auxStr = filterInputStr(auxStr)
     return auxStr
 
@@ -161,7 +161,7 @@ def findSyncPattern(szData):
 
     if ((len(szData) % 2) != 0):
         print("Missing bucket in data...")
-        sys.exit()
+        exit()
 
     # try first if the second sync bucket is on the end of the data
     bucketAtEnd = True
