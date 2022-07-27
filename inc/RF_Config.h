@@ -35,3 +35,4 @@
 #define EFM8BB1_SUPPORT_BY302_PROTOCOL			1		// Byron BY302 Doorbell, Issue #102
 #define EFM8BB1_SUPPORT_DT_5514_PROTOCOL		1		// 5514 SILENT Dual Tech, Issue #104
 #define EFM8BB1_SUPPORT_H13726_PROTOCOL			1		// Auriol H13726 Weather Station, Issue #106
+#define EFM8BB1_SUPPORT_AOK_PROTOCOL			1		// A-OK AC114-01B, AC123-01D,06D remote control
